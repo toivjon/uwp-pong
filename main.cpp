@@ -2,8 +2,8 @@
 
 using namespace winrt;
 using namespace Windows::ApplicationModel::Core;
-using namespace Windows::UI::Core;
 using namespace Windows::Gaming::Input;
+using namespace Windows::UI::Core;
 
 struct Pong : implements<Pong, IFrameworkViewSource, IFrameworkView>
 {
