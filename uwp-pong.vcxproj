@@ -105,6 +105,7 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="scene.h" />
+    <ClInclude Include="welcome_scene.h" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -125,6 +126,7 @@
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="welcome_scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

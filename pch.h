@@ -5,3 +5,6 @@
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Gaming.Input.h>
 #include <winrt/Windows.UI.Core.h>
+
+#include "scene.h"
+#include "welcome_scene.h"

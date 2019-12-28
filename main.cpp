@@ -1,5 +1,6 @@
 #include "pch.h"
 
+using namespace pong;
 using namespace winrt;
 using namespace Windows::ApplicationModel::Core;
 using namespace Windows::Gaming::Input;
@@ -54,7 +55,8 @@ public:
 	// Load the resources required to run the application.
 	void Load(hstring const&)
 	{
-		// ... something to do?
+		// load the welcome scene as the initial scene.
+		mScene = std::make_unique<WelcomeScene>();
 	}
 
 	// ========================================================================
@@ -72,6 +74,8 @@ public:
 						OutputDebugString(L"BOOM! A button was pressed!");
 					}
 				}
+				mScene->OnUpdate();
+				mScene->OnRender();
 				dispatcher.ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
 			}
 			else {
@@ -88,9 +92,10 @@ public:
 		// ... something to do?
 	}
 private:
-	bool              mExiting;
-	bool              mVisible;
-	std::set<Gamepad> mGamepads;
+	bool					mExiting;
+	bool					mVisible;
+	std::set<Gamepad>		mGamepads;
+	std::unique_ptr<Scene>	mScene;
 };
 
 // ============================================================================
