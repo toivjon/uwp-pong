@@ -7,7 +7,7 @@ void WelcomeScene::OnUpdate()
 	// TODO
 }
 
-void WelcomeScene::OnRender()
+void WelcomeScene::OnRender(RenderingCtx&)
 {
 	// TODO
 }

@@ -90,13 +90,15 @@ public:
 
 				// update game logics with a fixed framerate.
 				mDeltaAccumulator += dt;
-				static const uint64_t FPS = (1000 / 60);
-				while (mDeltaAccumulator >= FPS) {
+				static const uint64_t TIMESTEP = (1000 / 60);
+				while (mDeltaAccumulator >= TIMESTEP) {
 					mScene->OnUpdate();
-					mDeltaAccumulator -= FPS;
+					mDeltaAccumulator -= TIMESTEP;
 				}
 
-				mScene->OnRender();
+				// calculate interpolation alpha and render the scene.
+				mRenderingCtx.SetAlpha((float)mDeltaAccumulator / (float)TIMESTEP);
+				mScene->OnRender(mRenderingCtx);
 				dispatcher.ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
 			} else {
 				dispatcher.ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
@@ -125,6 +127,7 @@ private:
 	std::unique_ptr<Scene>	mScene;
 	uint64_t				mPreviousMillis;
 	uint64_t				mDeltaAccumulator;
+	RenderingCtx			mRenderingCtx;
 };
 
 // ============================================================================

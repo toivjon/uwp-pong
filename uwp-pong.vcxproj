@@ -104,6 +104,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="rendering_ctx.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="welcome_scene.h" />
   </ItemGroup>

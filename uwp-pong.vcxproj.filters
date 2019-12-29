@@ -9,6 +9,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="welcome_scene.h" />
+    <ClInclude Include="rendering_ctx.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">

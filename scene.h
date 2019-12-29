@@ -1,5 +1,7 @@
 #pragma once
 
+#include "pch.h"
+
 namespace pong
 {
 	// The base scene abstraction for all scenes within the application.
@@ -9,7 +11,7 @@ namespace pong
 		// A function which gets called on each logic tick.
 		virtual void OnUpdate() = 0;
 		// A function which gets called on each rendering ticket.
-		virtual void OnRender() = 0;
+		virtual void OnRender(RenderingCtx&) = 0;
 		// A function which gets called when the scene is entered.
 		virtual void OnEnter() = 0;
 		// A function which gets called when the scene is being leaved.

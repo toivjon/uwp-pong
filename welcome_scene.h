@@ -9,7 +9,7 @@ namespace pong
 	{
 	public:
 		void OnUpdate() override;
-		void OnRender() override;
+		void OnRender(RenderingCtx& renderer) override;
 		void OnEnter() override;
 		void OnLeave() override;
 	};

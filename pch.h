@@ -9,5 +9,6 @@
 #include <winrt/Windows.System.h>
 #include <winrt/Windows.UI.Core.h>
 
+#include "rendering_ctx.h"
 #include "scene.h"
 #include "welcome_scene.h"
