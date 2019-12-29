@@ -66,7 +66,14 @@ public:
 	// Run the application until the application is exited.
 	void Run()
 	{
+		mPreviousMillis = 0u;
+		mDeltaAccumulator = 0u;
 		while (!mExiting) {
+			// calculate the delta time and store the current millis.
+			auto currentMillis = GetCurrentMillis();
+			auto dt = (currentMillis - mPreviousMillis);
+			mPreviousMillis = currentMillis;
+
 			auto window = CoreWindow::GetForCurrentThread();
 			auto dispatcher = window.Dispatcher();
 			if (mVisible) {
@@ -80,7 +87,15 @@ public:
 				if ((window.GetKeyState(VirtualKey::A) & CoreVirtualKeyStates::Down) != (CoreVirtualKeyStates)0) {
 					OutputDebugString(L"BOOM! A key was pressed!\n");
 				}
-				mScene->OnUpdate();
+
+				// update game logics with a fixed framerate.
+				mDeltaAccumulator += dt;
+				static const uint64_t FPS = (1000 / 60);
+				while (mDeltaAccumulator >= FPS) {
+					mScene->OnUpdate();
+					mDeltaAccumulator -= FPS;
+				}
+
 				mScene->OnRender();
 				dispatcher.ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
 			} else {
@@ -96,11 +111,20 @@ public:
 	{
 		// ... something to do?
 	}
+
+	// ========================================================================
+	// Get the current time in milliseconds.
+	uint64_t GetCurrentMillis() {
+		using namespace std::chrono;
+		return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+	}
 private:
 	bool					mExiting;
 	bool					mVisible;
 	std::set<Gamepad>		mGamepads;
 	std::unique_ptr<Scene>	mScene;
+	uint64_t				mPreviousMillis;
+	uint64_t				mDeltaAccumulator;
 };
 
 // ============================================================================
