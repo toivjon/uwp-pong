@@ -3,7 +3,9 @@
 using namespace pong;
 using namespace winrt;
 using namespace Windows::ApplicationModel::Core;
+using namespace Windows::Devices::Input;
 using namespace Windows::Gaming::Input;
+using namespace Windows::System;
 using namespace Windows::UI::Core;
 
 struct Pong : implements<Pong, IFrameworkViewSource, IFrameworkView>
@@ -57,6 +59,7 @@ public:
 	{
 		// load the welcome scene as the initial scene.
 		mScene = std::make_unique<WelcomeScene>();
+		mScene->OnEnter();
 	}
 
 	// ========================================================================
@@ -71,14 +74,16 @@ public:
 					GamepadReading reading = gamepad.GetCurrentReading();
 					GamepadButtons buttons = reading.Buttons;
 					if ((buttons & GamepadButtons::A) != (GamepadButtons)0) {
-						OutputDebugString(L"BOOM! A button was pressed!");
+						OutputDebugString(L"BOOM! A button was pressed!\n");
 					}
+				}
+				if ((window.GetKeyState(VirtualKey::A) & CoreVirtualKeyStates::Down) != (CoreVirtualKeyStates)0) {
+					OutputDebugString(L"BOOM! A key was pressed!\n");
 				}
 				mScene->OnUpdate();
 				mScene->OnRender();
 				dispatcher.ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
-			}
-			else {
+			} else {
 				dispatcher.ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
 			}
 		}
