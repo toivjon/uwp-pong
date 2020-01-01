@@ -4,6 +4,7 @@
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="welcome_scene.cpp" />
+    <ClCompile Include="rendering_ctx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
