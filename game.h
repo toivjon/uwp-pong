@@ -25,7 +25,10 @@ namespace pong
 		virtual void Uninitialize();
 
 		// The function that is called when the main window of the application is being closed.
-		virtual void OnWindowClosed(Windows::UI::Core::CoreWindow^, Windows::UI::Core::CoreWindowEventArgs^);
+		void OnWindowClosed(Windows::UI::Core::CoreWindow^, Windows::UI::Core::CoreWindowEventArgs^);
+
+		// The function that is called when the application view gets activated.
+		void OnActivated(Windows::ApplicationModel::Core::CoreApplicationView^, Windows::ApplicationModel::Activation::IActivatedEventArgs^);
 	private:
 		// The flag used to stop execution of the application's main loop when the main window is closed.
 		bool mWindowClosed;

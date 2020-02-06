@@ -2,6 +2,7 @@
 
 using namespace pong;
 
+using namespace Windows::ApplicationModel::Activation;
 using namespace Windows::ApplicationModel::Core;
 using namespace Windows::Foundation;
 using namespace Windows::UI::Core;
@@ -10,9 +11,9 @@ IFrameworkView^ Game::CreateView() {
 	return ref new Game();
 }
 
-void Game::Initialize(Windows::ApplicationModel::Core::CoreApplicationView^)
+void Game::Initialize(CoreApplicationView^ view)
 {
-	// ...
+	view->Activated += ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &Game::OnActivated);
 }
 
 void Game::SetWindow(CoreWindow^ window)
@@ -41,4 +42,9 @@ void Game::Uninitialize()
 void Game::OnWindowClosed(CoreWindow^, CoreWindowEventArgs^)
 {
 	mWindowClosed = true;
+}
+
+void Game::OnActivated(CoreApplicationView^, IActivatedEventArgs^)
+{
+	CoreWindow::GetForCurrentThread()->Activate();
 }
