@@ -28,7 +28,8 @@ void Game::Load(Platform::String^)
 void Game::Run()
 {
 	while (!mWindowClosed) {
-		// ...
+		auto window = CoreWindow::GetForCurrentThread();
+		window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
 	}
 }
 
