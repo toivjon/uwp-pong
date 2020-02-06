@@ -23,5 +23,11 @@ namespace pong
 
 		// The function used to dispose reserved resources.
 		virtual void Uninitialize();
+
+		// The function that is called when the main window of the application is being closed.
+		virtual void OnWindowClosed(Windows::UI::Core::CoreWindow^, Windows::UI::Core::CoreWindowEventArgs^);
+	private:
+		// The flag used to stop execution of the application's main loop when the main window is closed.
+		bool mWindowClosed;
 	};
 }
