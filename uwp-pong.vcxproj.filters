@@ -1,22 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="pch.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="welcome_scene.cpp" />
-    <ClCompile Include="rendering_ctx.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="pch.h" />
-    <ClInclude Include="scene.h" />
-    <ClInclude Include="welcome_scene.h" />
-    <ClInclude Include="rendering_ctx.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Assets\Wide310x150Logo.scale-200.png">
+    <Filter Include="Assets">
+      <UniqueIdentifier>7da202cf-af42-478a-959a-54a6c443daa8</UniqueIdentifier>
+      <Extensions>bmp;fbx;gif;jpg;jpeg;tga;tiff;tif;png</Extensions>
+    </Filter>
+    <Image Include="Assets\LockScreenLogo.scale-200.png">
       <Filter>Assets</Filter>
     </Image>
     <Image Include="Assets\SplashScreen.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square150x150Logo.scale-200.png">
       <Filter>Assets</Filter>
     </Image>
     <Image Include="Assets\Square44x44Logo.scale-200.png">
@@ -25,27 +20,19 @@
     <Image Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png">
       <Filter>Assets</Filter>
     </Image>
-    <Image Include="Assets\Square150x150Logo.scale-200.png">
+    <Image Include="Assets\Wide310x150Logo.scale-200.png">
       <Filter>Assets</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="App.cpp" />
+  </ItemGroup>
+  <ItemGroup>
     <Image Include="Assets\StoreLogo.png">
-      <Filter>Assets</Filter>
-    </Image>
-    <Image Include="Assets\LockScreenLogo.scale-200.png">
       <Filter>Assets</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-    <None Include="PropertySheet.props" />
-    <None Include="uwp-pong_TemporaryKey.pfx" />
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="Assets">
-      <UniqueIdentifier>{7b39659b-588b-4076-b946-a8d2f99e6809}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
 </Project>
