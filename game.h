@@ -29,8 +29,14 @@ namespace pong
 
 		// The function that is called when the application view gets activated.
 		void OnActivated(Windows::ApplicationModel::Core::CoreApplicationView^, Windows::ApplicationModel::Activation::IActivatedEventArgs^);
+
+		// The function that is called when window visibility is being changed.
+		void OnWindowVisibilityChanged(Windows::UI::Core::CoreWindow^, Windows::UI::Core::VisibilityChangedEventArgs^);
 	private:
 		// The flag used to stop execution of the application's main loop when the main window is closed.
 		bool mWindowClosed;
+
+		// The flag used to indicate whether the main window is visible and game should be rendered.
+		bool mWindowVisible;
 	};
 }

@@ -19,6 +19,7 @@ void Game::Initialize(CoreApplicationView^ view)
 void Game::SetWindow(CoreWindow^ window)
 {
 	window->Closed += ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(this, &Game::OnWindowClosed);
+	window->VisibilityChanged += ref new TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^>(this, &Game::OnWindowVisibilityChanged);
 }
 
 void Game::Load(Platform::String^)
@@ -30,7 +31,11 @@ void Game::Run()
 {
 	while (!mWindowClosed) {
 		auto window = CoreWindow::GetForCurrentThread();
-		window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
+		if (mWindowVisible) {
+			window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
+		} else {
+			window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
+		}
 	}
 }
 
@@ -47,4 +52,9 @@ void Game::OnWindowClosed(CoreWindow^, CoreWindowEventArgs^)
 void Game::OnActivated(CoreApplicationView^, IActivatedEventArgs^)
 {
 	CoreWindow::GetForCurrentThread()->Activate();
+}
+
+void Game::OnWindowVisibilityChanged(CoreWindow^, VisibilityChangedEventArgs^ args)
+{
+	mWindowVisible = args->Visible;
 }
