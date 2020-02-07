@@ -1,5 +1,9 @@
 #pragma once
 
+#include "audio.h"
+
+#include <memory>
+
 namespace pong
 {
 	// The base core class for the UWP game implementation.
@@ -38,5 +42,8 @@ namespace pong
 
 		// The flag used to indicate whether the main window is visible and game should be rendered.
 		bool mWindowVisible;
+
+		// The audio engine used to process sound effects.
+		std::unique_ptr<Audio> mAudio;
 	};
 }

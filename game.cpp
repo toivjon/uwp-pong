@@ -14,6 +14,7 @@ IFrameworkView^ Game::CreateView() {
 void Game::Initialize(CoreApplicationView^ view)
 {
 	view->Activated += ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &Game::OnActivated);
+	mAudio = std::make_unique<Audio>();
 }
 
 void Game::SetWindow(CoreWindow^ window)
