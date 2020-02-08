@@ -40,5 +40,6 @@
   <ItemGroup>
     <ClInclude Include="game.h" />
     <ClInclude Include="audio.h" />
+    <ClInclude Include="util.h" />
   </ItemGroup>
 </Project>
