@@ -41,6 +41,6 @@
     <ClInclude Include="game.h" />
     <ClInclude Include="audio.h" />
     <ClInclude Include="util.h" />
-    <ClInclude Include="object.h" />
+    <ClInclude Include="context.h" />
   </ItemGroup>
 </Project>

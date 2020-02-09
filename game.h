@@ -1,6 +1,7 @@
 #pragma once
 
 #include "audio.h"
+#include "context.h"
 
 #include <memory>
 
@@ -42,6 +43,9 @@ namespace pong
 
 		// The flag used to indicate whether the main window is visible and game should be rendered.
 		bool mWindowVisible;
+
+		// The game context tracking the current state of the game.
+		std::unique_ptr<Context> mContext;
 
 		// The audio engine used to process sound effects.
 		std::unique_ptr<Audio> mAudio;
