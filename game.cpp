@@ -34,6 +34,7 @@ void Game::Run()
 		auto window = CoreWindow::GetForCurrentThread();
 		if (mWindowVisible) {
 			window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
+			// TODO check input
 			// TODO update
 			// TODO render
 		} else {
