@@ -36,6 +36,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="audio.cpp" />
+    <ClCompile Include="context.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game.h" />
