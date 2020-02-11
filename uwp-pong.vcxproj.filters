@@ -37,11 +37,14 @@
     <ClCompile Include="game.cpp" />
     <ClCompile Include="audio.cpp" />
     <ClCompile Include="context.cpp" />
+    <ClCompile Include="scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game.h" />
     <ClInclude Include="audio.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="context.h" />
+    <ClInclude Include="scene.h" />
+    <ClInclude Include="event.h" />
   </ItemGroup>
 </Project>

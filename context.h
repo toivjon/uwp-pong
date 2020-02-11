@@ -1,6 +1,10 @@
 #pragma once
 
+#include "event.h"
+
 #include <string>
+#include <queue>
+#include <vector>
 
 namespace pong
 {
@@ -13,7 +17,10 @@ namespace pong
 		// The function used to render and present the contents of the current scene.
 		void Render(double alpha);
 
-		// void ChangeScene(const std::string& name);
-		// void PlaySound(const std::string& name);
+		// The function used to change the current scene.
+		void ChangeScene(const std::string& name);
+	private:
+		// A priority queue to hold events for the next update iteration.
+		std::priority_queue<Event> mEvents;
 	};
 }
