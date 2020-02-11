@@ -1,8 +1,11 @@
 #pragma once
 
 #include "event.h"
+#include "scene.h"
 
+#include <memory>
 #include <string>
+#include <unordered_map>
 #include <queue>
 #include <vector>
 
@@ -22,5 +25,11 @@ namespace pong
 	private:
 		// A priority queue to hold events for the next update iteration.
 		std::priority_queue<Event> mEvents;
+
+		// A reference to the currently active scene.
+		std::shared_ptr<Scene> mScene;
+
+		// A mapping containing all available scenes by their name.
+		std::unordered_map<std::string, std::shared_ptr<Scene>> mScenes;
 	};
 }

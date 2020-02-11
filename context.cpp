@@ -12,8 +12,17 @@ void Context::Update(unsigned long dt)
 	while (!events.empty()) {
 		auto event = events.top();
 		switch (event.Type) {
-		case EventType::ChangeScene:
+		case EventType::ChangeScene: {
+			auto args = std::get<ChangeSceneArgs>(event.Args);
+			if (mScene) {
+				mScene->OnExit(*this);
+			}
+			mScene = mScenes[args.NextSceneName];
+			if (mScene) {
+				mScene->OnEnter(*this);
+			}
 			break;
+		}
 		default:
 			break;
 		}
@@ -28,6 +37,12 @@ void Context::Render(double alpha)
 
 void Context::ChangeScene(const std::string& name)
 {
+	// just check that we actually have the target scene.
+	if (mScenes.find(name) == mScenes.end()) {
+		throw "Invalid scene name provided";
+	}
+
+	// enqueue an event about the change.
 	Event e;
 	e.Priority = 0;
 	e.Type = EventType::ChangeScene;
