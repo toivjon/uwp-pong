@@ -37,6 +37,12 @@ namespace pong
 
 		// The function that is called when window visibility is being changed.
 		void OnWindowVisibilityChanged(Windows::UI::Core::CoreWindow^, Windows::UI::Core::VisibilityChangedEventArgs^);
+
+		// The function that is called when a gamepad is being detected by the system.
+		void OnGamepadAdded(Object^ o, Windows::Gaming::Input::Gamepad^ gamepad);
+
+		// The function that is called when a gamepad is being removed.
+		void OnGamepadRemoved(Object^ o, Windows::Gaming::Input::Gamepad^ gamepad);
 	private:
 		// The flag used to stop execution of the application's main loop when the main window is closed.
 		bool mWindowClosed;

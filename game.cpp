@@ -6,6 +6,7 @@ using namespace pong;
 using namespace Windows::ApplicationModel::Activation;
 using namespace Windows::ApplicationModel::Core;
 using namespace Windows::Foundation;
+using namespace Windows::Gaming::Input;
 using namespace Windows::UI::Core;
 
 // The amount of update operations per second.
@@ -23,6 +24,8 @@ void Game::Initialize(CoreApplicationView^ view)
 	view->Activated += ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &Game::OnActivated);
 	mContext = std::make_unique<Context>();
 	mAudio = std::make_unique<Audio>();
+	Gamepad::GamepadAdded += ref new EventHandler<Gamepad^>(this, &Game::OnGamepadAdded);
+	Gamepad::GamepadRemoved += ref new EventHandler<Gamepad^>(this, &Game::OnGamepadRemoved);
 }
 
 void Game::SetWindow(CoreWindow^ window)
@@ -85,4 +88,14 @@ void Game::OnActivated(CoreApplicationView^, IActivatedEventArgs^)
 void Game::OnWindowVisibilityChanged(CoreWindow^, VisibilityChangedEventArgs^ args)
 {
 	mWindowVisible = args->Visible;
+}
+
+void Game::OnGamepadAdded(Object^ o, Gamepad^ gamepad)
+{
+	// TODO
+}
+
+void Game::OnGamepadRemoved(Object^ o, Gamepad^ gamepad)
+{
+	// TODO
 }
