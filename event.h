@@ -7,12 +7,19 @@ namespace pong
 {
 	enum class EventType {
 		Unknown,
-		ChangeScene
+		ChangeScene,
+		GamepadAdded,
+		GamepadRemoved
 	};
 
 	struct ChangeSceneArgs {
 		// The name of the scene to be moved into.
 		std::string NextSceneName;
+	};
+
+	struct GamepadEvent {
+		// A reference to target gamepad item.
+		Windows::Gaming::Input::Gamepad^ Gamepad;
 	};
 
 	struct Event {
@@ -23,7 +30,7 @@ namespace pong
 		EventType Type = EventType::Unknown;
 
 		// The type specific variadic arguments for the event.
-		std::variant<ChangeSceneArgs> Args;
+		std::variant<ChangeSceneArgs, GamepadEvent> Args;
 
 		// A comparator for the ordering in the priority queue.
 		friend bool operator < (const Event& lhs, const Event& rhs) {

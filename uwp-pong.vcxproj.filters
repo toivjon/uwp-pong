@@ -38,6 +38,7 @@
     <ClCompile Include="audio.cpp" />
     <ClCompile Include="context.cpp" />
     <ClCompile Include="scene.cpp" />
+    <ClCompile Include="player.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game.h" />
@@ -46,5 +47,6 @@
     <ClInclude Include="context.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="event.h" />
+    <ClInclude Include="player.h" />
   </ItemGroup>
 </Project>

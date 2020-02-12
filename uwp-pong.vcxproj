@@ -258,6 +258,7 @@
     <ClCompile Include="context.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="player.cpp" />
     <ClCompile Include="scene.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -270,6 +271,7 @@
     <ClInclude Include="context.h" />
     <ClInclude Include="event.h" />
     <ClInclude Include="game.h" />
+    <ClInclude Include="player.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>

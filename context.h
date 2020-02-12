@@ -1,6 +1,7 @@
 #pragma once
 
 #include "event.h"
+#include "player.h"
 #include "scene.h"
 
 #include <memory>
@@ -22,6 +23,9 @@ namespace pong
 
 		// The function used to change the current scene.
 		void ChangeScene(const std::string& name);
+
+		Player& GetLeftPlayer() 	{ return mLeftPlayer;	}
+		Player& GetRightPlayer()	{ return mRightPlayer;  }
 	private:
 		// A priority queue to hold events for the next update iteration.
 		std::priority_queue<Event> mEvents;
@@ -31,5 +35,8 @@ namespace pong
 
 		// A mapping containing all available scenes by their name.
 		std::unordered_map<std::string, std::shared_ptr<Scene>> mScenes;
+
+		Player mLeftPlayer;
+		Player mRightPlayer;
 	};
 }
