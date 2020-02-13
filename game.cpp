@@ -22,7 +22,6 @@ IFrameworkView^ Game::CreateView() {
 void Game::Initialize(CoreApplicationView^ view)
 {
 	view->Activated += ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &Game::OnActivated);
-	mContext = std::make_unique<Context>();
 	mAudio = std::make_unique<Audio>();
 	Gamepad::GamepadAdded += ref new EventHandler<Gamepad^>(this, &Game::OnGamepadAdded);
 	Gamepad::GamepadRemoved += ref new EventHandler<Gamepad^>(this, &Game::OnGamepadRemoved);
@@ -47,8 +46,8 @@ void Game::Run()
 		auto window = CoreWindow::GetForCurrentThread();
 		if (mWindowVisible) {
 			window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
-			mContext->GetRightPlayer().CheckInput(*mContext.get());
-			mContext->GetLeftPlayer().CheckInput(*mContext.get());
+			mContext.GetRightPlayer().CheckInput(mContext);
+			mContext.GetLeftPlayer().CheckInput(mContext);
 
 			// calculate the time usable for the current frame.
 			auto now = CurrentMillis();
@@ -58,13 +57,13 @@ void Game::Run()
 
 			// perform ticking of the game logic and physics.
 			while (millisAccumulator >= UPDATE_MILLIS) {
-				mContext->Update(UPDATE_MILLIS);
+				mContext.Update(UPDATE_MILLIS);
 				millisAccumulator -= UPDATE_MILLIS;
 			}
 
 			// perform interpolated rendering of the game scene.
 			auto alpha = double(millisAccumulator) / double(UPDATE_MILLIS);
-			mContext->Render(alpha);
+			mContext.Render(alpha);
 		} else {
 			window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
 		}
@@ -97,7 +96,7 @@ void Game::OnGamepadAdded(Object^ o, Gamepad^ gamepad)
 	e.Type = EventType::GamepadAdded;
 	e.Priority = 0;
 	std::get<GamepadEvent>(e.Args).Gamepad = gamepad;
-	mContext->EnqueueEvent(e);
+	mContext.EnqueueEvent(e);
 }
 
 void Game::OnGamepadRemoved(Object^ o, Gamepad^ gamepad)
@@ -106,5 +105,5 @@ void Game::OnGamepadRemoved(Object^ o, Gamepad^ gamepad)
 	e.Type = EventType::GamepadRemoved;
 	e.Priority = 0;
 	std::get<GamepadEvent>(e.Args).Gamepad = gamepad;
-	mContext->EnqueueEvent(e);
+	mContext.EnqueueEvent(e);
 }
