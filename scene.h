@@ -6,7 +6,7 @@
 namespace pong
 {
 	class Context;
-	class Scene final
+	class Scene
 	{
 	public:
 		enum class ID { MainMenu, Court, GameOver };
