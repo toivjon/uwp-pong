@@ -44,8 +44,7 @@ public:
 std::shared_ptr<Scene> Scene::Create(Scene::ID id)
 {
 	static std::unordered_map<Scene::ID, std::shared_ptr<Scene>> mScenes;
-	auto it = mScenes.find(id);
-	if (it == mScenes.end()) {
+	if (mScenes.find(id) == mScenes.end()) {
 		switch (id) {
 		case ID::MainMenu:
 			mScenes[id] = std::make_shared<MainMenu>();
