@@ -95,7 +95,7 @@ void Game::OnGamepadAdded(Object^ o, Gamepad^ gamepad)
 	Event e;
 	e.Type = EventType::GamepadAdded;
 	e.Priority = 0;
-	std::get<GamepadEvent>(e.Args).Gamepad = gamepad;
+	e.Args = GamepadEvent{ gamepad };
 	mContext.EnqueueEvent(e);
 }
 
@@ -104,6 +104,6 @@ void Game::OnGamepadRemoved(Object^ o, Gamepad^ gamepad)
 	Event e;
 	e.Type = EventType::GamepadRemoved;
 	e.Priority = 0;
-	std::get<GamepadEvent>(e.Args).Gamepad = gamepad;
+	e.Args = GamepadEvent{ gamepad };
 	mContext.EnqueueEvent(e);
 }
