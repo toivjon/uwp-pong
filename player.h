@@ -13,7 +13,8 @@ namespace pong
 		Windows::Gaming::Input::Gamepad^ GetGamepad() { return mGamepad; }
 		bool HasGamepad() const { return mGamepad != nullptr; }
 	private:
-		// The gamepad controller reference for the target player.
 		Windows::Gaming::Input::Gamepad^ mGamepad;
+		Windows::Gaming::Input::GamepadReading mOldReading;
+		Windows::Gaming::Input::GamepadReading mNewReading;
 	};
 }
