@@ -24,6 +24,8 @@ namespace pong
 		// The function used to change the current scene.
 		void ChangeScene(const std::string& name);
 
+		void EnqueueEvent(const Event& event);
+
 		Player& GetLeftPlayer() 	{ return mLeftPlayer;	}
 		Player& GetRightPlayer()	{ return mRightPlayer;  }
 	private:

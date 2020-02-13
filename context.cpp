@@ -49,3 +49,8 @@ void Context::ChangeScene(const std::string& name)
 	e.Args = ChangeSceneArgs{ name };
 	mEvents.push(e);
 }
+
+void Context::EnqueueEvent(const Event& event)
+{
+	mEvents.push(event);
+}
