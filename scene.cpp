@@ -1,6 +1,8 @@
 #include "scene.h"
 #include "context.h"
 
+#include <unordered_map>
+
 using namespace pong;
 
 void Scene::OnEnter(Context& ctx)
@@ -41,7 +43,7 @@ public:
 
 };
 
-std::shared_ptr<Scene> Scene::Create(Scene::ID id)
+std::shared_ptr<Scene> Scene::Get(Scene::ID id)
 {
 	static std::unordered_map<Scene::ID, std::shared_ptr<Scene>> mScenes;
 	if (mScenes.find(id) == mScenes.end()) {

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <unordered_map>
 
 namespace pong
 {
@@ -9,9 +8,11 @@ namespace pong
 	class Scene
 	{
 	public:
+		// An enumeration of all available scenes.
 		enum class ID { MainMenu, Court, GameOver };
 
-		static std::shared_ptr<Scene> Create(Scene::ID);
+		// A cached factory function to build a scene.
+		static std::shared_ptr<Scene> Get(Scene::ID);
 
 		virtual void OnEnter(Context& ctx);
 		virtual void OnExit(Context& ctx);
