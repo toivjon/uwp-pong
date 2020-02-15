@@ -43,7 +43,7 @@ void Game::Load(Platform::String^)
 void Game::Run()
 {
 	auto millisAccumulator = 0l;
-	auto currentMillis = CurrentMillis();
+	auto oldMillis = CurrentMillis();
 	while (!mWindowClosed) {
 		auto window = CoreWindow::GetForCurrentThread();
 		if (mWindowVisible) {
@@ -52,9 +52,9 @@ void Game::Run()
 			mContext.GetLeftPlayer().CheckInput(mContext);
 
 			// calculate the time usable for the current frame.
-			auto now = CurrentMillis();
-			auto delta = min(now - currentMillis, 100);
-			currentMillis = now;
+			auto newMillis = CurrentMillis();
+			auto delta = min(newMillis - oldMillis, 100);
+			oldMillis = newMillis;
 			millisAccumulator += delta;
 
 			// perform ticking of the game logic and physics.
