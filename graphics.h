@@ -13,8 +13,9 @@ namespace pong
 		Graphics();
 
 		void SetWindow(Windows::UI::Core::CoreWindow^ window);
-		void BeginFrame();
-		void Present();
+
+		void BeginDraw();
+		void EndDraw();
 	private:
 		void InitD3DContext();
 		void InitD2DContext();

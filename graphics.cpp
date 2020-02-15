@@ -61,13 +61,13 @@ void Graphics::SetWindow(CoreWindow^ window)
 	m2DDeviceCtx->SetTarget(bitmap.Get());
 }
 
-void Graphics::BeginFrame()
+void Graphics::BeginDraw()
 {
 	m2DDeviceCtx->BeginDraw();
 	m2DDeviceCtx->Clear(D2D1::ColorF(D2D1::ColorF::DarkBlue));
 }
 
-void Graphics::Present()
+void Graphics::EndDraw()
 {
 	ThrowIfFailed(m2DDeviceCtx->EndDraw());
 	ThrowIfFailed(mSwapChain->Present(1, 0));
