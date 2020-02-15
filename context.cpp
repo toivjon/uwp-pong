@@ -67,3 +67,9 @@ void Context::SetWindow(Windows::UI::Core::CoreWindow^ window)
 {
 	mGraphics->SetWindow(window);
 }
+
+void Context::CheckInput()
+{
+	mRightPlayer.CheckInput(*this);
+	mLeftPlayer.CheckInput(*this);
+}

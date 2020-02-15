@@ -47,8 +47,7 @@ void Game::Run()
 		auto window = CoreWindow::GetForCurrentThread();
 		if (mWindowVisible) {
 			window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
-			mContext->GetRightPlayer().CheckInput(*mContext);
-			mContext->GetLeftPlayer().CheckInput(*mContext);
+			mContext->CheckInput();
 
 			// calculate the time usable for the current frame.
 			auto newMillis = CurrentMillis();

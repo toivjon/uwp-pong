@@ -32,6 +32,8 @@ namespace pong
 
 		void SetWindow(Windows::UI::Core::CoreWindow^ window);
 
+		void CheckInput();
+
 		Player& GetLeftPlayer() 	{ return mLeftPlayer;	}
 		Player& GetRightPlayer()	{ return mRightPlayer;  }
 	private:
