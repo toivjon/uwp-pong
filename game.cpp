@@ -64,6 +64,7 @@ void Game::Run()
 			}
 
 			// perform interpolated rendering of the game scene.
+			mGraphics->BeginFrame();
 			auto alpha = double(millisAccumulator) / double(UPDATE_MILLIS);
 			mContext.Render(alpha);
 			mGraphics->Present();
