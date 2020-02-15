@@ -2,6 +2,7 @@
 
 #include "audio.h"
 #include "context.h"
+#include "graphics.h"
 
 #include <memory>
 
@@ -55,5 +56,8 @@ namespace pong
 
 		// The audio engine used to process sound effects.
 		std::unique_ptr<Audio> mAudio;
+
+		// The graphics engine used to process graphics.
+		std::unique_ptr<Graphics> mGraphics;
 	};
 }

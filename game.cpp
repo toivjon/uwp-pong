@@ -23,6 +23,7 @@ void Game::Initialize(CoreApplicationView^ view)
 {
 	view->Activated += ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &Game::OnActivated);
 	mAudio = std::make_unique<Audio>();
+	mGraphics = std::make_unique<Graphics>();
 	Gamepad::GamepadAdded += ref new EventHandler<Gamepad^>(this, &Game::OnGamepadAdded);
 	Gamepad::GamepadRemoved += ref new EventHandler<Gamepad^>(this, &Game::OnGamepadRemoved);
 }
@@ -31,6 +32,7 @@ void Game::SetWindow(CoreWindow^ window)
 {
 	window->Closed += ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(this, &Game::OnWindowClosed);
 	window->VisibilityChanged += ref new TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^>(this, &Game::OnWindowVisibilityChanged);
+	mGraphics->SetWindow(window);
 }
 
 void Game::Load(Platform::String^)

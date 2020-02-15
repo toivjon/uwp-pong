@@ -12,8 +12,9 @@ void Player::SetGamepad(Gamepad^ gamepad)
 
 void Player::CheckInput(Context& ctx)
 {
-	mOldReading = mNewReading;
-	mNewReading = mGamepad->GetCurrentReading();
-
+	if (mGamepad != nullptr) {
+		mOldReading = mNewReading;
+		mNewReading = mGamepad->GetCurrentReading();
+	}
 	// TODO ...
 }

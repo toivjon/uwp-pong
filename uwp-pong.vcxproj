@@ -256,7 +256,9 @@
   <ItemGroup>
     <ClCompile Include="audio.cpp" />
     <ClCompile Include="context.cpp" />
+    <ClCompile Include="entity.cpp" />
     <ClCompile Include="game.cpp" />
+    <ClCompile Include="graphics.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="scene.cpp" />
@@ -269,8 +271,10 @@
   <ItemGroup>
     <ClInclude Include="audio.h" />
     <ClInclude Include="context.h" />
+    <ClInclude Include="entity.h" />
     <ClInclude Include="event.h" />
     <ClInclude Include="game.h" />
+    <ClInclude Include="graphics.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="util.h" />
