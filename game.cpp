@@ -22,6 +22,7 @@ IFrameworkView^ Game::CreateView() {
 void Game::Initialize(CoreApplicationView^ view)
 {
 	view->Activated += ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &Game::OnActivated);
+	mContext = std::make_unique<Context>();
 	mAudio = std::make_unique<Audio>();
 	mGraphics = std::make_unique<Graphics>();
 	Gamepad::GamepadAdded += ref new EventHandler<Gamepad^>(this, &Game::OnGamepadAdded);
@@ -48,8 +49,8 @@ void Game::Run()
 		auto window = CoreWindow::GetForCurrentThread();
 		if (mWindowVisible) {
 			window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
-			mContext.GetRightPlayer().CheckInput(mContext);
-			mContext.GetLeftPlayer().CheckInput(mContext);
+			mContext->GetRightPlayer().CheckInput(*mContext);
+			mContext->GetLeftPlayer().CheckInput(*mContext);
 
 			// calculate the time usable for the current frame.
 			auto newMillis = CurrentMillis();
@@ -59,14 +60,14 @@ void Game::Run()
 
 			// perform ticking of the game logic and physics.
 			while (millisAccumulator >= UPDATE_MILLIS) {
-				mContext.Update(UPDATE_MILLIS);
+				mContext->Update(UPDATE_MILLIS);
 				millisAccumulator -= UPDATE_MILLIS;
 			}
 
 			// perform interpolated rendering of the game scene.
 			mGraphics->BeginDraw();
 			auto alpha = double(millisAccumulator) / double(UPDATE_MILLIS);
-			mContext.Render(alpha);
+			mContext->Render(alpha);
 			mGraphics->EndDraw();
 		} else {
 			window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
@@ -100,7 +101,7 @@ void Game::OnGamepadAdded(Object^ o, Gamepad^ gamepad)
 	e.Type = EventType::GamepadAdded;
 	e.Priority = 0;
 	e.Args = GamepadEvent{ gamepad };
-	mContext.EnqueueEvent(e);
+	mContext->EnqueueEvent(e);
 }
 
 void Game::OnGamepadRemoved(Object^ o, Gamepad^ gamepad)
@@ -109,5 +110,5 @@ void Game::OnGamepadRemoved(Object^ o, Gamepad^ gamepad)
 	e.Type = EventType::GamepadRemoved;
 	e.Priority = 0;
 	e.Args = GamepadEvent{ gamepad };
-	mContext.EnqueueEvent(e);
+	mContext->EnqueueEvent(e);
 }

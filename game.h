@@ -52,7 +52,7 @@ namespace pong
 		bool mWindowVisible;
 
 		// The game context tracking the current state of the game.
-		Context mContext;
+		std::unique_ptr<Context> mContext;
 
 		// The audio engine used to process sound effects.
 		std::unique_ptr<Audio> mAudio;
