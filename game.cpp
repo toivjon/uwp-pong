@@ -66,6 +66,7 @@ void Game::Run()
 			// perform interpolated rendering of the game scene.
 			auto alpha = double(millisAccumulator) / double(UPDATE_MILLIS);
 			mContext.Render(alpha);
+			mGraphics->Present();
 		} else {
 			window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
 		}

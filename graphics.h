@@ -12,6 +12,7 @@ namespace pong
 		Graphics();
 
 		void SetWindow(Windows::UI::Core::CoreWindow^ window);
+		void Present();
 	private:
 		Microsoft::WRL::ComPtr<ID3D11Device> mDevice;
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> mDeviceCtx;

@@ -48,3 +48,8 @@ void Graphics::SetWindow(CoreWindow^ window)
 		&mSwapChain
 	));
 }
+
+void Graphics::Present()
+{
+	mSwapChain->Present(1, 0);
+}
