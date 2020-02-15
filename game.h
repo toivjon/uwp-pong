@@ -1,8 +1,6 @@
 #pragma once
 
-#include "audio.h"
 #include "context.h"
-#include "graphics.h"
 
 #include <memory>
 
@@ -53,11 +51,5 @@ namespace pong
 
 		// The game context tracking the current state of the game.
 		std::unique_ptr<Context> mContext;
-
-		// The audio engine used to process sound effects.
-		std::unique_ptr<Audio> mAudio;
-
-		// The graphics engine used to process graphics.
-		std::unique_ptr<Graphics> mGraphics;
 	};
 }

@@ -23,8 +23,6 @@ void Game::Initialize(CoreApplicationView^ view)
 {
 	view->Activated += ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &Game::OnActivated);
 	mContext = std::make_unique<Context>();
-	mAudio = std::make_unique<Audio>();
-	mGraphics = std::make_unique<Graphics>();
 	Gamepad::GamepadAdded += ref new EventHandler<Gamepad^>(this, &Game::OnGamepadAdded);
 	Gamepad::GamepadRemoved += ref new EventHandler<Gamepad^>(this, &Game::OnGamepadRemoved);
 }
@@ -33,7 +31,7 @@ void Game::SetWindow(CoreWindow^ window)
 {
 	window->Closed += ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(this, &Game::OnWindowClosed);
 	window->VisibilityChanged += ref new TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^>(this, &Game::OnWindowVisibilityChanged);
-	mGraphics->SetWindow(window);
+	mContext->SetWindow(window);
 }
 
 void Game::Load(Platform::String^)
@@ -65,10 +63,8 @@ void Game::Run()
 			}
 
 			// perform interpolated rendering of the game scene.
-			mGraphics->BeginDraw();
 			auto alpha = double(millisAccumulator) / double(UPDATE_MILLIS);
 			mContext->Render(alpha);
-			mGraphics->EndDraw();
 		} else {
 			window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
 		}

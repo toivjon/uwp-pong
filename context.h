@@ -1,6 +1,8 @@
 #pragma once
 
+#include "audio.h"
 #include "event.h"
+#include "graphics.h"
 #include "player.h"
 #include "scene.h"
 
@@ -15,6 +17,8 @@ namespace pong
 	class Context final
 	{
 	public:
+		Context();
+
 		// The function used to perform the next logical step for the game.
 		void Update(unsigned long dt);
 
@@ -25,6 +29,8 @@ namespace pong
 		void ChangeScene(const std::string& name);
 
 		void EnqueueEvent(const Event& event);
+
+		void SetWindow(Windows::UI::Core::CoreWindow^ window);
 
 		Player& GetLeftPlayer() 	{ return mLeftPlayer;	}
 		Player& GetRightPlayer()	{ return mRightPlayer;  }
@@ -40,5 +46,8 @@ namespace pong
 
 		Player mLeftPlayer;
 		Player mRightPlayer;
+
+		std::unique_ptr<Audio> mAudio;
+		std::unique_ptr<Graphics> mGraphics;
 	};
 }

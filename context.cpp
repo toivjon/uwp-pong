@@ -2,6 +2,12 @@
 
 using namespace pong;
 
+Context::Context()
+{
+	mAudio = std::make_unique<Audio>();
+	mGraphics = std::make_unique<Graphics>();
+}
+
 void Context::Update(unsigned long dt)
 {
 	// get events from the current queue.
@@ -32,7 +38,9 @@ void Context::Update(unsigned long dt)
 
 void Context::Render(double alpha)
 {
+	mGraphics->BeginDraw();
 	// TODO
+	mGraphics->EndDraw();
 }
 
 void Context::ChangeScene(const std::string& name)
@@ -53,4 +61,9 @@ void Context::ChangeScene(const std::string& name)
 void Context::EnqueueEvent(const Event& event)
 {
 	mEvents.push(event);
+}
+
+void Context::SetWindow(Windows::UI::Core::CoreWindow^ window)
+{
+	mGraphics->SetWindow(window);
 }
