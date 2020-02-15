@@ -9,6 +9,7 @@ Graphics::Graphics()
 {
 	InitD3DContext();
 	InitD2DContext();
+	InitDirectWrite();
 }
 
 void Graphics::SetWindow(CoreWindow^ window)
@@ -135,4 +136,30 @@ void Graphics::InitD2DContext()
 		D2D1_DEVICE_CONTEXT_OPTIONS_NONE,
 		&m2DDeviceCtx
 	));
+}
+
+void Graphics::InitDirectWrite()
+{
+	// construct a new DirectWrite factory to build text resources.
+	ThrowIfFailed(DWriteCreateFactory(
+		DWRITE_FACTORY_TYPE_SHARED,
+		__uuidof(IDWriteFactory),
+		reinterpret_cast<IUnknown**>(mWritefactory.GetAddressOf())
+	));
+
+	// construct a new DirectWrite text format to format text rendering.
+	ThrowIfFailed(mWritefactory->CreateTextFormat(
+		L"Calibri",
+		nullptr,
+		DWRITE_FONT_WEIGHT_REGULAR,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		72.f,
+		L"en-us",
+		&mTextFormat
+	));
+
+	// specify some additional configuration for the text format.
+	ThrowIfFailed(mTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER));
+	ThrowIfFailed(mTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER));
 }
