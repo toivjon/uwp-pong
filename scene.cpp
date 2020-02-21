@@ -7,27 +7,7 @@
 
 using namespace pong;
 
-void Scene::OnEnter(Context& ctx)
-{
-	// ...
-}
-
-void Scene::OnExit(Context& ctx)
-{
-	// ...
-}
-
-void Scene::Render(RenderingContext& ctx)
-{
-	// ...
-}
-
-void Scene::OnUpdate(Context& ctx)
-{
-	// ...
-}
-
-class MainMenu : public Scene
+class MainMenu final : public Scene
 {
 public:
 	void OnEnter(Context& ctx)
@@ -60,6 +40,16 @@ public:
 		mLeftCenterLine->SetPosition(D2D_SIZE_F{}); // TODO relative to window size
 		mLeftCenterLine->AddComponent(std::make_shared<RectangleComponent>(D2D1_RECT_F{ 0, 0, 100, 100 }));
 	}
+
+	void OnExit(Context& ctx)
+	{
+		// ...
+	}
+
+	void OnUpdated(Context& ctx)
+	{
+		// ...
+	}
 private:
 	std::shared_ptr<Entity> mTitle;
 	std::shared_ptr<Entity> mLeftPlayerText;
@@ -70,16 +60,42 @@ private:
 	std::shared_ptr<Entity> mLeftCenterLine;
 };
 
-class Court : public Scene
+class Court final : public Scene
 {
 public:
+	void OnEnter(Context& ctx)
+	{
+		// ...
+	}
 
+	void OnExit(Context& ctx)
+	{
+		// ...
+	}
+
+	void OnUpdated(Context& ctx)
+	{
+		// ...
+	}
 };
 
-class GameOver : public Scene
+class GameOver final : public Scene
 {
 public:
+	void OnEnter(Context& ctx)
+	{
+		// ...
+	}
 
+	void OnExit(Context& ctx)
+	{
+		// ...
+	}
+
+	void OnUpdated(Context& ctx)
+	{
+		// ...
+	}
 };
 
 std::shared_ptr<Scene> Scene::Get(Scene::ID id)

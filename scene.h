@@ -6,7 +6,6 @@ namespace pong
 {
 	class Context;
 	class Graphics;
-	class RenderingContext;
 	class Scene
 	{
 	public:
@@ -16,8 +15,13 @@ namespace pong
 		// A cached factory function to build a scene.
 		static std::shared_ptr<Scene> Get(Scene::ID);
 
-		virtual void OnEnter(Context& ctx);
-		virtual void OnExit(Context& ctx);
-		virtual void OnUpdate(Context& ctx);
+		// A function called when the scene gets activated.
+		virtual void OnEnter(Context& ctx) = 0;
+
+		// A function called when the scene gets exited.
+		virtual void OnExit(Context& ctx) = 0;
+
+		// A function called on each logical game tick.
+		virtual void OnUpdate(Context& ctx) = 0;
 	};
 }
