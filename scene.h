@@ -18,7 +18,6 @@ namespace pong
 
 		virtual void OnEnter(Context& ctx);
 		virtual void OnExit(Context& ctx);
-		virtual void OnRender(RenderingContext& ctx);
 		virtual void OnUpdate(Context& ctx);
 	};
 }

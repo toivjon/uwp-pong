@@ -60,17 +60,6 @@ public:
 		mLeftCenterLine->SetPosition(D2D_SIZE_F{}); // TODO relative to window size
 		mLeftCenterLine->AddComponent(std::make_shared<RectangleComponent>(D2D1_RECT_F{ 0, 0, 100, 100 }));
 	}
-
-	void Render(RenderingContext& ctx)
-	{
-		mTitle->Render(ctx);
-		mLeftPlayerText->Render(ctx);
-		mRightPlayerText->Render(ctx);
-		mTopWall->Render(ctx);
-		mBottomWall->Render(ctx);
-		mRightCenterLine->Render(ctx);
-		mLeftCenterLine->Render(ctx);
-	}
 private:
 	std::shared_ptr<Entity> mTitle;
 	std::shared_ptr<Entity> mLeftPlayerText;
