@@ -4,8 +4,11 @@
 
 namespace pong
 {
+	// forward declarations
 	class Context;
-	class Graphics;
+
+	// ========================================================================
+
 	class Scene
 	{
 	public:
@@ -24,4 +27,7 @@ namespace pong
 		// A function called on each logical game tick.
 		virtual void OnUpdate(Context& ctx) = 0;
 	};
+
+	// ========================================================================
+
 }
