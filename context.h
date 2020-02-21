@@ -14,6 +14,22 @@
 
 namespace pong
 {
+	class RenderingContext final
+	{
+	public:
+		RenderingContext() = delete;
+		RenderingContext(Graphics& graphics);
+
+		const Graphics& GetGraphics() const { return mGraphics; }
+			  Graphics& GetGraphics()		{ return mGraphics; }
+
+		double GetAlpha() const		{ return mAlpha;	}
+		void SetAlpha(double alpha) { mAlpha = alpha;	}
+	private:
+		double		mAlpha;
+		Graphics&	mGraphics;
+	};
+
 	class Context final
 	{
 	public:

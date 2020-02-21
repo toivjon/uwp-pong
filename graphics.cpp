@@ -136,6 +136,12 @@ void Graphics::InitD2DContext()
 		D2D1_DEVICE_CONTEXT_OPTIONS_NONE,
 		&m2DDeviceCtx
 	));
+
+	// create a white brush to be used when drawing white objects.
+	ThrowIfFailed(m2DDeviceCtx->CreateSolidColorBrush(
+		D2D1::ColorF(D2D1::ColorF::White),
+		&mWhiteBrush
+	));
 }
 
 void Graphics::InitDirectWrite()
@@ -162,4 +168,9 @@ void Graphics::InitDirectWrite()
 	// specify some additional configuration for the text format.
 	ThrowIfFailed(mTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER));
 	ThrowIfFailed(mTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER));
+}
+
+ComPtr<IDWriteTextFormat> Graphics::GetTextFormat(int size)
+{
+	return mTextFormat;
 }

@@ -2,10 +2,18 @@
 
 using namespace pong;
 
+RenderingContext::RenderingContext(Graphics& graphics)
+	:	mAlpha(0.0),
+		mGraphics(graphics)
+{
+
+}
+
 Context::Context()
 {
 	mAudio = std::make_unique<Audio>();
 	mGraphics = std::make_unique<Graphics>();
+	mScene = Scene::Get(Scene::ID::MainMenu);
 }
 
 void Context::Update(unsigned long dt)
@@ -39,7 +47,9 @@ void Context::Update(unsigned long dt)
 void Context::Render(double alpha)
 {
 	mGraphics->BeginDraw();
-	// TODO
+	RenderingContext ctx(*mGraphics);
+	ctx.SetAlpha(alpha);
+	mScene->Render(ctx);
 	mGraphics->EndDraw();
 }
 

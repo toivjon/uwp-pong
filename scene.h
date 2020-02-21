@@ -5,6 +5,8 @@
 namespace pong
 {
 	class Context;
+	class Graphics;
+	class RenderingContext;
 	class Scene
 	{
 	public:
@@ -16,7 +18,7 @@ namespace pong
 
 		virtual void OnEnter(Context& ctx);
 		virtual void OnExit(Context& ctx);
-		virtual void OnRender(Context& ctx);
+		virtual void OnRender(RenderingContext& ctx);
 		virtual void OnUpdate(Context& ctx);
 	};
 }

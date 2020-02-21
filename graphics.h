@@ -17,6 +17,11 @@ namespace pong
 
 		void BeginDraw();
 		void EndDraw();
+
+		Microsoft::WRL::ComPtr<ID2D1DeviceContext5> Get2DContext() { return m2DDeviceCtx; }
+		Microsoft::WRL::ComPtr<IDWriteTextFormat> GetTextFormat(int size);
+
+		Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> GetWhiteBrush() { return mWhiteBrush; }
 	private:
 		void InitD3DContext();
 		void InitD2DContext();
@@ -31,5 +36,7 @@ namespace pong
 		Microsoft::WRL::ComPtr<ID3D11RenderTargetView>	mRenderTargetView;
 		Microsoft::WRL::ComPtr<IDWriteFactory>			mWritefactory;
 		Microsoft::WRL::ComPtr<IDWriteTextFormat>		mTextFormat;
+
+		Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> mWhiteBrush;
 	};
 }
