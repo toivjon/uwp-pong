@@ -69,14 +69,3 @@ bool Entity::HasComponent(std::shared_ptr<Component> component)
 	}
 	return false;
 }
-
-void Entity::Render(RenderingContext& ctx)
-{
-	ctx.GetGraphics().Get2DContext()->SetTransform(D2D1::Matrix3x2F::Translation(mPosition));
-	for (auto component : mComponents) {
-		auto renderable = std::dynamic_pointer_cast<RenderableComponent>(component);
-		if (renderable) {
-			renderable->Render(ctx);
-		}
-	}
-}
