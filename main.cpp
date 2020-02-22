@@ -22,6 +22,8 @@ using namespace Microsoft::WRL;
 constexpr auto UPDATES_PER_SECOND = 25;
 // The update physical step size in milliseconds.
 constexpr auto UPDATE_MILLIS = 1000 / 25;
+// The amount of dots in the center line.
+constexpr auto CENTERLINE_DOTS = 15;
 
 // =================
 // === Utilities ===
@@ -44,6 +46,16 @@ inline void ThrowIfFailed(HRESULT hr) {
 inline float ConvertDipsToPixels(float dips, float dpi) {
 	static const float dipsPerInch = 96.0f;
 	return floorf(dips * dpi / dipsPerInch + 0.5f);
+}
+
+inline D2D1_RECT_F Interpolate(const D2D1_RECT_F& a, const D2D1_RECT_F& b, double alpha)
+{
+	D2D1_RECT_F result;
+	result.top = a.top + (b.top - a.top) * alpha;
+	result.bottom = a.bottom + (b.bottom - a.bottom) * alpha;
+	result.left = a.left + (b.left - a.left) * alpha;
+	result.right = a.right + (b.right - a.right) * alpha;
+	return result;
 }
 
 // ============
@@ -232,32 +244,64 @@ public:
 		auto window = CoreWindow::GetForCurrentThread();
 		ResizeGameObjects(window);
 		ResizeSwapchain(window);
-		/*
-		DisplayInformation^ currentDisplayInformation = DisplayInformation::GetForCurrentView();
-		auto dpi = currentDisplayInformation->LogicalDpi;
-
-		auto bottom = CoreWindow::GetForCurrentThread()->Bounds.Bottom;
-		auto bottom_pix = ConvertDipsToPixels(bottom, dpi);
-
-		auto bounds = window->Bounds;
-		auto wpix = ConvertDipsToPixels(bounds.Width, dpi);
-		auto hpix = ConvertDipsToPixels(bounds.Height, dpi);
-
-		wchar_t buffer[128];
-		swprintf_s(buffer, 128, L"width: %.2f height: %.2f\n", windowSize.Width, windowSize.Height);
-		OutputDebugString(buffer);
-		// mBottomWallRect = { 0,windowSize.Height - (windowSize.Height / 10),windowSize.Width, windowSize.Height / 10 };
-		*/
 	}
 
 	void ResizeGameObjects(CoreWindow^ window)
 	{
-		auto windowSize = Size(window->Bounds.Width, window->Bounds.Height);
+		// get the width and height of the window.
+		auto windowWidth = window->Bounds.Width;
+		auto windowHeight = window->Bounds.Height;
 
-		mTopWallRect.top = 0;
-		mTopWallRect.bottom = windowSize.Height / 20;
-		mTopWallRect.left = 0;
-		mTopWallRect.right = windowSize.Width;
+		// calculate aspect ratio correction values.
+		static const auto aspectRatio = (800.f / 600.f);
+		auto currentAspectRatio = (windowWidth / windowHeight);
+		auto widthSpacing = 0.f, heightSpacing = 0.f;
+		if (currentAspectRatio > aspectRatio) {
+			auto widthEdge = windowHeight * aspectRatio;
+			widthSpacing = windowWidth - widthEdge;
+		} else if (currentAspectRatio < aspectRatio) {
+			auto heightEdge = windowWidth / aspectRatio;
+			heightSpacing = windowHeight - heightEdge;
+		}
+
+		// calculate cell size and the view center points.
+		auto cellSize = (windowHeight - heightSpacing) / 30;
+		auto horizontalCenter = windowWidth / 2;
+		auto verticalCenter = windowHeight / 2;
+
+		mTopWallRect.top = heightSpacing / 2;
+		mTopWallRect.bottom = mTopWallRect.top + cellSize;
+		mTopWallRect.left = widthSpacing / 2;
+		mTopWallRect.right = windowWidth - widthSpacing / 2;
+
+		mBottomWallRect.top = windowHeight - heightSpacing / 2 - cellSize;
+		mBottomWallRect.bottom = mBottomWallRect.top + cellSize;
+		mBottomWallRect.left = widthSpacing / 2;
+		mBottomWallRect.right = windowWidth - widthSpacing / 2;
+
+		for (auto i = 0; i < CENTERLINE_DOTS; i++) {
+			mCenterlineRects[i].top = heightSpacing / 2 + (i*2 + 0.5f) * cellSize;
+			mCenterlineRects[i].bottom = mCenterlineRects[i].top + cellSize;
+			mCenterlineRects[i].left = horizontalCenter - (cellSize / 2);
+			mCenterlineRects[i].right = mCenterlineRects[i].left + cellSize;
+		}
+
+		for (auto i = 0; i < 2; i++) {
+			mLeftPaddleRects[i].top = verticalCenter - (2.5f * cellSize);
+			mLeftPaddleRects[i].bottom = mLeftPaddleRects[i].top + 5 * cellSize;
+			mLeftPaddleRects[i].left = widthSpacing / 2 + cellSize;
+			mLeftPaddleRects[i].right = mLeftPaddleRects[i].left + cellSize;
+
+			mRightPaddleRects[i].top = verticalCenter - (2.5f * cellSize);
+			mRightPaddleRects[i].bottom = mRightPaddleRects[i].top + 5 * cellSize;
+			mRightPaddleRects[i].left = windowWidth - (2 * cellSize + widthSpacing / 2);
+			mRightPaddleRects[i].right = mRightPaddleRects[i].left + cellSize;
+
+			mBallRects[i].top = verticalCenter - (.5f * cellSize);
+			mBallRects[i].bottom = mBallRects[i].top + cellSize;
+			mBallRects[i].left = horizontalCenter - (.5f * cellSize);
+			mBallRects[i].right = mBallRects[i].left + cellSize;
+		}
 	}
 
 	void ResizeSwapchain(CoreWindow^ window)
@@ -337,15 +381,37 @@ public:
 	void Update(int dt)
 	{
 		// TODO
+		mBufferIdx = (mBufferIdx + 1) % 2;
+
+		mLeftPaddleRects[mBufferIdx].top = mLeftPaddleRects[(mBufferIdx + 1) %2].top + 3;
+		mLeftPaddleRects[mBufferIdx].bottom = mLeftPaddleRects[(mBufferIdx + 1) % 2].bottom + 3;
+
+		mRightPaddleRects[mBufferIdx].top = mRightPaddleRects[(mBufferIdx + 1) % 2].top + 3;
+		mRightPaddleRects[mBufferIdx].bottom = mRightPaddleRects[(mBufferIdx + 1) % 2].bottom + 3;
 	}
 
 	void Render(double alpha)
 	{
 		m2dCtx->BeginDraw();
-		m2dCtx->Clear(D2D1::ColorF(D2D1::ColorF::DarkBlue));
+		m2dCtx->Clear(D2D1::ColorF(D2D1::ColorF::Black));
 
+		// static objects
+
+		for (auto i = 0; i < CENTERLINE_DOTS; i++) {
+			m2dCtx->FillRectangle(mCenterlineRects[i], mWhiteBrush.Get());
+		}
 		m2dCtx->FillRectangle(mTopWallRect, mWhiteBrush.Get());
-		// m2dCtx->FillRectangle(mBottomWallRect, mWhiteBrush.Get());
+		m2dCtx->FillRectangle(mBottomWallRect, mWhiteBrush.Get());
+		// TODO draw left score
+		// TODO draw right score
+
+		// dynamic objects
+
+		auto prevBufferIdx = mBufferIdx == 0 ? 1 : 0;
+
+		m2dCtx->FillRectangle(Interpolate(mLeftPaddleRects[prevBufferIdx], mLeftPaddleRects[mBufferIdx], alpha), mWhiteBrush.Get());
+		m2dCtx->FillRectangle(Interpolate(mRightPaddleRects[prevBufferIdx], mRightPaddleRects[mBufferIdx], alpha), mWhiteBrush.Get());
+		m2dCtx->FillRectangle(Interpolate(mBallRects[prevBufferIdx], mBallRects[mBufferIdx], alpha), mWhiteBrush.Get());
 		
 		ThrowIfFailed(m2dCtx->EndDraw());
 		ThrowIfFailed(mSwapChain->Present(1, 0));
@@ -368,6 +434,12 @@ private:
 
 	D2D1_RECT_F mTopWallRect;
 	D2D1_RECT_F mBottomWallRect;
+	D2D1_RECT_F mCenterlineRects[CENTERLINE_DOTS];
+	D2D1_RECT_F mLeftPaddleRects[2];
+	D2D1_RECT_F mRightPaddleRects[2];
+	D2D1_RECT_F mBallRects[2];
+
+	int mBufferIdx = 0;
 };
 
 [Platform::MTAThread]
