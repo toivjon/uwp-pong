@@ -46,7 +46,7 @@ public:
 		// ...
 	}
 
-	void OnUpdated(Context& ctx)
+	void OnUpdate(Context& ctx)
 	{
 		// ...
 	}
@@ -73,7 +73,7 @@ public:
 		// ...
 	}
 
-	void OnUpdated(Context& ctx)
+	void OnUpdate(Context& ctx)
 	{
 		// ...
 	}
@@ -92,7 +92,7 @@ public:
 		// ...
 	}
 
-	void OnUpdated(Context& ctx)
+	void OnUpdate(Context& ctx)
 	{
 		// ...
 	}

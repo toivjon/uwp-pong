@@ -49,7 +49,7 @@ void Context::Render(double alpha)
 	mGraphics->BeginDraw();
 	RenderingContext ctx(*mGraphics);
 	ctx.SetAlpha(alpha);
-	mScene->Render(ctx);
+	// mScene->Render(ctx);
 	mGraphics->EndDraw();
 }
 
