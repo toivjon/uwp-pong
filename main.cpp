@@ -168,6 +168,12 @@ public:
 			D2D1::ColorF(D2D1::ColorF::White),
 			&mWhiteBrush
 		));
+
+		// create a black brush to be used when drawing black objects.
+		ThrowIfFailed(m2dCtx->CreateSolidColorBrush(
+			D2D1::ColorF(D2D1::ColorF::Black),
+			&mBlackBrush
+		));
 	}
 
 	virtual void SetWindow(CoreWindow^ window)
@@ -303,6 +309,49 @@ public:
 		mRightPointsRect.left = horizontalCenter + cellSize * 4;
 		mRightPointsRect.right = mRightPointsRect.left + cellSize;
 
+		ThrowIfFailed(mWritefactory->CreateTextFormat(
+			L"Calibri",
+			nullptr,
+			DWRITE_FONT_WEIGHT_REGULAR,
+			DWRITE_FONT_STYLE_NORMAL,
+			DWRITE_FONT_STRETCH_NORMAL,
+			cellSize * 0.75,
+			L"en-us",
+			&mLeftPlayerNameTextFormat
+		));
+		ThrowIfFailed(mLeftPlayerNameTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING));
+		ThrowIfFailed(mLeftPlayerNameTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER));
+
+		ThrowIfFailed(mWritefactory->CreateTextFormat(
+			L"Calibri",
+			nullptr,
+			DWRITE_FONT_WEIGHT_REGULAR,
+			DWRITE_FONT_STYLE_NORMAL,
+			DWRITE_FONT_STRETCH_NORMAL,
+			cellSize * 0.75,
+			L"en-us",
+			&mRightPlayerNameTextFormat
+		));
+		ThrowIfFailed(mRightPlayerNameTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING));
+		ThrowIfFailed(mRightPlayerNameTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER));
+
+		/*
+		mLeftPlayerNameRect.top = heightSpacing / 2 + cellSize * 1.5f;
+		mLeftPlayerNameRect.bottom = mLeftPlayerNameRect.top + cellSize;
+		mLeftPlayerNameRect.left = widthSpacing / 2;
+		mLeftPlayerNameRect.right = horizontalCenter - cellSize * 3;
+		*/
+
+		mLeftPlayerNameRect.top = heightSpacing / 2;
+		mLeftPlayerNameRect.bottom = mLeftPlayerNameRect.top + cellSize;
+		mLeftPlayerNameRect.left = widthSpacing / 2 + cellSize * .5f;
+		mLeftPlayerNameRect.right = horizontalCenter - cellSize * 3;
+
+		mRightPlayerNameRect.top = heightSpacing / 2;
+		mRightPlayerNameRect.bottom = mRightPlayerNameRect.top + cellSize;
+		mRightPlayerNameRect.left = horizontalCenter + cellSize * 3;
+		mRightPlayerNameRect.right = windowWidth - widthSpacing / 2 - cellSize * .5f;
+
 		for (auto i = 0; i < CENTERLINE_DOTS; i++) {
 			mCenterlineRects[i].top = heightSpacing / 2 + (i*2 + 0.5f) * cellSize;
 			mCenterlineRects[i].bottom = mCenterlineRects[i].top + cellSize;
@@ -428,6 +477,8 @@ public:
 		m2dCtx->FillRectangle(mBottomWallRect, mWhiteBrush.Get());
 		m2dCtx->DrawText(std::to_wstring(mLeftPoints).c_str(), 1, mPointsTextFormat.Get(), mLeftPointsRect, mWhiteBrush.Get(), nullptr);
 		m2dCtx->DrawText(std::to_wstring(mRightPoints).c_str(), 1, mPointsTextFormat.Get(), mRightPointsRect, mWhiteBrush.Get(), nullptr);
+		m2dCtx->DrawText(L"oobiduupijeejeejfdajfidajfodisajfiods", 24, mLeftPlayerNameTextFormat.Get(), mLeftPlayerNameRect, mBlackBrush.Get(), nullptr);
+		m2dCtx->DrawText(L"player-2", 8, mRightPlayerNameTextFormat.Get(), mRightPlayerNameRect, mBlackBrush.Get(), nullptr);
 
 		// dynamic objects
 
@@ -449,6 +500,9 @@ private:
 	uint8_t mLeftPoints;
 	uint8_t mRightPoints;
 
+	std::wstring mLeftPlayerName;
+	std::wstring mRightPlayerName;
+
 	ComPtr<ID3D11Device>		m3dDevice;
 	ComPtr<ID3D11DeviceContext>	m3dCtx;
 	ComPtr<ID2D1Factory6>		m2dFactory;
@@ -458,14 +512,19 @@ private:
 	ComPtr<IDWriteFactory>		mWritefactory;
 
 	ComPtr<ID2D1SolidColorBrush> mWhiteBrush;
+	ComPtr<ID2D1SolidColorBrush> mBlackBrush;
 
 	ComPtr<IDWriteTextFormat> mPointsTextFormat;
+	ComPtr<IDWriteTextFormat> mLeftPlayerNameTextFormat;
+	ComPtr<IDWriteTextFormat> mRightPlayerNameTextFormat;
 
 	D2D1_RECT_F mCenterlineRects[CENTERLINE_DOTS];
 	D2D1_RECT_F mTopWallRect;
 	D2D1_RECT_F mBottomWallRect;
 	D2D1_RECT_F mLeftPointsRect;
 	D2D1_RECT_F mRightPointsRect;
+	D2D1_RECT_F mLeftPlayerNameRect;
+	D2D1_RECT_F mRightPlayerNameRect;
 	D2D1_RECT_F mLeftPaddleRects[2];
 	D2D1_RECT_F mRightPaddleRects[2];
 	D2D1_RECT_F mBallRects[2];
