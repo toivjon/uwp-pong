@@ -342,13 +342,6 @@ public:
 		ThrowIfFailed(mRightPlayerNameTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING));
 		ThrowIfFailed(mRightPlayerNameTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER));
 
-		/*
-		mLeftPlayerNameRect.top = heightSpacing / 2 + cellSize * 1.5f;
-		mLeftPlayerNameRect.bottom = mLeftPlayerNameRect.top + cellSize;
-		mLeftPlayerNameRect.left = widthSpacing / 2;
-		mLeftPlayerNameRect.right = horizontalCenter - cellSize * 3;
-		*/
-
 		mLeftPlayerNameRect.top = heightSpacing / 2;
 		mLeftPlayerNameRect.bottom = mLeftPlayerNameRect.top + cellSize;
 		mLeftPlayerNameRect.left = widthSpacing / 2 + cellSize * .5f;
