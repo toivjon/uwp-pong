@@ -4,6 +4,7 @@
 #include <d3d11.h>
 #include <dwrite.h>
 #include <dxgi1_6.h>
+#include <string>
 #include <wrl.h>
 
 using namespace Windows::ApplicationModel::Activation;
@@ -425,8 +426,8 @@ public:
 		}
 		m2dCtx->FillRectangle(mTopWallRect, mWhiteBrush.Get());
 		m2dCtx->FillRectangle(mBottomWallRect, mWhiteBrush.Get());
-		m2dCtx->DrawText(L"1", 1, mPointsTextFormat.Get(), mLeftPointsRect, mWhiteBrush.Get(), nullptr);
-		m2dCtx->DrawText(L"2", 1, mPointsTextFormat.Get(), mRightPointsRect, mWhiteBrush.Get(), nullptr);
+		m2dCtx->DrawText(std::to_wstring(mLeftPoints).c_str(), 1, mPointsTextFormat.Get(), mLeftPointsRect, mWhiteBrush.Get(), nullptr);
+		m2dCtx->DrawText(std::to_wstring(mRightPoints).c_str(), 1, mPointsTextFormat.Get(), mRightPointsRect, mWhiteBrush.Get(), nullptr);
 
 		// dynamic objects
 
@@ -444,6 +445,9 @@ private:
 	bool mWindowClosed;
 	// The flag used to indicate whether the main window is visible and game should be rendered.
 	bool mWindowVisible;
+
+	uint8_t mLeftPoints;
+	uint8_t mRightPoints;
 
 	ComPtr<ID3D11Device>		m3dDevice;
 	ComPtr<ID3D11DeviceContext>	m3dCtx;
