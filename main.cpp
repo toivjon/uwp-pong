@@ -77,6 +77,7 @@ public:
 		Gamepad::GamepadAdded += ref new EventHandler<Gamepad^>(this, &Pong::GamepadAdded);
 		Gamepad::GamepadRemoved += ref new EventHandler<Gamepad^>(this, &Pong::GamepadRemoved);
 		InitializeGraphics();
+		InitializeGame();
 	}
 
 	void InitializeGraphics()
@@ -174,6 +175,12 @@ public:
 			D2D1::ColorF(D2D1::ColorF::Black),
 			&mBlackBrush
 		));
+	}
+
+	void InitializeGame()
+	{
+		mLeftPlayerName = L"player-1";
+		mRightPlayerName = L"player-2";
 	}
 
 	virtual void SetWindow(CoreWindow^ window)
@@ -477,8 +484,8 @@ public:
 		m2dCtx->FillRectangle(mBottomWallRect, mWhiteBrush.Get());
 		m2dCtx->DrawText(std::to_wstring(mLeftPoints).c_str(), 1, mPointsTextFormat.Get(), mLeftPointsRect, mWhiteBrush.Get(), nullptr);
 		m2dCtx->DrawText(std::to_wstring(mRightPoints).c_str(), 1, mPointsTextFormat.Get(), mRightPointsRect, mWhiteBrush.Get(), nullptr);
-		m2dCtx->DrawText(L"oobiduupijeejeejfdajfidajfodisajfiods", 24, mLeftPlayerNameTextFormat.Get(), mLeftPlayerNameRect, mBlackBrush.Get(), nullptr);
-		m2dCtx->DrawText(L"player-2", 8, mRightPlayerNameTextFormat.Get(), mRightPlayerNameRect, mBlackBrush.Get(), nullptr);
+		m2dCtx->DrawText(mLeftPlayerName.c_str(), mLeftPlayerName.size(), mLeftPlayerNameTextFormat.Get(), mLeftPlayerNameRect, mBlackBrush.Get(), nullptr);
+		m2dCtx->DrawText(mRightPlayerName.c_str(), mRightPlayerName.size(), mRightPlayerNameTextFormat.Get(), mRightPlayerNameRect, mBlackBrush.Get(), nullptr);
 
 		// dynamic objects
 
