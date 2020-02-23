@@ -49,7 +49,7 @@ inline float ConvertDipsToPixels(float dips, float dpi) {
 	return floorf(dips * dpi / dipsPerInch + 0.5f);
 }
 
-inline D2D1_RECT_F Interpolate(const D2D1_RECT_F& a, const D2D1_RECT_F& b, double alpha)
+inline D2D1_RECT_F Interpolate(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float alpha)
 {
 	D2D1_RECT_F result;
 	result.top = a.top + (b.top - a.top) * alpha;
@@ -219,7 +219,7 @@ public:
 				}
 
 				// perform interpolated rendering of the game scene.
-				auto alpha = double(millisAccumulator) / double(UPDATE_MILLIS);
+				float alpha = float(millisAccumulator) / float(UPDATE_MILLIS);
 				Render(alpha);
 			}
 			else {
@@ -322,7 +322,7 @@ public:
 			DWRITE_FONT_WEIGHT_REGULAR,
 			DWRITE_FONT_STYLE_NORMAL,
 			DWRITE_FONT_STRETCH_NORMAL,
-			cellSize * 0.75,
+			cellSize * 0.75f,
 			L"en-us",
 			&mLeftPlayerNameTextFormat
 		));
@@ -335,7 +335,7 @@ public:
 			DWRITE_FONT_WEIGHT_REGULAR,
 			DWRITE_FONT_STYLE_NORMAL,
 			DWRITE_FONT_STRETCH_NORMAL,
-			cellSize * 0.75,
+			cellSize * 0.75f,
 			L"en-us",
 			&mRightPlayerNameTextFormat
 		));
@@ -385,7 +385,13 @@ public:
 		m2dCtx->SetTarget(nullptr);
 
 		if (mSwapChain) {
-			mSwapChain->ResizeBuffers(2, windowSize.Width, windowSize.Height, DXGI_FORMAT_B8G8R8A8_UNORM, 0);
+			mSwapChain->ResizeBuffers(
+				2,
+				static_cast<UINT>(windowSize.Width),
+				static_cast<UINT>(windowSize.Height),
+				DXGI_FORMAT_B8G8R8A8_UNORM,
+				0
+			);
 		} else {
 			// query the DXGI factory from our DirectX 11 device.
 			ComPtr<IDXGIDevice1> dxgiDevice;
@@ -463,7 +469,7 @@ public:
 		mRightPaddleRects[mBufferIdx].bottom = mRightPaddleRects[(mBufferIdx + 1) % 2].bottom + 3;
 	}
 
-	void Render(double alpha)
+	void Render(float alpha)
 	{
 		m2dCtx->BeginDraw();
 		m2dCtx->Clear(D2D1::ColorF(D2D1::ColorF::Black));
@@ -477,8 +483,22 @@ public:
 		m2dCtx->FillRectangle(mBottomWallRect, mWhiteBrush.Get());
 		m2dCtx->DrawText(std::to_wstring(mLeftPoints).c_str(), 1, mPointsTextFormat.Get(), mLeftPointsRect, mWhiteBrush.Get(), nullptr);
 		m2dCtx->DrawText(std::to_wstring(mRightPoints).c_str(), 1, mPointsTextFormat.Get(), mRightPointsRect, mWhiteBrush.Get(), nullptr);
-		m2dCtx->DrawText(mLeftPlayerName.c_str(), mLeftPlayerName.size(), mLeftPlayerNameTextFormat.Get(), mLeftPlayerNameRect, mBlackBrush.Get(), nullptr);
-		m2dCtx->DrawText(mRightPlayerName.c_str(), mRightPlayerName.size(), mRightPlayerNameTextFormat.Get(), mRightPlayerNameRect, mBlackBrush.Get(), nullptr);
+		m2dCtx->DrawText(
+			mLeftPlayerName.c_str(),
+			static_cast<UINT32>(mLeftPlayerName.size()),
+			mLeftPlayerNameTextFormat.Get(),
+			mLeftPlayerNameRect,
+			mBlackBrush.Get(),
+			nullptr
+		);
+		m2dCtx->DrawText(
+			mRightPlayerName.c_str(),
+			static_cast<UINT32>(mRightPlayerName.size()),
+			mRightPlayerNameTextFormat.Get(),
+			mRightPlayerNameRect,
+			mBlackBrush.Get(),
+			nullptr
+		);
 
 		// dynamic objects
 
