@@ -279,6 +279,29 @@ public:
 		mBottomWallRect.left = widthSpacing / 2;
 		mBottomWallRect.right = windowWidth - widthSpacing / 2;
 
+		ThrowIfFailed(mWritefactory->CreateTextFormat(
+			L"Calibri",
+			nullptr,
+			DWRITE_FONT_WEIGHT_REGULAR,
+			DWRITE_FONT_STYLE_NORMAL,
+			DWRITE_FONT_STRETCH_NORMAL,
+			cellSize * 6,
+			L"en-us",
+			&mPointsTextFormat
+		));
+		ThrowIfFailed(mPointsTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER));
+		ThrowIfFailed(mPointsTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER));
+
+		mLeftPointsRect.top = heightSpacing / 2 + cellSize * 2;
+		mLeftPointsRect.bottom = mLeftPointsRect.top + cellSize * 6;
+		mLeftPointsRect.left = horizontalCenter - cellSize * 5;
+		mLeftPointsRect.right = mLeftPointsRect.left + cellSize;
+
+		mRightPointsRect.top = heightSpacing / 2 + cellSize * 2;
+		mRightPointsRect.bottom = mRightPointsRect.top + cellSize * 6;
+		mRightPointsRect.left = horizontalCenter + cellSize * 4;
+		mRightPointsRect.right = mRightPointsRect.left + cellSize;
+
 		for (auto i = 0; i < CENTERLINE_DOTS; i++) {
 			mCenterlineRects[i].top = heightSpacing / 2 + (i*2 + 0.5f) * cellSize;
 			mCenterlineRects[i].bottom = mCenterlineRects[i].top + cellSize;
@@ -402,8 +425,8 @@ public:
 		}
 		m2dCtx->FillRectangle(mTopWallRect, mWhiteBrush.Get());
 		m2dCtx->FillRectangle(mBottomWallRect, mWhiteBrush.Get());
-		// TODO draw left score
-		// TODO draw right score
+		m2dCtx->DrawText(L"1", 1, mPointsTextFormat.Get(), mLeftPointsRect, mWhiteBrush.Get(), nullptr);
+		m2dCtx->DrawText(L"2", 1, mPointsTextFormat.Get(), mRightPointsRect, mWhiteBrush.Get(), nullptr);
 
 		// dynamic objects
 
@@ -432,9 +455,13 @@ private:
 
 	ComPtr<ID2D1SolidColorBrush> mWhiteBrush;
 
+	ComPtr<IDWriteTextFormat> mPointsTextFormat;
+
+	D2D1_RECT_F mCenterlineRects[CENTERLINE_DOTS];
 	D2D1_RECT_F mTopWallRect;
 	D2D1_RECT_F mBottomWallRect;
-	D2D1_RECT_F mCenterlineRects[CENTERLINE_DOTS];
+	D2D1_RECT_F mLeftPointsRect;
+	D2D1_RECT_F mRightPointsRect;
 	D2D1_RECT_F mLeftPaddleRects[2];
 	D2D1_RECT_F mRightPaddleRects[2];
 	D2D1_RECT_F mBallRects[2];
