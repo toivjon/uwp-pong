@@ -1,4 +1,5 @@
 #include <chrono>
+#include <concrt.h>
 #include <cwchar>
 #include <d2d1_3.h>
 #include <d3d11.h>
@@ -7,6 +8,7 @@
 #include <string>
 #include <wrl.h>
 
+using namespace concurrency;
 using namespace Windows::ApplicationModel::Activation;
 using namespace Windows::ApplicationModel::Core;
 using namespace Windows::Foundation;
@@ -25,6 +27,10 @@ constexpr auto UPDATES_PER_SECOND = 25;
 constexpr auto UPDATE_MILLIS = 1000 / 25;
 // The amount of dots in the center line.
 constexpr auto CENTERLINE_DOTS = 15;
+// The placeholder for the left player name.
+constexpr const wchar_t* LEFT_PLAYER_NAME_PLACEHOLDER = L"player-1";
+// The placeholder name for the right player name.
+constexpr const wchar_t* RIGHT_PLAYER_NAME_PLACEHOLDER = L"player-2";
 
 // =================
 // === Utilities ===
@@ -179,8 +185,8 @@ public:
 
 	void InitializeGame()
 	{
-		mLeftPlayerName = L"player-1";
-		mRightPlayerName = L"player-2";
+		mLeftPlayerName = LEFT_PLAYER_NAME_PLACEHOLDER;
+		mRightPlayerName = RIGHT_PLAYER_NAME_PLACEHOLDER;
 	}
 
 	virtual void SetWindow(CoreWindow^ window)
@@ -444,10 +450,32 @@ public:
 
 	void GamepadAdded(Object^ o, Gamepad^ gamepad)
 	{
-		// TODO
+		critical_section::scoped_lock lock{ mControllersLock };
+		if (mLeftPlayerController == nullptr) {
+			mLeftPlayerController = gamepad;
+			mLeftPlayerName = gamepad->User->NonRoamableId->Data();
+		} else if (mRightPlayerController == nullptr) {
+			mRightPlayerController = gamepad;
+			mRightPlayerName = gamepad->User->NonRoamableId->Data();
+		}
 	}
 
 	void GamepadRemoved(Object^ o, Gamepad^ gamepad)
+	{
+		critical_section::scoped_lock lock{ mControllersLock };
+		if (mLeftPlayerController == gamepad) {
+			mLeftPlayerController = nullptr;
+			mLeftPlayerName = LEFT_PLAYER_NAME_PLACEHOLDER;
+			Pause();
+		}
+		else if (mRightPlayerController == nullptr) {
+			mRightPlayerController = nullptr;
+			mRightPlayerName = RIGHT_PLAYER_NAME_PLACEHOLDER;
+			Pause();
+		}
+	}
+
+	void Pause()
 	{
 		// TODO
 	}
@@ -522,6 +550,10 @@ private:
 
 	std::wstring mLeftPlayerName;
 	std::wstring mRightPlayerName;
+
+	Gamepad^			mLeftPlayerController;
+	Gamepad^			mRightPlayerController;
+	critical_section	mControllersLock;
 
 	ComPtr<ID3D11Device>		m3dDevice;
 	ComPtr<ID3D11DeviceContext>	m3dCtx;
