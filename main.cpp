@@ -65,6 +65,16 @@ inline D2D1_RECT_F Interpolate(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float
 	return result;
 }
 
+// A utility function to perform a simple AABB intersection test.
+inline bool Collides(const D2D1_RECT_F& a, const D2D1_RECT_F& b)
+{
+	return !(
+		a.right  < b.left  ||
+		a.bottom < b.top   ||
+		a.left   > b.right ||
+		a.top    > b.bottom);
+}
+
 // ============
 // === Game ===
 // ============
@@ -494,6 +504,13 @@ public:
 
 		mRightPaddleRects[mBufferIdx].top = mRightPaddleRects[(mBufferIdx + 1) % 2].top + 3;
 		mRightPaddleRects[mBufferIdx].bottom = mRightPaddleRects[(mBufferIdx + 1) % 2].bottom + 3;
+
+		if (Collides(mLeftPaddleRects[mBufferIdx], mBottomWallRect)) {
+			mLeftPaddleRects[mBufferIdx] = mLeftPaddleRects[(mBufferIdx + 1) % 2];
+		}
+		if (Collides(mRightPaddleRects[mBufferIdx], mBottomWallRect)) {
+			mRightPaddleRects[mBufferIdx] = mRightPaddleRects[(mBufferIdx + 1) % 2];
+		}
 	}
 
 	void Render(float alpha)
