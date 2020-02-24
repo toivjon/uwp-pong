@@ -14,6 +14,7 @@ using namespace Windows::ApplicationModel::Core;
 using namespace Windows::Foundation;
 using namespace Windows::Gaming::Input;
 using namespace Windows::Graphics::Display;
+using namespace Windows::System;
 using namespace Windows::UI::Core;
 using namespace Microsoft::WRL;
 
@@ -31,6 +32,8 @@ constexpr auto CENTERLINE_DOTS = 15;
 constexpr const wchar_t* LEFT_PLAYER_NAME_PLACEHOLDER = L"player-1";
 // The placeholder name for the right player name.
 constexpr const wchar_t* RIGHT_PLAYER_NAME_PLACEHOLDER = L"player-2";
+// The velocity used with the paddles.
+constexpr auto PADDLE_VELOCITY = 20;
 
 // =================
 // === Utilities ===
@@ -199,11 +202,57 @@ public:
 		mRightPlayerName = RIGHT_PLAYER_NAME_PLACEHOLDER;
 	}
 
+	void KeyDown(CoreWindow^ window, KeyEventArgs^ args)
+	{
+		switch (args->VirtualKey) {
+		case VirtualKey::Up:
+			mRightPaddleVelocity = -PADDLE_VELOCITY;
+			break;
+		case VirtualKey::Down:
+			mRightPaddleVelocity = PADDLE_VELOCITY;
+			break;
+		case VirtualKey::W:
+			mLeftPaddleVelocity = -PADDLE_VELOCITY;
+			break;
+		case VirtualKey::S:
+			mLeftPaddleVelocity = PADDLE_VELOCITY;
+			break;
+		}
+	}
+
+	void KeyUp(CoreWindow^ window, KeyEventArgs^ args)
+	{
+		switch (args->VirtualKey) {
+		case VirtualKey::Up:
+			if (mRightPaddleVelocity < 0.f) {
+				mRightPaddleVelocity = 0.f;
+			}
+			break;
+		case VirtualKey::Down:
+			if (mRightPaddleVelocity > 0.f) {
+				mRightPaddleVelocity = 0.f;
+			}
+			break;
+		case VirtualKey::W:
+			if (mLeftPaddleVelocity < 0.f) {
+				mLeftPaddleVelocity = 0.f;
+			}
+			break;
+		case VirtualKey::S:
+			if (mLeftPaddleVelocity > 0.f) {
+				mLeftPaddleVelocity = 0.f;
+			}
+			break;
+		}
+	}
+
 	virtual void SetWindow(CoreWindow^ window)
 	{
 		window->Closed += ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(this, &Pong::WindowClosed);
 		window->VisibilityChanged += ref new TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^>(this, &Pong::WindowVisibilityChanged);
 		window->SizeChanged += ref new TypedEventHandler<CoreWindow^, WindowSizeChangedEventArgs^>(this, &Pong::WindowSizeChanged);
+		window->KeyDown += ref new TypedEventHandler<CoreWindow^, KeyEventArgs^>(this, &Pong::KeyDown);
+		window->KeyUp += ref new TypedEventHandler<CoreWindow^, KeyEventArgs^>(this, &Pong::KeyUp);
 		ResizeContent();
 	}
 
@@ -499,11 +548,11 @@ public:
 		// TODO
 		mBufferIdx = (mBufferIdx + 1) % 2;
 
-		mLeftPaddleRects[mBufferIdx].top = mLeftPaddleRects[(mBufferIdx + 1) %2].top + 3;
-		mLeftPaddleRects[mBufferIdx].bottom = mLeftPaddleRects[(mBufferIdx + 1) % 2].bottom + 3;
+		mLeftPaddleRects[mBufferIdx].top = mLeftPaddleRects[(mBufferIdx + 1) %2].top + mLeftPaddleVelocity;
+		mLeftPaddleRects[mBufferIdx].bottom = mLeftPaddleRects[(mBufferIdx + 1) % 2].bottom + mLeftPaddleVelocity;
 
-		mRightPaddleRects[mBufferIdx].top = mRightPaddleRects[(mBufferIdx + 1) % 2].top + 3;
-		mRightPaddleRects[mBufferIdx].bottom = mRightPaddleRects[(mBufferIdx + 1) % 2].bottom + 3;
+		mRightPaddleRects[mBufferIdx].top = mRightPaddleRects[(mBufferIdx + 1) % 2].top + mRightPaddleVelocity;
+		mRightPaddleRects[mBufferIdx].bottom = mRightPaddleRects[(mBufferIdx + 1) % 2].bottom + mRightPaddleVelocity;
 
 		if (Collides(mLeftPaddleRects[mBufferIdx], mBottomWallRect)) {
 			mLeftPaddleRects[mBufferIdx] = mLeftPaddleRects[(mBufferIdx + 1) % 2];
@@ -525,8 +574,22 @@ public:
 		}
 		m2dCtx->FillRectangle(mTopWallRect, mWhiteBrush.Get());
 		m2dCtx->FillRectangle(mBottomWallRect, mWhiteBrush.Get());
-		m2dCtx->DrawText(std::to_wstring(mLeftPoints).c_str(), 1, mPointsTextFormat.Get(), mLeftPointsRect, mWhiteBrush.Get(), nullptr);
-		m2dCtx->DrawText(std::to_wstring(mRightPoints).c_str(), 1, mPointsTextFormat.Get(), mRightPointsRect, mWhiteBrush.Get(), nullptr);
+		m2dCtx->DrawText(
+			std::to_wstring(mLeftPoints).c_str(),
+			1,
+			mPointsTextFormat.Get(),
+			mLeftPointsRect,
+			mWhiteBrush.Get(),
+			nullptr
+		);
+		m2dCtx->DrawText(
+			std::to_wstring(mRightPoints).c_str(),
+			1,
+			mPointsTextFormat.Get(),
+			mRightPointsRect,
+			mWhiteBrush.Get(),
+			nullptr
+		);
 		m2dCtx->DrawText(
 			mLeftPlayerName.c_str(),
 			static_cast<UINT32>(mLeftPlayerName.size()),
@@ -570,6 +633,9 @@ private:
 	Gamepad^			mLeftPlayerController;
 	Gamepad^			mRightPlayerController;
 	critical_section	mControllersLock;
+
+	float mLeftPaddleVelocity = 0.f;
+	float mRightPaddleVelocity = 0.f;
 
 	ComPtr<ID3D11Device>		m3dDevice;
 	ComPtr<ID3D11DeviceContext>	m3dCtx;
