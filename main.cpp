@@ -467,8 +467,7 @@ public:
 			mLeftPlayerController = nullptr;
 			mLeftPlayerName = LEFT_PLAYER_NAME_PLACEHOLDER;
 			Pause();
-		}
-		else if (mRightPlayerController == nullptr) {
+		} else if (mRightPlayerController == nullptr) {
 			mRightPlayerController = nullptr;
 			mRightPlayerName = RIGHT_PLAYER_NAME_PLACEHOLDER;
 			Pause();
