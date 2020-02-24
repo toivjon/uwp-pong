@@ -556,8 +556,13 @@ public:
 
 		if (Collides(mLeftPaddleRects[mBufferIdx], mBottomWallRect)) {
 			mLeftPaddleRects[mBufferIdx] = mLeftPaddleRects[(mBufferIdx + 1) % 2];
+		} else if (Collides(mLeftPaddleRects[mBufferIdx], mTopWallRect)) {
+			mLeftPaddleRects[mBufferIdx] = mLeftPaddleRects[(mBufferIdx + 1) % 2];
 		}
+
 		if (Collides(mRightPaddleRects[mBufferIdx], mBottomWallRect)) {
+			mRightPaddleRects[mBufferIdx] = mRightPaddleRects[(mBufferIdx + 1) % 2];
+		} else if (Collides(mRightPaddleRects[mBufferIdx], mTopWallRect)) {
 			mRightPaddleRects[mBufferIdx] = mRightPaddleRects[(mBufferIdx + 1) % 2];
 		}
 	}
