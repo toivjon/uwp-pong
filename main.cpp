@@ -32,8 +32,6 @@ constexpr auto CENTERLINE_DOTS = 15;
 constexpr const wchar_t* LEFT_PLAYER_NAME_PLACEHOLDER = L"player-1";
 // The placeholder name for the right player name.
 constexpr const wchar_t* RIGHT_PLAYER_NAME_PLACEHOLDER = L"player-2";
-// The velocity used with the paddles.
-constexpr auto PADDLE_VELOCITY = 20;
 
 // =================
 // === Utilities ===
@@ -206,16 +204,16 @@ public:
 	{
 		switch (args->VirtualKey) {
 		case VirtualKey::Up:
-			mRightPaddleVelocity = -PADDLE_VELOCITY;
+			mRightPaddleVelocity = -mPaddleVelocity;
 			break;
 		case VirtualKey::Down:
-			mRightPaddleVelocity = PADDLE_VELOCITY;
+			mRightPaddleVelocity = mPaddleVelocity;
 			break;
 		case VirtualKey::W:
-			mLeftPaddleVelocity = -PADDLE_VELOCITY;
+			mLeftPaddleVelocity = -mPaddleVelocity;
 			break;
 		case VirtualKey::S:
-			mLeftPaddleVelocity = PADDLE_VELOCITY;
+			mLeftPaddleVelocity = mPaddleVelocity;
 			break;
 		}
 	}
@@ -342,6 +340,9 @@ public:
 			auto heightEdge = windowWidth / aspectRatio;
 			heightSpacing = windowHeight - heightEdge;
 		}
+
+		// calculate physical coefficients.
+		mPaddleVelocity = (windowHeight - heightSpacing) / 30;
 
 		// calculate cell size and the view center points.
 		auto cellSize = (windowHeight - heightSpacing) / 30;
@@ -636,6 +637,8 @@ private:
 	bool mWindowClosed;
 	// The flag used to indicate whether the main window is visible and game should be rendered.
 	bool mWindowVisible;
+
+	float mPaddleVelocity = 0.f;
 
 	uint8_t mLeftPoints;
 	uint8_t mRightPoints;
