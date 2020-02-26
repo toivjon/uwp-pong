@@ -342,7 +342,18 @@ public:
 		}
 
 		// calculate physical coefficients.
+		static const float EPSILON = 0.001f;
 		mPaddleVelocity = (windowHeight - heightSpacing) / 30;
+
+		// correct left paddle velocity if currently applied.
+		if (mLeftPaddleVelocity > EPSILON || mLeftPaddleVelocity < -EPSILON) {
+			mLeftPaddleVelocity = mPaddleVelocity;
+		}
+
+		// correct right paddle velocity if currently applied.
+		if (mRightPaddleVelocity > EPSILON || mRightPaddleVelocity < -EPSILON) {
+			mRightPaddleVelocity = mPaddleVelocity;
+		}
 
 		// calculate cell size and the view center points.
 		auto cellSize = (windowHeight - heightSpacing) / 30;
