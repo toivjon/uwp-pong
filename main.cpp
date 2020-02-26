@@ -555,15 +555,23 @@ public:
 		mRightPaddleRects[mBufferIdx].bottom = mRightPaddleRects[(mBufferIdx + 1) % 2].bottom + mRightPaddleVelocity;
 
 		if (Collides(mLeftPaddleRects[mBufferIdx], mBottomWallRect)) {
-			mLeftPaddleRects[mBufferIdx] = mLeftPaddleRects[(mBufferIdx + 1) % 2];
+			auto paddleHeight = mLeftPaddleRects[mBufferIdx].bottom - mLeftPaddleRects[mBufferIdx].top;
+			mLeftPaddleRects[mBufferIdx].bottom = mBottomWallRect.top;
+			mLeftPaddleRects[mBufferIdx].top = mBottomWallRect.top - paddleHeight;
 		} else if (Collides(mLeftPaddleRects[mBufferIdx], mTopWallRect)) {
-			mLeftPaddleRects[mBufferIdx] = mLeftPaddleRects[(mBufferIdx + 1) % 2];
+			auto paddleHeight = mLeftPaddleRects[mBufferIdx].bottom - mLeftPaddleRects[mBufferIdx].top;
+			mLeftPaddleRects[mBufferIdx].bottom = mTopWallRect.bottom + paddleHeight;
+			mLeftPaddleRects[mBufferIdx].top = mTopWallRect.bottom;
 		}
 
 		if (Collides(mRightPaddleRects[mBufferIdx], mBottomWallRect)) {
-			mRightPaddleRects[mBufferIdx] = mRightPaddleRects[(mBufferIdx + 1) % 2];
+			auto paddleHeight = mRightPaddleRects[mBufferIdx].bottom - mRightPaddleRects[mBufferIdx].top;
+			mRightPaddleRects[mBufferIdx].bottom = mBottomWallRect.top;
+			mRightPaddleRects[mBufferIdx].top = mBottomWallRect.top - paddleHeight;
 		} else if (Collides(mRightPaddleRects[mBufferIdx], mTopWallRect)) {
-			mRightPaddleRects[mBufferIdx] = mRightPaddleRects[(mBufferIdx + 1) % 2];
+			auto paddleHeight = mRightPaddleRects[mBufferIdx].bottom - mRightPaddleRects[mBufferIdx].top;
+			mRightPaddleRects[mBufferIdx].bottom = mTopWallRect.bottom + paddleHeight;
+			mRightPaddleRects[mBufferIdx].top = mTopWallRect.bottom;
 		}
 	}
 
