@@ -39,6 +39,8 @@ constexpr auto RIGHT_PLAYER_NAME_PLACEHOLDER = L"player-2";
 constexpr auto ASPECT_RATIO = (800.f / 600.f);
 // The epsilon constant for floating point arithmetic.
 constexpr auto EPSILON = 0.001f;
+// The amount of milliseconds to wait before each ball launch.
+constexpr auto COUNTDOWN_MS = 1000;
 
 // =================
 // === Utilities ===
@@ -618,6 +620,11 @@ public:
 
 	void Update(int dt)
 	{
+		mCountdown = max(0, mCountdown - dt);
+		if (mCountdown > 0) {
+			return;
+		}
+
 		mBufferIdx = (mBufferIdx + 1) % 2;
 		auto prevBufferIdx = (mBufferIdx + 1) % 2;
 
@@ -661,9 +668,11 @@ public:
 		// check whether the ball has reached a goal.
 		if (Contains(mLeftGoalRect, mBallRects[mBufferIdx])) {
 			mRightPoints++;
+			mCountdown = COUNTDOWN_MS;
 			ResetMovingObjects();
 		} else if (Contains(mRightGoalRect, mBallRects[mBufferIdx])) {
 			mLeftPoints++;
+			mCountdown = COUNTDOWN_MS;
 			ResetMovingObjects();
 		}
 
@@ -753,6 +762,8 @@ private:
 
 	// The size of single game object cell used to form all game objects.
 	float mCellSize;
+	// The timer for a small countdown before each ball launch.
+	int mCountdown = COUNTDOWN_MS;
 
 	float mPaddleVelocity = 0.f;
 	float mBallVelocity = 0.f;
