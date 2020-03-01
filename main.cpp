@@ -5,10 +5,12 @@
 #include <d3d11.h>
 #include <dwrite.h>
 #include <dxgi1_6.h>
+#include <DirectXMath.h>
 #include <string>
 #include <wrl.h>
 
 using namespace concurrency;
+using namespace DirectX;
 using namespace Windows::ApplicationModel::Activation;
 using namespace Windows::ApplicationModel::Core;
 using namespace Windows::Foundation;
@@ -74,6 +76,20 @@ inline bool Collides(const D2D1_RECT_F& a, const D2D1_RECT_F& b)
 		a.bottom < b.top   ||
 		a.left   > b.right ||
 		a.top    > b.bottom);
+}
+
+// A utility to check whether target rect contains the target point.
+inline bool Contains(const D2D1_RECT_F& rect, float x, float y) {
+	return rect.left <= x && x <= rect.right
+		&& rect.top  <= y && y <= rect.bottom;
+}
+
+// A utility to check whether a-rect contains the target b-rect.
+inline bool Contains(const D2D1_RECT_F& a, const D2D1_RECT_F& b) {
+	return Contains(a, b.left, b.top)
+		&& Contains(a, b.left, b.bottom)
+		&& Contains(a, b.right, b.top)
+		&& Contains(a, b.right, b.bottom);
 }
 
 // ============
@@ -198,6 +214,9 @@ public:
 	{
 		mLeftPlayerName = LEFT_PLAYER_NAME_PLACEHOLDER;
 		mRightPlayerName = RIGHT_PLAYER_NAME_PLACEHOLDER;
+
+		mBallDirection = XMVectorSet(1.f, 1.f, 0.f, 0.f);
+		mBallDirection = XMVector2Normalize(mBallDirection);
 	}
 
 	void KeyDown(CoreWindow^ window, KeyEventArgs^ args)
@@ -344,6 +363,7 @@ public:
 		// calculate physical coefficients.
 		static const float EPSILON = 0.001f;
 		mPaddleVelocity = (windowHeight - heightSpacing) / 30;
+		mBallVelocity = mPaddleVelocity / 4;
 
 		// correct left paddle velocity if currently applied.
 		if (mLeftPaddleVelocity > EPSILON || mLeftPaddleVelocity < -EPSILON) {
@@ -452,6 +472,16 @@ public:
 			mBallRects[i].left = horizontalCenter - (.5f * cellSize);
 			mBallRects[i].right = mBallRects[i].left + cellSize;
 		}
+
+		mLeftGoalRect.top = 0;
+		mLeftGoalRect.bottom = windowHeight;
+		mLeftGoalRect.left = -D3D10_FLOAT32_MAX;
+		mLeftGoalRect.right = widthSpacing / 2;
+
+		mRightGoalRect.top = 0;
+		mRightGoalRect.bottom = windowHeight;
+		mRightGoalRect.left = windowWidth - widthSpacing / 2;
+		mRightGoalRect.right = D3D10_FLOAT32_MAX;
 	}
 
 	void ResizeSwapchain(CoreWindow^ window)
@@ -557,15 +587,25 @@ public:
 
 	void Update(int dt)
 	{
-		// TODO
 		mBufferIdx = (mBufferIdx + 1) % 2;
+		auto prevBufferIdx = (mBufferIdx + 1) % 2;
 
-		mLeftPaddleRects[mBufferIdx].top = mLeftPaddleRects[(mBufferIdx + 1) %2].top + mLeftPaddleVelocity;
-		mLeftPaddleRects[mBufferIdx].bottom = mLeftPaddleRects[(mBufferIdx + 1) % 2].bottom + mLeftPaddleVelocity;
+		// apply movement for the left paddle.
+		mLeftPaddleRects[mBufferIdx].top = mLeftPaddleRects[prevBufferIdx].top + mLeftPaddleVelocity;
+		mLeftPaddleRects[mBufferIdx].bottom = mLeftPaddleRects[prevBufferIdx].bottom + mLeftPaddleVelocity;
 
-		mRightPaddleRects[mBufferIdx].top = mRightPaddleRects[(mBufferIdx + 1) % 2].top + mRightPaddleVelocity;
-		mRightPaddleRects[mBufferIdx].bottom = mRightPaddleRects[(mBufferIdx + 1) % 2].bottom + mRightPaddleVelocity;
+		// apply movement for the right paddle.
+		mRightPaddleRects[mBufferIdx].top = mRightPaddleRects[prevBufferIdx].top + mRightPaddleVelocity;
+		mRightPaddleRects[mBufferIdx].bottom = mRightPaddleRects[prevBufferIdx].bottom + mRightPaddleVelocity;
 
+		// apply movement for the ball.
+		auto ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
+		mBallRects[mBufferIdx].top = mBallRects[prevBufferIdx].top + ballMovement.m128_f32[1];
+		mBallRects[mBufferIdx].bottom = mBallRects[prevBufferIdx].bottom + ballMovement.m128_f32[1];
+		mBallRects[mBufferIdx].right = mBallRects[prevBufferIdx].right + ballMovement.m128_f32[0];
+		mBallRects[mBufferIdx].left = mBallRects[prevBufferIdx].left + ballMovement.m128_f32[0];
+
+		// check that the left paddle stays between the top and bottom wall.
 		if (Collides(mLeftPaddleRects[mBufferIdx], mBottomWallRect)) {
 			auto paddleHeight = mLeftPaddleRects[mBufferIdx].bottom - mLeftPaddleRects[mBufferIdx].top;
 			mLeftPaddleRects[mBufferIdx].bottom = mBottomWallRect.top;
@@ -576,6 +616,7 @@ public:
 			mLeftPaddleRects[mBufferIdx].top = mTopWallRect.bottom;
 		}
 
+		// check that the right paddle stays between the top and bottom wall.
 		if (Collides(mRightPaddleRects[mBufferIdx], mBottomWallRect)) {
 			auto paddleHeight = mRightPaddleRects[mBufferIdx].bottom - mRightPaddleRects[mBufferIdx].top;
 			mRightPaddleRects[mBufferIdx].bottom = mBottomWallRect.top;
@@ -584,6 +625,33 @@ public:
 			auto paddleHeight = mRightPaddleRects[mBufferIdx].bottom - mRightPaddleRects[mBufferIdx].top;
 			mRightPaddleRects[mBufferIdx].bottom = mTopWallRect.bottom + paddleHeight;
 			mRightPaddleRects[mBufferIdx].top = mTopWallRect.bottom;
+		}
+
+		// check whether the ball has reached a goal.
+		if (Contains(mLeftGoalRect, mBallRects[mBufferIdx])) {
+			// TODO reset ball state
+			// TODO randomize ball direction
+			// TODO reset paddle states
+			mRightPoints++;
+		} else if (Contains(mRightGoalRect, mBallRects[mBufferIdx])) {
+			// TODO reset ball state
+			// TODO randomize ball direction
+			// TODO reset paddle states
+			mLeftPoints++;
+		}
+
+		if (Collides(mBallRects[mBufferIdx], mTopWallRect)) {
+			// TODO handle
+			mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
+		} else if (Collides(mBallRects[mBufferIdx], mBottomWallRect)) {
+			// TODO handle
+			mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
+		}
+
+		if (Collides(mBallRects[mBufferIdx], mRightPaddleRects[mBufferIdx])) {
+			// TODO handle
+		} else if (Collides(mBallRects[mBufferIdx], mLeftPaddleRects[mBufferIdx])) {
+			// TODO handle
 		}
 	}
 
@@ -632,6 +700,7 @@ public:
 			nullptr
 		);
 
+		m2dCtx->FillRectangle(mRightGoalRect, mWhiteBrush.Get());
 		// dynamic objects
 
 		auto prevBufferIdx = mBufferIdx == 0 ? 1 : 0;
@@ -650,6 +719,7 @@ private:
 	bool mWindowVisible;
 
 	float mPaddleVelocity = 0.f;
+	float mBallVelocity = 0.f;
 
 	uint8_t mLeftPoints;
 	uint8_t mRightPoints;
@@ -663,6 +733,8 @@ private:
 
 	float mLeftPaddleVelocity = 0.f;
 	float mRightPaddleVelocity = 0.f;
+
+	XMVECTOR mBallDirection;
 
 	ComPtr<ID3D11Device>		m3dDevice;
 	ComPtr<ID3D11DeviceContext>	m3dCtx;
@@ -689,6 +761,8 @@ private:
 	D2D1_RECT_F mLeftPaddleRects[2];
 	D2D1_RECT_F mRightPaddleRects[2];
 	D2D1_RECT_F mBallRects[2];
+	D2D1_RECT_F mLeftGoalRect;
+	D2D1_RECT_F mRightGoalRect;
 
 	int mBufferIdx = 0;
 };
