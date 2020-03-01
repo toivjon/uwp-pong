@@ -228,9 +228,7 @@ public:
 	{
 		mLeftPlayerName = LEFT_PLAYER_NAME_PLACEHOLDER;
 		mRightPlayerName = RIGHT_PLAYER_NAME_PLACEHOLDER;
-
-		mBallDirection = XMVectorSet(1.f, 1.f, 0.f, 0.f);
-		mBallDirection = XMVector2Normalize(mBallDirection);
+		RandomizeBallDirection();
 	}
 
 	void KeyDown(CoreWindow^ window, KeyEventArgs^ args)
@@ -506,7 +504,10 @@ public:
 			mBallRects[i].left = halfWidth - (.5f * mCellSize);
 			mBallRects[i].right = mBallRects[i].left + mCellSize;
 		}
+	}
 
+	void RandomizeBallDirection()
+	{
 		// randomize a new direction for the ball.
 		mBallDirection = XMVectorSet(
 			-1.f + (2.f * randomInt(0, 1)),
@@ -670,10 +671,12 @@ public:
 			mRightPoints++;
 			mCountdown = COUNTDOWN_MS;
 			ResetMovingObjects();
+			RandomizeBallDirection();
 		} else if (Contains(mRightGoalRect, mBallRects[mBufferIdx])) {
 			mLeftPoints++;
 			mCountdown = COUNTDOWN_MS;
 			ResetMovingObjects();
+			RandomizeBallDirection();
 		}
 
 		if (Collides(mBallRects[mBufferIdx], mTopWallRect)) {
