@@ -6,6 +6,7 @@
 #include <dwrite.h>
 #include <dxgi1_6.h>
 #include <DirectXMath.h>
+#include <random>
 #include <string>
 #include <wrl.h>
 
@@ -60,6 +61,13 @@ inline void ThrowIfFailed(HRESULT hr) {
 inline float ConvertDipsToPixels(float dips, float dpi) {
 	static const float dipsPerInch = 96.0f;
 	return floorf(dips * dpi / dipsPerInch + 0.5f);
+}
+
+inline int randomInt(int min, int max) {
+	static std::random_device rd;
+	static std::mt19937 mt(rd());
+	std::uniform_int_distribution<int> dist(min, max);
+	return dist(mt);
 }
 
 inline D2D1_RECT_F Interpolate(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float alpha)
@@ -460,23 +468,6 @@ public:
 			mCenterlineRects[i].right = mCenterlineRects[i].left + mCellSize;
 		}
 
-		for (auto i = 0; i < 2; i++) {
-			mLeftPaddleRects[i].top = verticalCenter - (2.5f * mCellSize);
-			mLeftPaddleRects[i].bottom = mLeftPaddleRects[i].top + 5 * mCellSize;
-			mLeftPaddleRects[i].left = mWindowWidthSpacing / 2 + mCellSize;
-			mLeftPaddleRects[i].right = mLeftPaddleRects[i].left + mCellSize;
-
-			mRightPaddleRects[i].top = verticalCenter - (2.5f * mCellSize);
-			mRightPaddleRects[i].bottom = mRightPaddleRects[i].top + 5 * mCellSize;
-			mRightPaddleRects[i].left = mWindowWidth - (2 * mCellSize + mWindowWidthSpacing / 2);
-			mRightPaddleRects[i].right = mRightPaddleRects[i].left + mCellSize;
-
-			mBallRects[i].top = verticalCenter - (.5f * mCellSize);
-			mBallRects[i].bottom = mBallRects[i].top + mCellSize;
-			mBallRects[i].left = horizontalCenter - (.5f * mCellSize);
-			mBallRects[i].right = mBallRects[i].left + mCellSize;
-		}
-
 		mLeftGoalRect.top = 0;
 		mLeftGoalRect.bottom = mWindowHeight;
 		mLeftGoalRect.left = -D3D10_FLOAT32_MAX;
@@ -486,6 +477,42 @@ public:
 		mRightGoalRect.bottom = mWindowHeight;
 		mRightGoalRect.left = mWindowWidth - mWindowWidthSpacing / 2;
 		mRightGoalRect.right = D3D10_FLOAT32_MAX;
+
+		ResetMovingObjects();
+	}
+
+	void ResetMovingObjects()
+	{
+		// precalculate the half window dimensions.
+		auto halfWidth = mWindowWidth / 2;
+		auto halfHeight = mWindowHeight / 2;
+
+		// reset both buffers for each moving object.
+		for (auto i = 0; i < 2; i++) {
+			mLeftPaddleRects[i].top = halfHeight - (2.5f * mCellSize);
+			mLeftPaddleRects[i].bottom = mLeftPaddleRects[i].top + 5 * mCellSize;
+			mLeftPaddleRects[i].left = mWindowWidthSpacing / 2 + mCellSize;
+			mLeftPaddleRects[i].right = mLeftPaddleRects[i].left + mCellSize;
+
+			mRightPaddleRects[i].top = halfHeight - (2.5f * mCellSize);
+			mRightPaddleRects[i].bottom = mRightPaddleRects[i].top + 5 * mCellSize;
+			mRightPaddleRects[i].left = mWindowWidth - (2 * mCellSize + mWindowWidthSpacing / 2);
+			mRightPaddleRects[i].right = mRightPaddleRects[i].left + mCellSize;
+
+			mBallRects[i].top = halfHeight - (.5f * mCellSize);
+			mBallRects[i].bottom = mBallRects[i].top + mCellSize;
+			mBallRects[i].left = halfWidth - (.5f * mCellSize);
+			mBallRects[i].right = mBallRects[i].left + mCellSize;
+		}
+
+		// randomize a new direction for the ball.
+		mBallDirection = XMVectorSet(
+			-1.f + (2.f * randomInt(0, 1)),
+			-1.f + (2.f * randomInt(0, 1)),
+			0.f,
+			0.f
+		);
+		mBallDirection = XMVector2Normalize(mBallDirection);
 	}
 
 	void ResizeSwapchain(CoreWindow^ window)
@@ -633,15 +660,11 @@ public:
 
 		// check whether the ball has reached a goal.
 		if (Contains(mLeftGoalRect, mBallRects[mBufferIdx])) {
-			// TODO reset ball state
-			// TODO randomize ball direction
-			// TODO reset paddle states
 			mRightPoints++;
+			ResetMovingObjects();
 		} else if (Contains(mRightGoalRect, mBallRects[mBufferIdx])) {
-			// TODO reset ball state
-			// TODO randomize ball direction
-			// TODO reset paddle states
 			mLeftPoints++;
+			ResetMovingObjects();
 		}
 
 		if (Collides(mBallRects[mBufferIdx], mTopWallRect)) {
