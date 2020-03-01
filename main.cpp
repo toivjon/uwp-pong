@@ -668,17 +668,15 @@ public:
 		}
 
 		if (Collides(mBallRects[mBufferIdx], mTopWallRect)) {
-			// TODO handle
 			mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
 		} else if (Collides(mBallRects[mBufferIdx], mBottomWallRect)) {
-			// TODO handle
 			mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
 		}
 
 		if (Collides(mBallRects[mBufferIdx], mRightPaddleRects[mBufferIdx])) {
-			// TODO handle
+			mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
 		} else if (Collides(mBallRects[mBufferIdx], mLeftPaddleRects[mBufferIdx])) {
-			// TODO handle
+			mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
 		}
 	}
 
