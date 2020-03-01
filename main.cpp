@@ -31,9 +31,9 @@ constexpr auto UPDATE_MILLIS = 1000 / 25;
 // The amount of dots in the center line.
 constexpr auto CENTERLINE_DOTS = 15;
 // The placeholder for the left player name.
-constexpr wchar_t* LEFT_PLAYER_NAME_PLACEHOLDER = L"player-1";
+constexpr auto LEFT_PLAYER_NAME_PLACEHOLDER = L"player-1";
 // The placeholder name for the right player name.
-constexpr wchar_t* RIGHT_PLAYER_NAME_PLACEHOLDER = L"player-2";
+constexpr auto RIGHT_PLAYER_NAME_PLACEHOLDER = L"player-2";
 // The constant aspect ratio for the game content.
 constexpr auto ASPECT_RATIO = (800.f / 600.f);
 // The epsilon constant for floating point arithmetic.
