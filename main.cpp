@@ -31,9 +31,13 @@ constexpr auto UPDATE_MILLIS = 1000 / 25;
 // The amount of dots in the center line.
 constexpr auto CENTERLINE_DOTS = 15;
 // The placeholder for the left player name.
-constexpr const wchar_t* LEFT_PLAYER_NAME_PLACEHOLDER = L"player-1";
+constexpr wchar_t* LEFT_PLAYER_NAME_PLACEHOLDER = L"player-1";
 // The placeholder name for the right player name.
-constexpr const wchar_t* RIGHT_PLAYER_NAME_PLACEHOLDER = L"player-2";
+constexpr wchar_t* RIGHT_PLAYER_NAME_PLACEHOLDER = L"player-2";
+// The constant aspect ratio for the game content.
+constexpr auto ASPECT_RATIO = (800.f / 600.f);
+// The epsilon constant for floating point arithmetic.
+constexpr auto EPSILON = 0.001f;
 
 // =================
 // === Utilities ===
@@ -337,32 +341,33 @@ public:
 
 	void ResizeContent()
 	{
+		// get and calculate some general dimensions for the game.
 		auto window = CoreWindow::GetForCurrentThread();
+		mWindowWidth = window->Bounds.Width;
+		mWindowHeight = window->Bounds.Height;
+
+		// calculate aspect ratio correction spacing values.
+		auto currentAspectRatio = (mWindowWidth / mWindowHeight);
+		mWindowWidthSpacing = 0.f, mWindowHeightSpacing = 0.f;
+		if (currentAspectRatio > ASPECT_RATIO) {
+			auto widthEdge = mWindowHeight * ASPECT_RATIO;
+			mWindowWidthSpacing = mWindowWidth - widthEdge;
+		} else if (currentAspectRatio < ASPECT_RATIO) {
+			auto heightEdge = mWindowWidth / ASPECT_RATIO;
+			mWindowHeightSpacing = mWindowHeight - heightEdge;
+		}
+
+		// precalculate the game object cell size.
+		mCellSize = (mWindowHeight - mWindowHeightSpacing) / 30;
+
 		ResizeGameObjects(window);
 		ResizeSwapchain(window);
 	}
 
 	void ResizeGameObjects(CoreWindow^ window)
 	{
-		// get the width and height of the window.
-		auto windowWidth = window->Bounds.Width;
-		auto windowHeight = window->Bounds.Height;
-
-		// calculate aspect ratio correction values.
-		static const auto aspectRatio = (800.f / 600.f);
-		auto currentAspectRatio = (windowWidth / windowHeight);
-		auto widthSpacing = 0.f, heightSpacing = 0.f;
-		if (currentAspectRatio > aspectRatio) {
-			auto widthEdge = windowHeight * aspectRatio;
-			widthSpacing = windowWidth - widthEdge;
-		} else if (currentAspectRatio < aspectRatio) {
-			auto heightEdge = windowWidth / aspectRatio;
-			heightSpacing = windowHeight - heightEdge;
-		}
-
 		// calculate physical coefficients.
-		static const float EPSILON = 0.001f;
-		mPaddleVelocity = (windowHeight - heightSpacing) / 30;
+		mPaddleVelocity = (mWindowHeight - mWindowHeightSpacing) / 30;
 		mBallVelocity = mPaddleVelocity / 4;
 
 		// correct left paddle velocity if currently applied.
@@ -375,20 +380,19 @@ public:
 			mRightPaddleVelocity = mPaddleVelocity;
 		}
 
-		// calculate cell size and the view center points.
-		auto cellSize = (windowHeight - heightSpacing) / 30;
-		auto horizontalCenter = windowWidth / 2;
-		auto verticalCenter = windowHeight / 2;
+		// calculate view center points.
+		auto horizontalCenter = mWindowWidth / 2;
+		auto verticalCenter = mWindowHeight / 2;
 
-		mTopWallRect.top = heightSpacing / 2;
-		mTopWallRect.bottom = mTopWallRect.top + cellSize;
-		mTopWallRect.left = widthSpacing / 2;
-		mTopWallRect.right = windowWidth - widthSpacing / 2;
+		mTopWallRect.top = mWindowHeightSpacing / 2;
+		mTopWallRect.bottom = mTopWallRect.top + mCellSize;
+		mTopWallRect.left = mWindowWidthSpacing / 2;
+		mTopWallRect.right = mWindowWidth - mWindowWidthSpacing / 2;
 
-		mBottomWallRect.top = windowHeight - heightSpacing / 2 - cellSize;
-		mBottomWallRect.bottom = mBottomWallRect.top + cellSize;
-		mBottomWallRect.left = widthSpacing / 2;
-		mBottomWallRect.right = windowWidth - widthSpacing / 2;
+		mBottomWallRect.top = mWindowHeight - mWindowHeightSpacing / 2 - mCellSize;
+		mBottomWallRect.bottom = mBottomWallRect.top + mCellSize;
+		mBottomWallRect.left = mWindowWidthSpacing / 2;
+		mBottomWallRect.right = mWindowWidth - mWindowWidthSpacing / 2;
 
 		ThrowIfFailed(mWritefactory->CreateTextFormat(
 			L"Calibri",
@@ -396,22 +400,22 @@ public:
 			DWRITE_FONT_WEIGHT_REGULAR,
 			DWRITE_FONT_STYLE_NORMAL,
 			DWRITE_FONT_STRETCH_NORMAL,
-			cellSize * 6,
+			mCellSize * 6,
 			L"en-us",
 			&mPointsTextFormat
 		));
 		ThrowIfFailed(mPointsTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER));
 		ThrowIfFailed(mPointsTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER));
 
-		mLeftPointsRect.top = heightSpacing / 2 + cellSize * 2;
-		mLeftPointsRect.bottom = mLeftPointsRect.top + cellSize * 6;
-		mLeftPointsRect.left = horizontalCenter - cellSize * 5;
-		mLeftPointsRect.right = mLeftPointsRect.left + cellSize;
+		mLeftPointsRect.top = mWindowHeightSpacing / 2 + mCellSize * 2;
+		mLeftPointsRect.bottom = mLeftPointsRect.top + mCellSize * 6;
+		mLeftPointsRect.left = horizontalCenter - mCellSize * 5;
+		mLeftPointsRect.right = mLeftPointsRect.left + mCellSize;
 
-		mRightPointsRect.top = heightSpacing / 2 + cellSize * 2;
-		mRightPointsRect.bottom = mRightPointsRect.top + cellSize * 6;
-		mRightPointsRect.left = horizontalCenter + cellSize * 4;
-		mRightPointsRect.right = mRightPointsRect.left + cellSize;
+		mRightPointsRect.top = mWindowHeightSpacing / 2 + mCellSize * 2;
+		mRightPointsRect.bottom = mRightPointsRect.top + mCellSize * 6;
+		mRightPointsRect.left = horizontalCenter + mCellSize * 4;
+		mRightPointsRect.right = mRightPointsRect.left + mCellSize;
 
 		ThrowIfFailed(mWritefactory->CreateTextFormat(
 			L"Calibri",
@@ -419,7 +423,7 @@ public:
 			DWRITE_FONT_WEIGHT_REGULAR,
 			DWRITE_FONT_STYLE_NORMAL,
 			DWRITE_FONT_STRETCH_NORMAL,
-			cellSize * 0.75f,
+			mCellSize * 0.75f,
 			L"en-us",
 			&mLeftPlayerNameTextFormat
 		));
@@ -432,55 +436,55 @@ public:
 			DWRITE_FONT_WEIGHT_REGULAR,
 			DWRITE_FONT_STYLE_NORMAL,
 			DWRITE_FONT_STRETCH_NORMAL,
-			cellSize * 0.75f,
+			mCellSize * 0.75f,
 			L"en-us",
 			&mRightPlayerNameTextFormat
 		));
 		ThrowIfFailed(mRightPlayerNameTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING));
 		ThrowIfFailed(mRightPlayerNameTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER));
 
-		mLeftPlayerNameRect.top = heightSpacing / 2;
-		mLeftPlayerNameRect.bottom = mLeftPlayerNameRect.top + cellSize;
-		mLeftPlayerNameRect.left = widthSpacing / 2 + cellSize * .5f;
-		mLeftPlayerNameRect.right = horizontalCenter - cellSize * 3;
+		mLeftPlayerNameRect.top = mWindowHeightSpacing / 2;
+		mLeftPlayerNameRect.bottom = mLeftPlayerNameRect.top + mCellSize;
+		mLeftPlayerNameRect.left = mWindowWidthSpacing / 2 + mCellSize * .5f;
+		mLeftPlayerNameRect.right = horizontalCenter - mCellSize * 3;
 
-		mRightPlayerNameRect.top = heightSpacing / 2;
-		mRightPlayerNameRect.bottom = mRightPlayerNameRect.top + cellSize;
-		mRightPlayerNameRect.left = horizontalCenter + cellSize * 3;
-		mRightPlayerNameRect.right = windowWidth - widthSpacing / 2 - cellSize * .5f;
+		mRightPlayerNameRect.top = mWindowHeightSpacing / 2;
+		mRightPlayerNameRect.bottom = mRightPlayerNameRect.top + mCellSize;
+		mRightPlayerNameRect.left = horizontalCenter + mCellSize * 3;
+		mRightPlayerNameRect.right = mWindowWidth - mWindowWidthSpacing / 2 - mCellSize * .5f;
 
 		for (auto i = 0; i < CENTERLINE_DOTS; i++) {
-			mCenterlineRects[i].top = heightSpacing / 2 + (i*2 + 0.5f) * cellSize;
-			mCenterlineRects[i].bottom = mCenterlineRects[i].top + cellSize;
-			mCenterlineRects[i].left = horizontalCenter - (cellSize / 2);
-			mCenterlineRects[i].right = mCenterlineRects[i].left + cellSize;
+			mCenterlineRects[i].top = mWindowHeightSpacing / 2 + (i*2 + 0.5f) * mCellSize;
+			mCenterlineRects[i].bottom = mCenterlineRects[i].top + mCellSize;
+			mCenterlineRects[i].left = horizontalCenter - (mCellSize / 2);
+			mCenterlineRects[i].right = mCenterlineRects[i].left + mCellSize;
 		}
 
 		for (auto i = 0; i < 2; i++) {
-			mLeftPaddleRects[i].top = verticalCenter - (2.5f * cellSize);
-			mLeftPaddleRects[i].bottom = mLeftPaddleRects[i].top + 5 * cellSize;
-			mLeftPaddleRects[i].left = widthSpacing / 2 + cellSize;
-			mLeftPaddleRects[i].right = mLeftPaddleRects[i].left + cellSize;
+			mLeftPaddleRects[i].top = verticalCenter - (2.5f * mCellSize);
+			mLeftPaddleRects[i].bottom = mLeftPaddleRects[i].top + 5 * mCellSize;
+			mLeftPaddleRects[i].left = mWindowWidthSpacing / 2 + mCellSize;
+			mLeftPaddleRects[i].right = mLeftPaddleRects[i].left + mCellSize;
 
-			mRightPaddleRects[i].top = verticalCenter - (2.5f * cellSize);
-			mRightPaddleRects[i].bottom = mRightPaddleRects[i].top + 5 * cellSize;
-			mRightPaddleRects[i].left = windowWidth - (2 * cellSize + widthSpacing / 2);
-			mRightPaddleRects[i].right = mRightPaddleRects[i].left + cellSize;
+			mRightPaddleRects[i].top = verticalCenter - (2.5f * mCellSize);
+			mRightPaddleRects[i].bottom = mRightPaddleRects[i].top + 5 * mCellSize;
+			mRightPaddleRects[i].left = mWindowWidth - (2 * mCellSize + mWindowWidthSpacing / 2);
+			mRightPaddleRects[i].right = mRightPaddleRects[i].left + mCellSize;
 
-			mBallRects[i].top = verticalCenter - (.5f * cellSize);
-			mBallRects[i].bottom = mBallRects[i].top + cellSize;
-			mBallRects[i].left = horizontalCenter - (.5f * cellSize);
-			mBallRects[i].right = mBallRects[i].left + cellSize;
+			mBallRects[i].top = verticalCenter - (.5f * mCellSize);
+			mBallRects[i].bottom = mBallRects[i].top + mCellSize;
+			mBallRects[i].left = horizontalCenter - (.5f * mCellSize);
+			mBallRects[i].right = mBallRects[i].left + mCellSize;
 		}
 
 		mLeftGoalRect.top = 0;
-		mLeftGoalRect.bottom = windowHeight;
+		mLeftGoalRect.bottom = mWindowHeight;
 		mLeftGoalRect.left = -D3D10_FLOAT32_MAX;
-		mLeftGoalRect.right = widthSpacing / 2;
+		mLeftGoalRect.right = mWindowWidthSpacing / 2;
 
 		mRightGoalRect.top = 0;
-		mRightGoalRect.bottom = windowHeight;
-		mRightGoalRect.left = windowWidth - widthSpacing / 2;
+		mRightGoalRect.bottom = mWindowHeight;
+		mRightGoalRect.left = mWindowWidth - mWindowWidthSpacing / 2;
 		mRightGoalRect.right = D3D10_FLOAT32_MAX;
 	}
 
@@ -717,6 +721,17 @@ private:
 	bool mWindowClosed;
 	// The flag used to indicate whether the main window is visible and game should be rendered.
 	bool mWindowVisible;
+	// The width in pixels of the window attached for the game.
+	float mWindowWidth;
+	// The height in pixels of the window attached for the game.
+	float mWindowHeight;
+	// The horizontal spacing required to maintain the constant aspect ratio.
+	float mWindowWidthSpacing;
+	// The vertical spacing required to maintain the constant aspect ratio.
+	float mWindowHeightSpacing;
+
+	// The size of single game object cell used to form all game objects.
+	float mCellSize;
 
 	float mPaddleVelocity = 0.f;
 	float mBallVelocity = 0.f;
