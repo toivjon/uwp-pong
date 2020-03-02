@@ -349,6 +349,10 @@ public:
 
 	void ResizeContent()
 	{
+		auto oldWidth = mWindowWidth;
+		auto oldHeight = mWindowHeight;
+		auto oldCellSize = mCellSize;
+
 		// get and calculate some general dimensions for the game.
 		auto window = CoreWindow::GetForCurrentThread();
 		mWindowWidth = window->Bounds.Width;
@@ -368,11 +372,11 @@ public:
 		// precalculate the game object cell size.
 		mCellSize = (mWindowHeight - mWindowHeightSpacing) / 30;
 
-		ResizeGameObjects(window);
+		ResizeGameObjects(oldWidth, oldHeight, oldCellSize, window);
 		ResizeSwapchain(window);
 	}
 
-	void ResizeGameObjects(CoreWindow^ window)
+	void ResizeGameObjects(float oldWidth, float oldHeight, float oldCellSize, CoreWindow^ window)
 	{
 		// calculate physical coefficients.
 		mPaddleVelocity = (mWindowHeight - mWindowHeightSpacing) / 30;
@@ -478,20 +482,28 @@ public:
 		mRightGoalRect.left = mWindowWidth - mWindowWidthSpacing / 2;
 		mRightGoalRect.right = D3D10_FLOAT32_MAX;
 
+		auto oldHalfWidth = oldWidth / 2.f;
+		auto oldHalfHeight = oldHeight / 2.f;
+
 		for (auto i = 0; i < 2; i++) {
-			mLeftPaddleRects[i].top = verticalCenter - (2.5f * mCellSize);
+			auto oldLeftRelMovement = abs(oldCellSize) <= EPSILON ? 0.f : (mLeftPaddleRects[i].top - (oldHalfHeight - (2.5f * oldCellSize))) / oldCellSize;
+			auto oldRightRelMovement = abs(oldCellSize) <= EPSILON ? 0.f : (mRightPaddleRects[i].top - (oldHalfHeight - (2.5f * oldCellSize))) / oldCellSize;
+			auto ballRelMovementY = abs(oldCellSize) <= EPSILON ? 0.f : (mBallRects[i].top - (oldHalfHeight - (.5f * oldCellSize))) / oldCellSize;
+			auto ballRelMovementX = abs(oldCellSize) <= EPSILON ? 0.f : (mBallRects[i].left - (oldHalfWidth- (.5f * oldCellSize))) / oldCellSize;
+
+			mLeftPaddleRects[i].top = verticalCenter - (2.5f * mCellSize) + mCellSize * oldLeftRelMovement;
 			mLeftPaddleRects[i].bottom = mLeftPaddleRects[i].top + 5 * mCellSize;
 			mLeftPaddleRects[i].left = mWindowWidthSpacing / 2 + mCellSize;
 			mLeftPaddleRects[i].right = mLeftPaddleRects[i].left + mCellSize;
 
-			mRightPaddleRects[i].top = verticalCenter - (2.5f * mCellSize);
+			mRightPaddleRects[i].top = verticalCenter - (2.5f * mCellSize) + mCellSize * oldRightRelMovement;
 			mRightPaddleRects[i].bottom = mRightPaddleRects[i].top + 5 * mCellSize;
 			mRightPaddleRects[i].left = mWindowWidth - (2 * mCellSize + mWindowWidthSpacing / 2);
 			mRightPaddleRects[i].right = mRightPaddleRects[i].left + mCellSize;
 
-			mBallRects[i].top = verticalCenter - (.5f * mCellSize);
-			mBallRects[i].bottom = mBallRects[i].top + mCellSize;
-			mBallRects[i].left = horizontalCenter - (.5f * mCellSize);
+			mBallRects[i].top = verticalCenter - (.5f * mCellSize) + mCellSize * ballRelMovementY;
+			mBallRects[i].bottom = mBallRects[i].top + mCellSize; 
+			mBallRects[i].left = horizontalCenter - (.5f * mCellSize) + mCellSize * ballRelMovementX;
 			mBallRects[i].right = mBallRects[i].left + mCellSize;
 		}
 	}
