@@ -478,7 +478,22 @@ public:
 		mRightGoalRect.left = mWindowWidth - mWindowWidthSpacing / 2;
 		mRightGoalRect.right = D3D10_FLOAT32_MAX;
 
-		ResetMovingObjects();
+		for (auto i = 0; i < 2; i++) {
+			mLeftPaddleRects[i].top = verticalCenter - (2.5f * mCellSize);
+			mLeftPaddleRects[i].bottom = mLeftPaddleRects[i].top + 5 * mCellSize;
+			mLeftPaddleRects[i].left = mWindowWidthSpacing / 2 + mCellSize;
+			mLeftPaddleRects[i].right = mLeftPaddleRects[i].left + mCellSize;
+
+			mRightPaddleRects[i].top = verticalCenter - (2.5f * mCellSize);
+			mRightPaddleRects[i].bottom = mRightPaddleRects[i].top + 5 * mCellSize;
+			mRightPaddleRects[i].left = mWindowWidth - (2 * mCellSize + mWindowWidthSpacing / 2);
+			mRightPaddleRects[i].right = mRightPaddleRects[i].left + mCellSize;
+
+			mBallRects[i].top = verticalCenter - (.5f * mCellSize);
+			mBallRects[i].bottom = mBallRects[i].top + mCellSize;
+			mBallRects[i].left = horizontalCenter - (.5f * mCellSize);
+			mBallRects[i].right = mBallRects[i].left + mCellSize;
+		}
 	}
 
 	void ResetMovingObjects()
