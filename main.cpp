@@ -535,6 +535,9 @@ public:
 			mBallRects[i].left = halfWidth - (.5f * mCellSize);
 			mBallRects[i].right = mBallRects[i].left + mCellSize;
 		}
+
+		// reset ball velocity.
+		mBallVelocity = (mWindowHeight - mWindowHeightSpacing) / 30 / 4;
 	}
 
 	void RandomizeBallDirection()
