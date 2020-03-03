@@ -43,6 +43,8 @@ constexpr auto EPSILON = 0.001f;
 constexpr auto COUNTDOWN_MS = 1000;
 // The amount to push object from obstacle when colliding.
 constexpr auto NUDGE = 0.001f;
+// The scalar used to increase ball velocity on each hit with a paddle.
+constexpr auto BALL_SPEEDUP_SCALAR = 1.2f;
 
 // =================
 // === Utilities ===
@@ -722,10 +724,12 @@ public:
 			mBallRects[mBufferIdx].left += NUDGE;
 			mBallRects[mBufferIdx].right += NUDGE;
 			mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
+			mBallVelocity *= BALL_SPEEDUP_SCALAR;
 		} else if (Collides(mBallRects[mBufferIdx], mLeftPaddleRects[mBufferIdx])) {
 			mBallRects[mBufferIdx].left -= NUDGE;
 			mBallRects[mBufferIdx].right -= NUDGE;
 			mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
+			mBallVelocity *= BALL_SPEEDUP_SCALAR;
 		}
 	}
 
