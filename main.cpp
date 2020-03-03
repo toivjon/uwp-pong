@@ -709,8 +709,12 @@ public:
 		}
 
 		if (Collides(mBallRects[mBufferIdx], mTopWallRect)) {
+			mBallRects[mBufferIdx].top += NUDGE;
+			mBallRects[mBufferIdx].bottom += NUDGE;
 			mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
 		} else if (Collides(mBallRects[mBufferIdx], mBottomWallRect)) {
+			mBallRects[mBufferIdx].top -= NUDGE;
+			mBallRects[mBufferIdx].bottom -= NUDGE;
 			mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
 		}
 
