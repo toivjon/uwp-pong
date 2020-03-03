@@ -41,6 +41,8 @@ constexpr auto ASPECT_RATIO = (800.f / 600.f);
 constexpr auto EPSILON = 0.001f;
 // The amount of milliseconds to wait before each ball launch.
 constexpr auto COUNTDOWN_MS = 1000;
+// The amount to push object from obstacle when colliding.
+constexpr auto NUDGE = 0.001f;
 
 // =================
 // === Utilities ===
@@ -713,8 +715,12 @@ public:
 		}
 
 		if (Collides(mBallRects[mBufferIdx], mRightPaddleRects[mBufferIdx])) {
+			mBallRects[mBufferIdx].left += NUDGE;
+			mBallRects[mBufferIdx].right += NUDGE;
 			mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
 		} else if (Collides(mBallRects[mBufferIdx], mLeftPaddleRects[mBufferIdx])) {
+			mBallRects[mBufferIdx].left -= NUDGE;
+			mBallRects[mBufferIdx].right -= NUDGE;
 			mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
 		}
 	}
