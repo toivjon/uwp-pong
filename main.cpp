@@ -729,13 +729,15 @@ public:
 		}
 
 		if (Collides(mBallRects[mBufferIdx], mRightPaddleRects[mBufferIdx])) {
-			mBallRects[mBufferIdx].left += NUDGE;
-			mBallRects[mBufferIdx].right += NUDGE;
+			auto ballWidth = mBallRects[mBufferIdx].right - mBallRects[mBufferIdx].left;
+			mBallRects[mBufferIdx].left = mRightPaddleRects[mBufferIdx].left - ballWidth - NUDGE;
+			mBallRects[mBufferIdx].right = mBallRects[mBufferIdx].left  + ballWidth;
 			mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
 			mBallVelocity *= BALL_SPEEDUP_SCALAR;
 		} else if (Collides(mBallRects[mBufferIdx], mLeftPaddleRects[mBufferIdx])) {
-			mBallRects[mBufferIdx].left -= NUDGE;
-			mBallRects[mBufferIdx].right -= NUDGE;
+			auto ballWidth = mBallRects[mBufferIdx].right - mBallRects[mBufferIdx].left;
+			mBallRects[mBufferIdx].left = mLeftPaddleRects[mBufferIdx].right + NUDGE;
+			mBallRects[mBufferIdx].right = mBallRects[mBufferIdx].left + ballWidth;
 			mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
 			mBallVelocity *= BALL_SPEEDUP_SCALAR;
 		}
