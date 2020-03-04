@@ -384,7 +384,12 @@ public:
 	{
 		// calculate physical coefficients.
 		mPaddleVelocity = (mWindowHeight - mWindowHeightSpacing) / 30;
-		mBallVelocity = mPaddleVelocity / 4;
+		if (oldCellSize > EPSILON) {
+			auto scalar = mBallVelocity / oldCellSize;
+			mBallVelocity = mCellSize * scalar;
+		} else {
+			mBallVelocity = mPaddleVelocity / 4;
+		}
 
 		// correct left paddle velocity if currently applied.
 		if (mLeftPaddleVelocity > EPSILON || mLeftPaddleVelocity < -EPSILON) {
