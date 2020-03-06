@@ -830,7 +830,8 @@ public:
 			mBallRects[mBufferIdx].right = mBallRects[prevBufferIdx].right + ballMovement.m128_f32[0];
 			mBallRects[mBufferIdx].left = mBallRects[prevBufferIdx].left + ballMovement.m128_f32[0];
 
-			mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
+			if (abs(nx) > 0.f) mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
+			if (abs(ny) > 0.f) mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
 
 			ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
 			ballMovement = XMVectorScale(ballMovement, 1.f - t);
@@ -850,7 +851,8 @@ public:
 			mBallRects[mBufferIdx].right = mBallRects[prevBufferIdx].right + ballMovement.m128_f32[0];
 			mBallRects[mBufferIdx].left = mBallRects[prevBufferIdx].left + ballMovement.m128_f32[0];
 
-			mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
+			if (abs(nx) > 0.f) mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
+			if (abs(ny) > 0.f) mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
 
 			ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
 			ballMovement = XMVectorScale(ballMovement, 1.f - t);
