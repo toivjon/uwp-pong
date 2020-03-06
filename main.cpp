@@ -110,6 +110,68 @@ inline bool Contains(const D2D1_RECT_F& a, const D2D1_RECT_F& b) {
 		&& Contains(a, b.right, b.bottom);
 }
 
+inline D2D1_RECT_F MergeAABB(const D2D1_RECT_F& a, const D2D1_RECT_F& b) {
+	D2D1_RECT_F aabb;
+	aabb.bottom = max(a.bottom, b.bottom);
+	aabb.top = min(a.top, b.top);
+	aabb.right = max(a.right, b.right);
+	aabb.left = min(a.left, b.left);
+	return aabb;
+}
+
+inline float SweptAABB(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float vx, float vy, float& nx, float& ny) {
+	float xInvEntry, xInvExit, xEntry, xExit;
+	if (vx > 0.f) {
+		xInvEntry = b.left - a.right;
+		xInvExit = b.right - a.left;
+	} else {
+		xInvEntry = b.right - a.left;
+		xInvExit = b.left - a.right;
+	}
+
+	float yInvEntry, yInvExit, yEntry, yExit;
+	if (vy > 0.f) {
+		yInvEntry = b.top - a.bottom;
+		yInvExit = b.bottom - a.top;
+	} else {
+		yInvEntry = b.bottom - a.top;
+		yInvExit = b.top - a.bottom;
+	}
+
+	xEntry = xInvEntry / vx;
+	xExit = xInvExit / vx;
+	yEntry = yInvEntry / vy;
+	yExit = yInvExit / vy;
+
+	auto entryTime = max(xEntry, yEntry);
+	auto exitTime = min(xExit, yExit);
+
+	if (entryTime > exitTime || xEntry < 0.f && yEntry < 0.f || xEntry > 1.f || yEntry > 1.f) {
+		nx = 0.f;
+		ny = 0.f;
+		return 1.f;
+	} else {
+		if (xEntry > yEntry) {
+			if (xInvEntry < 0.f) {
+				nx = 1.f;
+				ny = 0.f;
+			} else {
+				nx = -1.f;
+				ny = 0.f;
+			}
+		} else {
+			if (yInvEntry < 0.f) {
+				nx = 0.f;
+				ny = 1.f;
+			} else {
+				nx = 0.f;
+				ny - 1.f;
+			}
+		}
+	}
+	return entryTime;
+}
+
 // ============
 // === Game ===
 // ============
@@ -718,27 +780,85 @@ public:
 			RandomizeBallDirection();
 		}
 
-		if (Collides(mBallRects[mBufferIdx], mTopWallRect)) {
-			mBallRects[mBufferIdx].top += NUDGE;
-			mBallRects[mBufferIdx].bottom += NUDGE;
+		// perfom a sweep collision test by starting with the broad phase and then narrowing it.
+		auto ballMovementAABB = MergeAABB(mBallRects[mBufferIdx], mBallRects[prevBufferIdx]);
+		if (Collides(ballMovementAABB, mTopWallRect)) {
+			float nx, ny;
+			auto t = SweptAABB(mBallRects[prevBufferIdx], mTopWallRect, ballMovement.m128_f32[0], ballMovement.m128_f32[1], nx, ny);
+
+			ballMovement = XMVectorScale(ballMovement, t);
+			mBallRects[mBufferIdx].top = mBallRects[prevBufferIdx].top + ballMovement.m128_f32[1];
+			mBallRects[mBufferIdx].bottom = mBallRects[prevBufferIdx].bottom + ballMovement.m128_f32[1];
+			mBallRects[mBufferIdx].right = mBallRects[prevBufferIdx].right + ballMovement.m128_f32[0];
+			mBallRects[mBufferIdx].left = mBallRects[prevBufferIdx].left + ballMovement.m128_f32[0];
+
 			mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
-		} else if (Collides(mBallRects[mBufferIdx], mBottomWallRect)) {
-			mBallRects[mBufferIdx].top -= NUDGE;
-			mBallRects[mBufferIdx].bottom -= NUDGE;
+
+			ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
+			ballMovement = XMVectorScale(ballMovement, 1.f - t);
+			mBallRects[mBufferIdx].top = mBallRects[mBufferIdx].top + ballMovement.m128_f32[1];
+			mBallRects[mBufferIdx].bottom = mBallRects[mBufferIdx].bottom + ballMovement.m128_f32[1];
+			mBallRects[mBufferIdx].right = mBallRects[mBufferIdx].right + ballMovement.m128_f32[0];
+			mBallRects[mBufferIdx].left = mBallRects[mBufferIdx].left + ballMovement.m128_f32[0];
+		} else if (Collides(ballMovementAABB, mBottomWallRect)) {
+			float nx, ny;
+			auto t = SweptAABB(mBallRects[prevBufferIdx], mBottomWallRect, ballMovement.m128_f32[0], ballMovement.m128_f32[1], nx, ny);
+
+			ballMovement = XMVectorScale(ballMovement, t);
+			mBallRects[mBufferIdx].top = mBallRects[prevBufferIdx].top + ballMovement.m128_f32[1];
+			mBallRects[mBufferIdx].bottom = mBallRects[prevBufferIdx].bottom + ballMovement.m128_f32[1];
+			mBallRects[mBufferIdx].right = mBallRects[prevBufferIdx].right + ballMovement.m128_f32[0];
+			mBallRects[mBufferIdx].left = mBallRects[prevBufferIdx].left + ballMovement.m128_f32[0];
+
 			mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
+
+			ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
+			ballMovement = XMVectorScale(ballMovement, 1.f - t);
+			mBallRects[mBufferIdx].top = mBallRects[mBufferIdx].top + ballMovement.m128_f32[1];
+			mBallRects[mBufferIdx].bottom = mBallRects[mBufferIdx].bottom + ballMovement.m128_f32[1];
+			mBallRects[mBufferIdx].right = mBallRects[mBufferIdx].right + ballMovement.m128_f32[0];
+			mBallRects[mBufferIdx].left = mBallRects[mBufferIdx].left + ballMovement.m128_f32[0];
 		}
 
 		if (Collides(mBallRects[mBufferIdx], mRightPaddleRects[mBufferIdx])) {
-			auto ballWidth = mBallRects[mBufferIdx].right - mBallRects[mBufferIdx].left;
-			mBallRects[mBufferIdx].left = mRightPaddleRects[mBufferIdx].left - ballWidth - NUDGE;
-			mBallRects[mBufferIdx].right = mBallRects[mBufferIdx].left  + ballWidth;
+			float nx, ny;
+			auto t = SweptAABB(mBallRects[prevBufferIdx], mRightPaddleRects[mBufferIdx], ballMovement.m128_f32[0], ballMovement.m128_f32[1], nx, ny);
+
+			ballMovement = XMVectorScale(ballMovement, t);
+			mBallRects[mBufferIdx].top = mBallRects[prevBufferIdx].top + ballMovement.m128_f32[1];
+			mBallRects[mBufferIdx].bottom = mBallRects[prevBufferIdx].bottom + ballMovement.m128_f32[1];
+			mBallRects[mBufferIdx].right = mBallRects[prevBufferIdx].right + ballMovement.m128_f32[0];
+			mBallRects[mBufferIdx].left = mBallRects[prevBufferIdx].left + ballMovement.m128_f32[0];
+
 			mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
+
+			ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
+			ballMovement = XMVectorScale(ballMovement, 1.f - t);
+			mBallRects[mBufferIdx].top = mBallRects[mBufferIdx].top + ballMovement.m128_f32[1];
+			mBallRects[mBufferIdx].bottom = mBallRects[mBufferIdx].bottom + ballMovement.m128_f32[1];
+			mBallRects[mBufferIdx].right = mBallRects[mBufferIdx].right + ballMovement.m128_f32[0];
+			mBallRects[mBufferIdx].left = mBallRects[mBufferIdx].left + ballMovement.m128_f32[0];
+
 			mBallVelocity *= BALL_SPEEDUP_SCALAR;
 		} else if (Collides(mBallRects[mBufferIdx], mLeftPaddleRects[mBufferIdx])) {
-			auto ballWidth = mBallRects[mBufferIdx].right - mBallRects[mBufferIdx].left;
-			mBallRects[mBufferIdx].left = mLeftPaddleRects[mBufferIdx].right + NUDGE;
-			mBallRects[mBufferIdx].right = mBallRects[mBufferIdx].left + ballWidth;
+			float nx, ny;
+			auto t = SweptAABB(mBallRects[prevBufferIdx], mLeftPaddleRects[mBufferIdx], ballMovement.m128_f32[0], ballMovement.m128_f32[1], nx, ny);
+
+			ballMovement = XMVectorScale(ballMovement, t);
+			mBallRects[mBufferIdx].top = mBallRects[prevBufferIdx].top + ballMovement.m128_f32[1];
+			mBallRects[mBufferIdx].bottom = mBallRects[prevBufferIdx].bottom + ballMovement.m128_f32[1];
+			mBallRects[mBufferIdx].right = mBallRects[prevBufferIdx].right + ballMovement.m128_f32[0];
+			mBallRects[mBufferIdx].left = mBallRects[prevBufferIdx].left + ballMovement.m128_f32[0];
+
 			mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
+
+			ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
+			ballMovement = XMVectorScale(ballMovement, 1.f - t);
+			mBallRects[mBufferIdx].top = mBallRects[mBufferIdx].top + ballMovement.m128_f32[1];
+			mBallRects[mBufferIdx].bottom = mBallRects[mBufferIdx].bottom + ballMovement.m128_f32[1];
+			mBallRects[mBufferIdx].right = mBallRects[mBufferIdx].right + ballMovement.m128_f32[0];
+			mBallRects[mBufferIdx].left = mBallRects[mBufferIdx].left + ballMovement.m128_f32[0];
+
 			mBallVelocity *= BALL_SPEEDUP_SCALAR;
 		}
 	}
