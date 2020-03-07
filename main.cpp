@@ -45,6 +45,8 @@ constexpr auto COUNTDOWN_MS = 1000;
 constexpr auto NUDGE = 0.001f;
 // The scalar used to increase ball velocity on each hit with a paddle.
 constexpr auto BALL_SPEEDUP_SCALAR = 1.2f;
+// The tolerance used to detect whether the thumbstick is not pressed.
+constexpr auto GAMEPAD_DEADZONE = 0.1f;
 
 // =================
 // === Utilities ===
@@ -735,13 +737,13 @@ public:
 		critical_section::scoped_lock lock{ mControllersLock };
 		if (mLeftPlayerController != nullptr) {
 			auto reading = mLeftPlayerController->GetCurrentReading();
-			mLeftPaddleVelocity = reading.LeftThumbstickY * -mPaddleVelocity;
+			mLeftPaddleVelocity = abs(reading.LeftThumbstickY) < GAMEPAD_DEADZONE ? 0.f : reading.LeftThumbstickY * -mPaddleVelocity;
 		} else {
 			mLeftPaddleVelocity = 0.f;
 		}
 		if (mRightPlayerController != nullptr) {
 			auto reading = mRightPlayerController->GetCurrentReading();
-			mRightPaddleVelocity = reading.LeftThumbstickY * -mPaddleVelocity;
+			mRightPaddleVelocity = abs(reading.LeftThumbstickY) < GAMEPAD_DEADZONE ? 0.f : reading.LeftThumbstickY * -mPaddleVelocity;
 		} else {
 			mRightPaddleVelocity = 0.f;
 		}
