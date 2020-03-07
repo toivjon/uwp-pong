@@ -401,6 +401,11 @@ public:
 	void Activated(CoreApplicationView^, IActivatedEventArgs^)
 	{
 		CoreWindow::GetForCurrentThread()->Activate();
+		auto window = CoreWindow::GetForCurrentThread();
+		window->Activate();
+		auto windowBounds = window->Bounds;
+		auto width = windowBounds.Width;
+		auto height = windowBounds.Height;
 	}
 
 	void WindowVisibilityChanged(CoreWindow^, VisibilityChangedEventArgs^ args)
@@ -621,7 +626,12 @@ public:
 
 	void ResizeSwapchain(CoreWindow^ window)
 	{
+		DisplayInformation^ currentDisplayInformation = DisplayInformation::GetForCurrentView();
+		auto dpi = currentDisplayInformation->LogicalDpi;
+
 		auto windowSize = Size(window->Bounds.Width, window->Bounds.Height);
+		windowSize.Width = ConvertDipsToPixels(windowSize.Width, dpi);
+		windowSize.Height = ConvertDipsToPixels(windowSize.Height, dpi);
 
 		// release old render target if any.
 		m2dCtx->SetTarget(nullptr);
@@ -645,6 +655,8 @@ public:
 
 			// specify swap chain configuration.
 			DXGI_SWAP_CHAIN_DESC1 desc = {};
+			desc.Width = windowSize.Width;
+			desc.Height = windowSize.Height;
 			desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 			desc.BufferCount = 2;
 			desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
@@ -667,6 +679,8 @@ public:
 		properties.bitmapOptions |= D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
 		properties.pixelFormat.format = DXGI_FORMAT_B8G8R8A8_UNORM;
 		properties.pixelFormat.alphaMode = D2D1_ALPHA_MODE_IGNORE;
+		properties.dpiX = dpi;
+		properties.dpiY = dpi;
 
 		// query the DXGI version of the back buffer surface.
 		ComPtr<IDXGISurface> dxgiBackBuffer;
@@ -682,6 +696,7 @@ public:
 
 		// assign the created bitmap as Direct2D render target.
 		m2dCtx->SetTarget(bitmap.Get());
+		m2dCtx->SetDpi(dpi, dpi);
 	}
 
 	void GamepadAdded(Object^ o, Gamepad^ gamepad)
