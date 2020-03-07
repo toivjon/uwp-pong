@@ -732,7 +732,19 @@ public:
 
 	void CheckInput()
 	{
-		// TODO
+		critical_section::scoped_lock lock{ mControllersLock };
+		if (mLeftPlayerController != nullptr) {
+			auto reading = mLeftPlayerController->GetCurrentReading();
+			mLeftPaddleVelocity = reading.LeftThumbstickY * -mPaddleVelocity;
+		} else {
+			mLeftPaddleVelocity = 0.f;
+		}
+		if (mRightPlayerController != nullptr) {
+			auto reading = mRightPlayerController->GetCurrentReading();
+			mRightPaddleVelocity = reading.LeftThumbstickY * -mPaddleVelocity;
+		} else {
+			mRightPaddleVelocity = 0.f;
+		}
 	}
 
 	void Update(int dt)
