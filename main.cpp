@@ -724,10 +724,12 @@ public:
 		if (mLeftPlayerController == gamepad) {
 			mLeftPlayerController = nullptr;
 			mLeftPlayerName = LEFT_PLAYER_NAME_PLACEHOLDER;
+			mLeftPaddleVelocity = 0.f;
 			Pause();
 		} else if (mRightPlayerController == gamepad) {
 			mRightPlayerController = nullptr;
 			mRightPlayerName = RIGHT_PLAYER_NAME_PLACEHOLDER;
+			mRightPaddleVelocity = 0.f;
 			Pause();
 		}
 	}
@@ -743,14 +745,10 @@ public:
 		if (mLeftPlayerController != nullptr) {
 			auto reading = mLeftPlayerController->GetCurrentReading();
 			mLeftPaddleVelocity = abs(reading.LeftThumbstickY) < GAMEPAD_DEADZONE ? 0.f : reading.LeftThumbstickY * -mPaddleVelocity;
-		} else {
-			mLeftPaddleVelocity = 0.f;
 		}
 		if (mRightPlayerController != nullptr) {
 			auto reading = mRightPlayerController->GetCurrentReading();
 			mRightPaddleVelocity = abs(reading.LeftThumbstickY) < GAMEPAD_DEADZONE ? 0.f : reading.LeftThumbstickY * -mPaddleVelocity;
-		} else {
-			mRightPaddleVelocity = 0.f;
 		}
 	}
 
