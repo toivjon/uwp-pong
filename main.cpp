@@ -295,8 +295,6 @@ public:
 
 	void InitializeGame()
 	{
-		mLeftPlayerName = LEFT_PLAYER_NAME_PLACEHOLDER;
-		mRightPlayerName = RIGHT_PLAYER_NAME_PLACEHOLDER;
 		RandomizeBallDirection();
 	}
 
@@ -979,8 +977,8 @@ private:
 	uint8_t mLeftPoints;
 	uint8_t mRightPoints;
 
-	std::wstring mLeftPlayerName;
-	std::wstring mRightPlayerName;
+	std::wstring mLeftPlayerName = LEFT_PLAYER_NAME_PLACEHOLDER;
+	std::wstring mRightPlayerName = RIGHT_PLAYER_NAME_PLACEHOLDER;
 
 	Gamepad^			mLeftPlayerController;
 	Gamepad^			mRightPlayerController;
