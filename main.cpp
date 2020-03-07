@@ -48,6 +48,10 @@ constexpr auto NUDGE = 0.001f;
 constexpr auto BALL_SPEEDUP_SCALAR = 1.2f;
 // The tolerance used to detect whether the thumbstick is not pressed.
 constexpr auto GAMEPAD_DEADZONE = 0.1f;
+// The amount of power to put into gamepad vibration when ball hits paddle (0.f - 1.f).
+constexpr auto GAMEPAD_FEEDBACK_STRENGTH = 0.75f;
+// The duration of the gamepad vibration when ball hits paddle.
+constexpr auto GAMEPAD_FEEDBACK_DURATION_MS = 200;
 
 // =================
 // === Utilities ===
@@ -871,6 +875,22 @@ public:
 			mBallRects[mBufferIdx].left = mBallRects[mBufferIdx].left + ballMovement.m128_f32[0];
 
 			mBallVelocity *= BALL_SPEEDUP_SCALAR;
+
+			critical_section::scoped_lock lock{ mControllersLock };
+			if (mRightPlayerController != nullptr) {
+				auto vibration = mRightPlayerController->Vibration;
+				vibration.LeftMotor = GAMEPAD_FEEDBACK_STRENGTH;
+				vibration.RightMotor = GAMEPAD_FEEDBACK_STRENGTH;
+				mRightPlayerController->Vibration = vibration;
+				auto controller = mRightPlayerController;
+				create_task([controller] {
+					std::this_thread::sleep_for(std::chrono::milliseconds(GAMEPAD_FEEDBACK_DURATION_MS));
+					auto vibration = controller->Vibration;
+					vibration.LeftMotor = 0.f;
+					vibration.RightMotor = 0.f;
+					controller->Vibration = vibration;
+					});
+			}
 		} else if (Collides(mBallRects[mBufferIdx], mLeftPaddleRects[mBufferIdx])) {
 			float nx, ny;
 			auto t = SweptAABB(mBallRects[prevBufferIdx], mLeftPaddleRects[mBufferIdx], ballMovement.m128_f32[0], ballMovement.m128_f32[1], nx, ny);
@@ -892,6 +912,22 @@ public:
 			mBallRects[mBufferIdx].left = mBallRects[mBufferIdx].left + ballMovement.m128_f32[0];
 
 			mBallVelocity *= BALL_SPEEDUP_SCALAR;
+
+			critical_section::scoped_lock lock{ mControllersLock };
+			if (mLeftPlayerController != nullptr) {
+				auto vibration = mLeftPlayerController->Vibration;
+				vibration.LeftMotor = GAMEPAD_FEEDBACK_STRENGTH;
+				vibration.RightMotor = GAMEPAD_FEEDBACK_STRENGTH;
+				mLeftPlayerController->Vibration = vibration;
+				auto controller = mLeftPlayerController;
+				create_task([controller] {
+					std::this_thread::sleep_for(std::chrono::milliseconds(GAMEPAD_FEEDBACK_DURATION_MS));
+					auto vibration = controller->Vibration;
+					vibration.LeftMotor = 0.f;
+					vibration.RightMotor = 0.f;
+					controller->Vibration = vibration;
+				});
+			}
 		}
 	}
 
