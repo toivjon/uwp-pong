@@ -6,6 +6,7 @@
 #include <dwrite.h>
 #include <dxgi1_6.h>
 #include <DirectXMath.h>
+#include <ppltasks.h>
 #include <random>
 #include <string>
 #include <wrl.h>
@@ -706,10 +707,12 @@ public:
 		critical_section::scoped_lock lock{ mControllersLock };
 		if (mLeftPlayerController == nullptr) {
 			mLeftPlayerController = gamepad;
-			mLeftPlayerName = gamepad->User->NonRoamableId->Data();
+			auto user = gamepad->User;
+			mLeftPlayerName = ((Platform::String^)create_task(user->GetPropertyAsync(KnownUserProperties::AccountName)).get())->Data();
 		} else if (mRightPlayerController == nullptr) {
 			mRightPlayerController = gamepad;
-			mRightPlayerName = gamepad->User->NonRoamableId->Data();
+			auto user = gamepad->User;
+			mRightPlayerName = ((Platform::String^)create_task(user->GetPropertyAsync(KnownUserProperties::AccountName)).get())->Data();
 		}
 	}
 
