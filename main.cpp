@@ -126,6 +126,43 @@ inline D2D1_RECT_F MergeAABB(const D2D1_RECT_F& a, const D2D1_RECT_F& b) {
 	return aabb;
 }
 
+inline bool Intersect(const D2D1_RECT_F& a, const D2D1_RECT_F& b, const XMVECTOR& av, const XMVECTOR& bv, float& tmin) {
+	tmin = 0.f;
+	if (Collides(a, b)) {
+		return true;
+	}
+
+	auto v = XMVectorSubtract(bv, av);
+	auto tmax = 1.f;
+	for (auto i = 0u; i < 2; i++) {
+		auto amax = (i == 0 ? a.right : a.bottom);
+		auto amin = (i == 0 ? a.left : a.top);
+		auto bmax = (i == 0 ? b.right : b.bottom);
+		auto bmin = (i == 0 ? b.left : b.top);
+		if (v.m128_f32[i] <= 0.f) {
+			if (bmax < amin) return false;
+			if (amax < bmin) tmin = max((amax - bmin) / v.m128_f32[i], tmin);
+			if (bmax > amin) tmax = min((amin - bmax) / v.m128_f32[i], tmax);
+		}
+		else if (v.m128_f32[i] > 0.f) {
+			if (bmin > amax) return false;
+			if (bmax < amin) tmin = max((amin - bmax) / v.m128_f32[i], tmin);
+			if (amax > bmin) tmax = min((amax - bmin) / v.m128_f32[i], tmax);
+		}
+		if (tmin > tmax) return false;
+	}
+	return true;
+}
+
+inline D2D1_RECT_F MoveAABB(const D2D1_RECT_F& aabb, const XMVECTOR& movement) {
+	return {
+		aabb.left   + movement.m128_f32[0],
+		aabb.top    + movement.m128_f32[1],
+		aabb.right  + movement.m128_f32[0],
+		aabb.bottom + movement.m128_f32[1]
+	};
+}
+
 inline float SweptAABB(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float vx, float vy, float& nx, float& ny) {
 	float xInvEntry, xInvExit, xEntry, xExit;
 	if (vx > 0.f) {
@@ -852,27 +889,31 @@ public:
 			mBallRects[mBufferIdx].left = mBallRects[mBufferIdx].left + ballMovement.m128_f32[0];
 		}
 
-		if (Collides(mBallRects[mBufferIdx], mRightPaddleRects[mBufferIdx])) {
-			float nx, ny;
-			auto t = SweptAABB(mBallRects[prevBufferIdx], mRightPaddleRects[mBufferIdx], ballMovement.m128_f32[0], ballMovement.m128_f32[1], nx, ny);
+		auto& oldBallPos = mBallRects[prevBufferIdx];
+		auto& oldRightPaddlePos = mRightPaddleRects[prevBufferIdx];
+		auto& oldLeftPaddlePos = mLeftPaddleRects[prevBufferIdx];
 
-			ballMovement = XMVectorScale(ballMovement, t);
-			mBallRects[mBufferIdx].top = mBallRects[prevBufferIdx].top + ballMovement.m128_f32[1];
-			mBallRects[mBufferIdx].bottom = mBallRects[prevBufferIdx].bottom + ballMovement.m128_f32[1];
-			mBallRects[mBufferIdx].right = mBallRects[prevBufferIdx].right + ballMovement.m128_f32[0];
-			mBallRects[mBufferIdx].left = mBallRects[prevBufferIdx].left + ballMovement.m128_f32[0];
+		auto rightPaddleMovement = XMVectorSet(0.f, mRightPaddleVelocity, 0.f, 0.f);
+		auto leftPaddleMovement = XMVectorSet(0.f, mLeftPaddleVelocity, 0.f, 0.f);
 
-			if (abs(nx) > 0.f) mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
-			if (abs(ny) > 0.f) mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
+		float tmin = 0.f;
+		if (Intersect(oldBallPos, oldRightPaddlePos, ballMovement, rightPaddleMovement, tmin)) {
+			// move the ball as far as it reaches the paddle.
+			ballMovement = XMVectorScale(ballMovement, tmin - NUDGE);
+			mBallRects[mBufferIdx] = MoveAABB(oldBallPos, ballMovement);
 
-			ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
-			ballMovement = XMVectorScale(ballMovement, 1.f - t);
-			mBallRects[mBufferIdx].top = mBallRects[mBufferIdx].top + ballMovement.m128_f32[1];
-			mBallRects[mBufferIdx].bottom = mBallRects[mBufferIdx].bottom + ballMovement.m128_f32[1];
-			mBallRects[mBufferIdx].right = mBallRects[mBufferIdx].right + ballMovement.m128_f32[0];
-			mBallRects[mBufferIdx].left = mBallRects[mBufferIdx].left + ballMovement.m128_f32[0];
-
+			// let's increase ball velocity on each paddle hit.
 			mBallVelocity *= BALL_SPEEDUP_SCALAR;
+
+			// TODO check which side we hit --> i.e. resolve hit normal direction.
+			// if (abs(nx) > 0.f) mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
+			// if (abs(ny) > 0.f) mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
+			mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
+
+			// move the ball into reflected direction as far as there's time left.
+			ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
+			ballMovement = XMVectorScale(ballMovement, 1.f - tmin + NUDGE);
+			mBallRects[mBufferIdx] = MoveAABB(mBallRects[mBufferIdx], ballMovement);
 
 			critical_section::scoped_lock lock{ mControllersLock };
 			if (mRightPlayerController != nullptr) {
@@ -889,27 +930,23 @@ public:
 					controller->Vibration = vibration;
 					});
 			}
-		} else if (Collides(mBallRects[mBufferIdx], mLeftPaddleRects[mBufferIdx])) {
-			float nx, ny;
-			auto t = SweptAABB(mBallRects[prevBufferIdx], mLeftPaddleRects[mBufferIdx], ballMovement.m128_f32[0], ballMovement.m128_f32[1], nx, ny);
+		} else if (Intersect(oldBallPos, oldLeftPaddlePos, ballMovement, leftPaddleMovement, tmin)) {
+			// move the ball as far as it reaches the paddle.
+			ballMovement = XMVectorScale(ballMovement, tmin - NUDGE);
+			mBallRects[mBufferIdx] = MoveAABB(oldBallPos, ballMovement);
 
-			ballMovement = XMVectorScale(ballMovement, t);
-			mBallRects[mBufferIdx].top = mBallRects[prevBufferIdx].top + ballMovement.m128_f32[1];
-			mBallRects[mBufferIdx].bottom = mBallRects[prevBufferIdx].bottom + ballMovement.m128_f32[1];
-			mBallRects[mBufferIdx].right = mBallRects[prevBufferIdx].right + ballMovement.m128_f32[0];
-			mBallRects[mBufferIdx].left = mBallRects[prevBufferIdx].left + ballMovement.m128_f32[0];
-
-			if (abs(nx) > 0.f) mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
-			if (abs(ny) > 0.f) mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
-
-			ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
-			ballMovement = XMVectorScale(ballMovement, 1.f - t);
-			mBallRects[mBufferIdx].top = mBallRects[mBufferIdx].top + ballMovement.m128_f32[1];
-			mBallRects[mBufferIdx].bottom = mBallRects[mBufferIdx].bottom + ballMovement.m128_f32[1];
-			mBallRects[mBufferIdx].right = mBallRects[mBufferIdx].right + ballMovement.m128_f32[0];
-			mBallRects[mBufferIdx].left = mBallRects[mBufferIdx].left + ballMovement.m128_f32[0];
-
+			// let's increase ball velocity on each paddle hit.
 			mBallVelocity *= BALL_SPEEDUP_SCALAR;
+
+			// TODO check which side we hit --> i.e. resolve hit normal direction.
+			// if (abs(nx) > 0.f) mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
+			// if (abs(ny) > 0.f) mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
+			mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
+
+			// move the ball into reflected direction as far as there's time left.
+			ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
+			ballMovement = XMVectorScale(ballMovement, 1.f - tmin + NUDGE);
+			mBallRects[mBufferIdx] = MoveAABB(mBallRects[mBufferIdx], ballMovement);
 
 			critical_section::scoped_lock lock{ mControllersLock };
 			if (mLeftPlayerController != nullptr) {
@@ -924,7 +961,7 @@ public:
 					vibration.LeftMotor = 0.f;
 					vibration.RightMotor = 0.f;
 					controller->Vibration = vibration;
-				});
+					});
 			}
 		}
 	}
