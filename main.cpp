@@ -831,13 +831,9 @@ public:
 		mBufferIdx = (mBufferIdx + 1) % 2;
 		auto prevBufferIdx = (mBufferIdx + 1) % 2;
 
-		// apply movement for the left paddle.
-		mLeftPaddleRects[mBufferIdx].top = mLeftPaddleRects[prevBufferIdx].top + mLeftPaddleVelocity;
-		mLeftPaddleRects[mBufferIdx].bottom = mLeftPaddleRects[prevBufferIdx].bottom + mLeftPaddleVelocity;
-
-		// apply movement for the right paddle.
-		mRightPaddleRects[mBufferIdx].top = mRightPaddleRects[prevBufferIdx].top + mRightPaddleVelocity;
-		mRightPaddleRects[mBufferIdx].bottom = mRightPaddleRects[prevBufferIdx].bottom + mRightPaddleVelocity;
+		// apply movement to paddles.
+		mLeftPaddleRects[mBufferIdx] = MoveAABB(mLeftPaddleRects[prevBufferIdx], XMVectorSet(0.f, mLeftPaddleVelocity, 0.f, 0.f));
+		mRightPaddleRects[mBufferIdx] = MoveAABB(mRightPaddleRects[prevBufferIdx], XMVectorSet(0.f, mRightPaddleVelocity, 0.f, 0.f));
 
 		// apply movement for the ball.
 		auto ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
