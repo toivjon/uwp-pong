@@ -194,12 +194,10 @@ inline float SweptAABB(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float vx, flo
 
 inline bool Intersect(const D2D1_RECT_F& a, const D2D1_RECT_F& b, const XMVECTOR& av, const XMVECTOR& bv, float& tmin, XMVECTOR& n) {
 	tmin = 0.f;
-	/*
 	if (Collides(a, b)) {
 		SweptAABB(a, b, av.m128_f32[0], av.m128_f32[1], n.m128_f32[0], n.m128_f32[1]);
 		return true;
 	}
-	*/
 
 	auto tmax = 1.f;
 	auto v = XMVectorSubtract(bv, av);
@@ -832,8 +830,10 @@ public:
 		auto prevBufferIdx = (mBufferIdx + 1) % 2;
 
 		// apply movement to paddles.
-		mLeftPaddleRects[mBufferIdx] = MoveAABB(mLeftPaddleRects[prevBufferIdx], XMVectorSet(0.f, mLeftPaddleVelocity, 0.f, 0.f));
-		mRightPaddleRects[mBufferIdx] = MoveAABB(mRightPaddleRects[prevBufferIdx], XMVectorSet(0.f, mRightPaddleVelocity, 0.f, 0.f));
+		auto leftPaddleMovement = XMVectorSet(0.f, mLeftPaddleVelocity, 0.f, 0.f);
+		auto rightPaddleMovement = XMVectorSet(0.f, mRightPaddleVelocity, 0.f, 0.f);
+		mLeftPaddleRects[mBufferIdx] = MoveAABB(mLeftPaddleRects[prevBufferIdx], leftPaddleMovement);
+		mRightPaddleRects[mBufferIdx] = MoveAABB(mRightPaddleRects[prevBufferIdx], rightPaddleMovement);
 
 		// check that the left paddle stays between the top and bottom wall.
 		if (Collides(mLeftPaddleRects[mBufferIdx], mBottomWallRect)) {
@@ -857,145 +857,112 @@ public:
 			mRightPaddleRects[mBufferIdx].top = mTopWallRect.bottom;
 		}
 
-		// apply movement for the ball.
-		auto ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
-		mBallRects[mBufferIdx].top = mBallRects[prevBufferIdx].top + ballMovement.m128_f32[1];
-		mBallRects[mBufferIdx].bottom = mBallRects[prevBufferIdx].bottom + ballMovement.m128_f32[1];
-		mBallRects[mBufferIdx].right = mBallRects[prevBufferIdx].right + ballMovement.m128_f32[0];
-		mBallRects[mBufferIdx].left = mBallRects[prevBufferIdx].left + ballMovement.m128_f32[0];
+		auto tBall = 1.f;
+		auto ballPosition = mBallRects[prevBufferIdx];
+		while (tBall > 0.f) {
+			// create a movement vector scaled with the time left for the ball.
+			auto movement = XMVectorScale(mBallDirection, mBallVelocity);
+			movement = XMVectorScale(movement, tBall);
 
-		// perfom a sweep collision test by starting with the broad phase and then narrowing it.
-		auto ballMovementAABB = MergeAABB(mBallRects[mBufferIdx], mBallRects[prevBufferIdx]);
-		if (Collides(ballMovementAABB, mTopWallRect)) {
-			float nx, ny;
-			auto t = SweptAABB(mBallRects[prevBufferIdx], mTopWallRect, ballMovement.m128_f32[0], ballMovement.m128_f32[1], nx, ny);
+			auto hitTime = 0.f;
+			auto hitNormal = XMVectorSet(0.f, 0.f, 0.f, 0.f);
+			if (mBallDirection.m128_f32[1] < 0.f && Intersect(ballPosition, mTopWallRect, movement, XMVECTOR(), hitTime, hitNormal)) {
+				// move the ball straight to the hit point.
+				movement = XMVectorScale(movement, hitTime);
+				ballPosition = MoveAABB(ballPosition, movement);
 
-			ballMovement = XMVectorScale(ballMovement, t);
-			mBallRects[mBufferIdx].top = mBallRects[prevBufferIdx].top + ballMovement.m128_f32[1];
-			mBallRects[mBufferIdx].bottom = mBallRects[prevBufferIdx].bottom + ballMovement.m128_f32[1];
-			mBallRects[mBufferIdx].right = mBallRects[prevBufferIdx].right + ballMovement.m128_f32[0];
-			mBallRects[mBufferIdx].left = mBallRects[prevBufferIdx].left + ballMovement.m128_f32[0];
+				// inverse balls vertical movement direction.
+				mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
 
-			mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
+				// apply a small nudge to make the ball to leave collision area.
+				movement = XMVectorScale(mBallDirection, mBallVelocity);
+				movement = XMVectorScale(movement, NUDGE);
+				ballPosition = MoveAABB(ballPosition, movement);
 
-			ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
-			ballMovement = XMVectorScale(ballMovement, 1.f - t);
-			mBallRects[mBufferIdx].top = mBallRects[mBufferIdx].top + ballMovement.m128_f32[1];
-			mBallRects[mBufferIdx].bottom = mBallRects[mBufferIdx].bottom + ballMovement.m128_f32[1];
-			mBallRects[mBufferIdx].right = mBallRects[mBufferIdx].right + ballMovement.m128_f32[0];
-			mBallRects[mBufferIdx].left = mBallRects[mBufferIdx].left + ballMovement.m128_f32[0];
-		} else if (Collides(ballMovementAABB, mBottomWallRect)) {
-			float nx, ny;
-			auto t = SweptAABB(mBallRects[prevBufferIdx], mBottomWallRect, ballMovement.m128_f32[0], ballMovement.m128_f32[1], nx, ny);
+				// decrease the amount of usable time for ball movement.
+				tBall -= hitTime;
+			} else if (mBallDirection.m128_f32[1] > 0.f && Intersect(ballPosition, mBottomWallRect, movement, XMVECTOR(), hitTime, hitNormal)) {
+				// move the ball straight to the hit point.
+				movement = XMVectorScale(movement, hitTime);
+				ballPosition = MoveAABB(ballPosition, movement);
 
-			ballMovement = XMVectorScale(ballMovement, t);
-			mBallRects[mBufferIdx].top = mBallRects[prevBufferIdx].top + ballMovement.m128_f32[1];
-			mBallRects[mBufferIdx].bottom = mBallRects[prevBufferIdx].bottom + ballMovement.m128_f32[1];
-			mBallRects[mBufferIdx].right = mBallRects[prevBufferIdx].right + ballMovement.m128_f32[0];
-			mBallRects[mBufferIdx].left = mBallRects[prevBufferIdx].left + ballMovement.m128_f32[0];
+				// inverse balls vertical movement direction.
+				mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
 
-			mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
+				// apply a small nudge to make the ball to leave collision area.
+				movement = XMVectorScale(mBallDirection, mBallVelocity);
+				movement = XMVectorScale(movement, NUDGE);
+				ballPosition = MoveAABB(ballPosition, movement);
 
-			ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
-			ballMovement = XMVectorScale(ballMovement, 1.f - t);
-			mBallRects[mBufferIdx].top = mBallRects[mBufferIdx].top + ballMovement.m128_f32[1];
-			mBallRects[mBufferIdx].bottom = mBallRects[mBufferIdx].bottom + ballMovement.m128_f32[1];
-			mBallRects[mBufferIdx].right = mBallRects[mBufferIdx].right + ballMovement.m128_f32[0];
-			mBallRects[mBufferIdx].left = mBallRects[mBufferIdx].left + ballMovement.m128_f32[0];
-		}
+				// decrease the amount of usable time for ball movement.
+				tBall -= hitTime;
+			} else if (mBallDirection.m128_f32[0] < 0.f && Intersect(ballPosition, mLeftPaddleRects[prevBufferIdx], movement, leftPaddleMovement, hitTime, hitNormal)) {
+				// move the ball straight to the hit point.
+				movement = XMVectorScale(movement, hitTime);
+				ballPosition = MoveAABB(ballPosition, movement);
 
-		auto& oldBallPos = mBallRects[prevBufferIdx];
-		auto& oldRightPaddlePos = mRightPaddleRects[prevBufferIdx];
-		auto& oldLeftPaddlePos = mLeftPaddleRects[prevBufferIdx];
+				// inverse balls horizontal movement direction.
+				mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
 
-		auto rightPaddleMovement = XMVectorSet(0.f, mRightPaddleVelocity, 0.f, 0.f);
-		auto leftPaddleMovement = XMVectorSet(0.f, mLeftPaddleVelocity, 0.f, 0.f);
+				// let's increase ball velocity on each paddle hit.
+				mBallVelocity *= BALL_SPEEDUP_SCALAR;
 
-		float tmin = 0.f;
-		XMVECTOR hitN = XMVectorSet(0.f, 0.f, 0.f, 0.f);
-		if (Intersect(oldBallPos, oldRightPaddlePos, ballMovement, rightPaddleMovement, tmin, hitN)) {
-			auto ballX = std::to_wstring(oldBallPos.left + (oldBallPos.right - oldBallPos.left) / 2);
-			auto ballY = std::to_wstring(oldBallPos.top + (oldBallPos.bottom - oldBallPos.top) / 2);
-			auto normX = std::to_wstring(hitN.m128_f32[0]);
-			auto normY = std::to_wstring(hitN.m128_f32[1]);
-			auto text = std::wstring(L"Intersect with right paddle: " + ballX + L" x " + ballY + L" n: " + normX + L" x " + normY + L"\n");
-			OutputDebugString(text.c_str());
+				// decrease the amount of usable time for ball movement.
+				tBall -= hitTime;
 
-			// move the ball as far as it reaches the paddle.
-			ballMovement = XMVectorScale(ballMovement, tmin);
-			mBallRects[mBufferIdx] = MoveAABB(oldBallPos, ballMovement);
+				// vibrate left player controller.
+				critical_section::scoped_lock lock{ mControllersLock };
+				if (mLeftPlayerController != nullptr) {
+					auto vibration = mLeftPlayerController->Vibration;
+					vibration.LeftMotor = GAMEPAD_FEEDBACK_STRENGTH;
+					vibration.RightMotor = GAMEPAD_FEEDBACK_STRENGTH;
+					mLeftPlayerController->Vibration = vibration;
+					auto controller = mLeftPlayerController;
+					create_task([controller] {
+						std::this_thread::sleep_for(std::chrono::milliseconds(GAMEPAD_FEEDBACK_DURATION_MS));
+						auto vibration = controller->Vibration;
+						vibration.LeftMotor = 0.f;
+						vibration.RightMotor = 0.f;
+						controller->Vibration = vibration;
+						});
+				}
+			} else if (mBallDirection.m128_f32[0] > 0.f && Intersect(ballPosition, mRightPaddleRects[prevBufferIdx], movement, rightPaddleMovement, hitTime, hitNormal)) {
+				// move the ball straight to the hit point.
+				movement = XMVectorScale(movement, hitTime);
+				ballPosition = MoveAABB(ballPosition, movement);
 
-			// let's increase ball velocity on each paddle hit.
-			mBallVelocity *= BALL_SPEEDUP_SCALAR;
+				// inverse balls horizontal movement direction.
+				mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
 
-			// TODO check which side we hit --> i.e. resolve hit normal direction.
-			if (abs(hitN.m128_f32[0]) > 0.f) mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
-			if (abs(hitN.m128_f32[1]) > 0.f) mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
+				// let's increase ball velocity on each paddle hit.
+				mBallVelocity *= BALL_SPEEDUP_SCALAR;
 
-			// move the ball into reflected direction as far as there's time left.
-			ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
-			ballMovement = XMVectorScale(ballMovement, 1.f - tmin + 0.1f);
-			mBallRects[mBufferIdx] = MoveAABB(mBallRects[mBufferIdx], ballMovement);
+				// decrease the amount of usable time for ball movement.
+				tBall -= hitTime;
 
-			// mBallDirection = XMVECTOR(); // TODO halt!
-
-			critical_section::scoped_lock lock{ mControllersLock };
-			if (mRightPlayerController != nullptr) {
-				auto vibration = mRightPlayerController->Vibration;
-				vibration.LeftMotor = GAMEPAD_FEEDBACK_STRENGTH;
-				vibration.RightMotor = GAMEPAD_FEEDBACK_STRENGTH;
-				mRightPlayerController->Vibration = vibration;
-				auto controller = mRightPlayerController;
-				create_task([controller] {
-					std::this_thread::sleep_for(std::chrono::milliseconds(GAMEPAD_FEEDBACK_DURATION_MS));
-					auto vibration = controller->Vibration;
-					vibration.LeftMotor = 0.f;
-					vibration.RightMotor = 0.f;
-					controller->Vibration = vibration;
-					});
-			}
-		} else if (Intersect(oldBallPos, oldLeftPaddlePos, ballMovement, leftPaddleMovement, tmin, hitN)) {
-			auto ballX = std::to_wstring(oldBallPos.left + (oldBallPos.right - oldBallPos.left) / 2);
-			auto ballY = std::to_wstring(oldBallPos.top + (oldBallPos.bottom - oldBallPos.top) / 2);
-			auto normX = std::to_wstring(hitN.m128_f32[0]);
-			auto normY = std::to_wstring(hitN.m128_f32[1]);
-			auto text = std::wstring(L"Intersect with left paddle: " + ballX + L" x " + ballY + L" n: " + normX + L" x " + normY + L"\n");
-			OutputDebugString(text.c_str());
-
-			// move the ball as far as it reaches the paddle.
-			ballMovement = XMVectorScale(ballMovement, tmin);
-			mBallRects[mBufferIdx] = MoveAABB(oldBallPos, ballMovement);
-
-			// let's increase ball velocity on each paddle hit.
-			mBallVelocity *= BALL_SPEEDUP_SCALAR;
-
-			// TODO check which side we hit --> i.e. resolve hit normal direction.
-			if (abs(hitN.m128_f32[0]) > 0.f) mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
-			if (abs(hitN.m128_f32[1]) > 0.f) mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
-
-			// move the ball into reflected direction as far as there's time left.
-			ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
-			ballMovement = XMVectorScale(ballMovement, 1.f); //  -tmin + 0.1f);
-			mBallRects[mBufferIdx] = MoveAABB(mBallRects[mBufferIdx], ballMovement);
-
-			// mBallDirection = XMVECTOR(); // TODO halt!
-
-			critical_section::scoped_lock lock{ mControllersLock };
-			if (mLeftPlayerController != nullptr) {
-				auto vibration = mLeftPlayerController->Vibration;
-				vibration.LeftMotor = GAMEPAD_FEEDBACK_STRENGTH;
-				vibration.RightMotor = GAMEPAD_FEEDBACK_STRENGTH;
-				mLeftPlayerController->Vibration = vibration;
-				auto controller = mLeftPlayerController;
-				create_task([controller] {
-					std::this_thread::sleep_for(std::chrono::milliseconds(GAMEPAD_FEEDBACK_DURATION_MS));
-					auto vibration = controller->Vibration;
-					vibration.LeftMotor = 0.f;
-					vibration.RightMotor = 0.f;
-					controller->Vibration = vibration;
-					});
+				// vibrate right player controller.
+				critical_section::scoped_lock lock{ mControllersLock };
+				if (mRightPlayerController != nullptr) {
+					auto vibration = mRightPlayerController->Vibration;
+					vibration.LeftMotor = GAMEPAD_FEEDBACK_STRENGTH;
+					vibration.RightMotor = GAMEPAD_FEEDBACK_STRENGTH;
+					mRightPlayerController->Vibration = vibration;
+					auto controller = mRightPlayerController;
+					create_task([controller] {
+						std::this_thread::sleep_for(std::chrono::milliseconds(GAMEPAD_FEEDBACK_DURATION_MS));
+						auto vibration = controller->Vibration;
+						vibration.LeftMotor = 0.f;
+						vibration.RightMotor = 0.f;
+						controller->Vibration = vibration;
+						});
+				}
+			} else {
+				// move the ball as far as possible.
+				ballPosition = MoveAABB(ballPosition, movement);
+				tBall = 0.f;
 			}
 		}
+		mBallRects[mBufferIdx] = ballPosition;
 
 		// check whether the ball has reached a goal.
 		if (Contains(mLeftGoalRect, mBallRects[mBufferIdx])) {
