@@ -846,13 +846,6 @@ public:
 			mLeftPaddleRects[mBufferIdx].top = mTopWallRect.bottom;
 		}
 
-		// apply movement for the ball.
-		auto ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
-		mBallRects[mBufferIdx].top = mBallRects[prevBufferIdx].top + ballMovement.m128_f32[1];
-		mBallRects[mBufferIdx].bottom = mBallRects[prevBufferIdx].bottom + ballMovement.m128_f32[1];
-		mBallRects[mBufferIdx].right = mBallRects[prevBufferIdx].right + ballMovement.m128_f32[0];
-		mBallRects[mBufferIdx].left = mBallRects[prevBufferIdx].left + ballMovement.m128_f32[0];
-
 		// check that the right paddle stays between the top and bottom wall.
 		if (Collides(mRightPaddleRects[mBufferIdx], mBottomWallRect)) {
 			auto paddleHeight = mRightPaddleRects[mBufferIdx].bottom - mRightPaddleRects[mBufferIdx].top;
@@ -863,6 +856,13 @@ public:
 			mRightPaddleRects[mBufferIdx].bottom = mTopWallRect.bottom + paddleHeight;
 			mRightPaddleRects[mBufferIdx].top = mTopWallRect.bottom;
 		}
+
+		// apply movement for the ball.
+		auto ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
+		mBallRects[mBufferIdx].top = mBallRects[prevBufferIdx].top + ballMovement.m128_f32[1];
+		mBallRects[mBufferIdx].bottom = mBallRects[prevBufferIdx].bottom + ballMovement.m128_f32[1];
+		mBallRects[mBufferIdx].right = mBallRects[prevBufferIdx].right + ballMovement.m128_f32[0];
+		mBallRects[mBufferIdx].left = mBallRects[prevBufferIdx].left + ballMovement.m128_f32[0];
 
 		// check whether the ball has reached a goal.
 		// TODO move these checks to last to first check whether a paddle intersect ball movement ;)
