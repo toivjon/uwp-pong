@@ -835,13 +835,6 @@ public:
 		mLeftPaddleRects[mBufferIdx] = MoveAABB(mLeftPaddleRects[prevBufferIdx], XMVectorSet(0.f, mLeftPaddleVelocity, 0.f, 0.f));
 		mRightPaddleRects[mBufferIdx] = MoveAABB(mRightPaddleRects[prevBufferIdx], XMVectorSet(0.f, mRightPaddleVelocity, 0.f, 0.f));
 
-		// apply movement for the ball.
-		auto ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
-		mBallRects[mBufferIdx].top = mBallRects[prevBufferIdx].top + ballMovement.m128_f32[1];
-		mBallRects[mBufferIdx].bottom = mBallRects[prevBufferIdx].bottom + ballMovement.m128_f32[1];
-		mBallRects[mBufferIdx].right = mBallRects[prevBufferIdx].right + ballMovement.m128_f32[0];
-		mBallRects[mBufferIdx].left = mBallRects[prevBufferIdx].left + ballMovement.m128_f32[0];
-
 		// check that the left paddle stays between the top and bottom wall.
 		if (Collides(mLeftPaddleRects[mBufferIdx], mBottomWallRect)) {
 			auto paddleHeight = mLeftPaddleRects[mBufferIdx].bottom - mLeftPaddleRects[mBufferIdx].top;
@@ -852,6 +845,13 @@ public:
 			mLeftPaddleRects[mBufferIdx].bottom = mTopWallRect.bottom + paddleHeight;
 			mLeftPaddleRects[mBufferIdx].top = mTopWallRect.bottom;
 		}
+
+		// apply movement for the ball.
+		auto ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
+		mBallRects[mBufferIdx].top = mBallRects[prevBufferIdx].top + ballMovement.m128_f32[1];
+		mBallRects[mBufferIdx].bottom = mBallRects[prevBufferIdx].bottom + ballMovement.m128_f32[1];
+		mBallRects[mBufferIdx].right = mBallRects[prevBufferIdx].right + ballMovement.m128_f32[0];
+		mBallRects[mBufferIdx].left = mBallRects[prevBufferIdx].left + ballMovement.m128_f32[0];
 
 		// check that the right paddle stays between the top and bottom wall.
 		if (Collides(mRightPaddleRects[mBufferIdx], mBottomWallRect)) {
