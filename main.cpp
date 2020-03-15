@@ -864,20 +864,6 @@ public:
 		mBallRects[mBufferIdx].right = mBallRects[prevBufferIdx].right + ballMovement.m128_f32[0];
 		mBallRects[mBufferIdx].left = mBallRects[prevBufferIdx].left + ballMovement.m128_f32[0];
 
-		// check whether the ball has reached a goal.
-		// TODO move these checks to last to first check whether a paddle intersect ball movement ;)
-		if (Contains(mLeftGoalRect, mBallRects[mBufferIdx])) {
-			mRightPoints++;
-			mCountdown = COUNTDOWN_MS;
-			ResetMovingObjects();
-			RandomizeBallDirection();
-		} else if (Contains(mRightGoalRect, mBallRects[mBufferIdx])) {
-			mLeftPoints++;
-			mCountdown = COUNTDOWN_MS;
-			ResetMovingObjects();
-			RandomizeBallDirection();
-		}
-
 		// perfom a sweep collision test by starting with the broad phase and then narrowing it.
 		auto ballMovementAABB = MergeAABB(mBallRects[mBufferIdx], mBallRects[prevBufferIdx]);
 		if (Collides(ballMovementAABB, mTopWallRect)) {
@@ -1009,6 +995,19 @@ public:
 					controller->Vibration = vibration;
 					});
 			}
+		}
+
+		// check whether the ball has reached a goal.
+		if (Contains(mLeftGoalRect, mBallRects[mBufferIdx])) {
+			mRightPoints++;
+			mCountdown = COUNTDOWN_MS;
+			ResetMovingObjects();
+			RandomizeBallDirection();
+		} else if (Contains(mRightGoalRect, mBallRects[mBufferIdx])) {
+			mLeftPoints++;
+			mCountdown = COUNTDOWN_MS;
+			ResetMovingObjects();
+			RandomizeBallDirection();
 		}
 	}
 
