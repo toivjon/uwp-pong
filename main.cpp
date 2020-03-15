@@ -822,6 +822,7 @@ public:
 
 	void Update(int dt)
 	{
+		// don't update anything while there's still countdown millis left.
 		mCountdown = max(0, mCountdown - dt);
 		if (mCountdown > 0) {
 			return;
