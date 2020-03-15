@@ -126,49 +126,19 @@ inline D2D1_RECT_F MergeAABB(const D2D1_RECT_F& a, const D2D1_RECT_F& b) {
 	return aabb;
 }
 
-inline bool Intersect(const D2D1_RECT_F& a, const D2D1_RECT_F& b, const XMVECTOR& av, const XMVECTOR& bv, float& tmin) {
-	tmin = 0.f;
-	if (Collides(a, b)) {
-		return true;
-	}
-
-	auto v = XMVectorSubtract(bv, av);
-	auto tmax = 1.f;
-	for (auto i = 0u; i < 2; i++) {
-		auto amax = (i == 0 ? a.right : a.bottom);
-		auto amin = (i == 0 ? a.left : a.top);
-		auto bmax = (i == 0 ? b.right : b.bottom);
-		auto bmin = (i == 0 ? b.left : b.top);
-		if (v.m128_f32[i] <= 0.f) {
-			if (bmax < amin) return false;
-			if (amax < bmin) tmin = max((amax - bmin) / v.m128_f32[i], tmin);
-			if (bmax > amin) tmax = min((amin - bmax) / v.m128_f32[i], tmax);
-		}
-		else if (v.m128_f32[i] > 0.f) {
-			if (bmin > amax) return false;
-			if (bmax < amin) tmin = max((amin - bmax) / v.m128_f32[i], tmin);
-			if (amax > bmin) tmax = min((amax - bmin) / v.m128_f32[i], tmax);
-		}
-		if (tmin > tmax) return false;
-	}
-	return true;
-}
-
-inline D2D1_RECT_F MoveAABB(const D2D1_RECT_F& aabb, const XMVECTOR& movement) {
-	return {
-		aabb.left   + movement.m128_f32[0],
-		aabb.top    + movement.m128_f32[1],
-		aabb.right  + movement.m128_f32[0],
-		aabb.bottom + movement.m128_f32[1]
-	};
-}
-
 inline float SweptAABB(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float vx, float vy, float& nx, float& ny) {
 	float xInvEntry, xInvExit, xEntry, xExit;
 	if (vx > 0.f) {
+		// if a-rect is moving right...
+		// -- calculate distance between closest pointt (entry)
+		// -- calculate distance between farthest points (exit)
 		xInvEntry = b.left - a.right;
 		xInvExit = b.right - a.left;
-	} else {
+	}
+	else {
+		// if a-rect is moving left...
+		// -- calculate distance between closest points (entry)
+		// -- calculate distance between farthest points (exit)
 		xInvEntry = b.right - a.left;
 		xInvExit = b.left - a.right;
 	}
@@ -177,7 +147,8 @@ inline float SweptAABB(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float vx, flo
 	if (vy > 0.f) {
 		yInvEntry = b.top - a.bottom;
 		yInvExit = b.bottom - a.top;
-	} else {
+	}
+	else {
 		yInvEntry = b.bottom - a.top;
 		yInvExit = b.top - a.bottom;
 	}
@@ -194,26 +165,86 @@ inline float SweptAABB(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float vx, flo
 		nx = 0.f;
 		ny = 0.f;
 		return 1.f;
-	} else {
+	}
+	else {
 		if (xEntry > yEntry) {
 			if (xInvEntry < 0.f) {
 				nx = 1.f;
 				ny = 0.f;
-			} else {
+			}
+			else {
 				nx = -1.f;
 				ny = 0.f;
 			}
-		} else {
+		}
+		else {
 			if (yInvEntry < 0.f) {
 				nx = 0.f;
 				ny = 1.f;
-			} else {
+			}
+			else {
 				nx = 0.f;
-				ny - 1.f;
+				ny = -1.f;
 			}
 		}
 	}
 	return entryTime;
+}
+
+
+inline bool Intersect(const D2D1_RECT_F& a, const D2D1_RECT_F& b, const XMVECTOR& av, const XMVECTOR& bv, float& tmin, XMVECTOR& n) {
+	tmin = 0.f;
+	/*
+	if (Collides(a, b)) {
+		SweptAABB(a, b, av.m128_f32[0], av.m128_f32[1], n.m128_f32[0], n.m128_f32[1]);
+		return true;
+	}
+	*/
+
+	auto tmax = 1.f;
+	auto v = XMVectorSubtract(bv, av);
+	for (auto i = 0u; i < 2; i++) {
+		auto amax = (i == 0 ? a.right : a.bottom);
+		auto amin = (i == 0 ? a.left : a.top);
+		auto bmax = (i == 0 ? b.right : b.bottom);
+		auto bmin = (i == 0 ? b.left : b.top);
+		auto t1 = (amax - bmin) / v.m128_f32[i];
+		auto t2 = (amin - bmax) / v.m128_f32[i];
+		if (v.m128_f32[i] <= 0.f) {
+			if (bmax < amin) return false;
+			if (amax <= bmin) {
+				if (i == 0u) {
+					n = XMVectorSet(-1.f, 0.f, 0.f, 0.f);
+				} else if (t1 > tmin) {
+					n = XMVectorSet(0.f, -1.f, 0.f, 0.f);
+				}
+				tmin = max(t1, tmin);
+			}
+			if (bmax > amin) tmax = min(t2, tmax);
+		} else if (v.m128_f32[i] > 0.f) {
+			if (bmin > amax) return false;
+			if (bmax < amin) {
+				if (i == 0u) {
+					n = XMVectorSet(1.f, 0.f, 0.f, 0.f);
+				} else if (t1 > tmin) {
+					n = XMVectorSet(0.f, 1.f, 0.f, 0.f);
+				}
+				tmin = max(t1, tmin);
+			}
+			if (amax > bmin) tmax = min(t2, tmax);
+		}
+		if (tmin > tmax) return false;
+	}
+	return true;
+}
+
+inline D2D1_RECT_F MoveAABB(const D2D1_RECT_F& aabb, const XMVECTOR& movement) {
+	return {
+		aabb.left   + movement.m128_f32[0],
+		aabb.top    + movement.m128_f32[1],
+		aabb.right  + movement.m128_f32[0],
+		aabb.bottom + movement.m128_f32[1]
+	};
 }
 
 // ============
@@ -837,6 +868,7 @@ public:
 		}
 
 		// check whether the ball has reached a goal.
+		// TODO move these checks to last to first check whether a paddle intersect ball movement ;)
 		if (Contains(mLeftGoalRect, mBallRects[mBufferIdx])) {
 			mRightPoints++;
 			mCountdown = COUNTDOWN_MS;
@@ -897,23 +929,32 @@ public:
 		auto leftPaddleMovement = XMVectorSet(0.f, mLeftPaddleVelocity, 0.f, 0.f);
 
 		float tmin = 0.f;
-		if (Intersect(oldBallPos, oldRightPaddlePos, ballMovement, rightPaddleMovement, tmin)) {
+		XMVECTOR hitN = XMVectorSet(0.f, 0.f, 0.f, 0.f);
+		if (Intersect(oldBallPos, oldRightPaddlePos, ballMovement, rightPaddleMovement, tmin, hitN)) {
+			auto ballX = std::to_wstring(oldBallPos.left + (oldBallPos.right - oldBallPos.left) / 2);
+			auto ballY = std::to_wstring(oldBallPos.top + (oldBallPos.bottom - oldBallPos.top) / 2);
+			auto normX = std::to_wstring(hitN.m128_f32[0]);
+			auto normY = std::to_wstring(hitN.m128_f32[1]);
+			auto text = std::wstring(L"Intersect with right paddle: " + ballX + L" x " + ballY + L" n: " + normX + L" x " + normY + L"\n");
+			OutputDebugString(text.c_str());
+
 			// move the ball as far as it reaches the paddle.
-			ballMovement = XMVectorScale(ballMovement, tmin - NUDGE);
+			ballMovement = XMVectorScale(ballMovement, tmin);
 			mBallRects[mBufferIdx] = MoveAABB(oldBallPos, ballMovement);
 
 			// let's increase ball velocity on each paddle hit.
 			mBallVelocity *= BALL_SPEEDUP_SCALAR;
 
 			// TODO check which side we hit --> i.e. resolve hit normal direction.
-			// if (abs(nx) > 0.f) mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
-			// if (abs(ny) > 0.f) mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
-			mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
+			if (abs(hitN.m128_f32[0]) > 0.f) mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
+			if (abs(hitN.m128_f32[1]) > 0.f) mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
 
 			// move the ball into reflected direction as far as there's time left.
 			ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
-			ballMovement = XMVectorScale(ballMovement, 1.f - tmin + NUDGE);
+			ballMovement = XMVectorScale(ballMovement, 1.f - tmin + 0.1f);
 			mBallRects[mBufferIdx] = MoveAABB(mBallRects[mBufferIdx], ballMovement);
+
+			// mBallDirection = XMVECTOR(); // TODO halt!
 
 			critical_section::scoped_lock lock{ mControllersLock };
 			if (mRightPlayerController != nullptr) {
@@ -930,23 +971,31 @@ public:
 					controller->Vibration = vibration;
 					});
 			}
-		} else if (Intersect(oldBallPos, oldLeftPaddlePos, ballMovement, leftPaddleMovement, tmin)) {
+		} else if (Intersect(oldBallPos, oldLeftPaddlePos, ballMovement, leftPaddleMovement, tmin, hitN)) {
+			auto ballX = std::to_wstring(oldBallPos.left + (oldBallPos.right - oldBallPos.left) / 2);
+			auto ballY = std::to_wstring(oldBallPos.top + (oldBallPos.bottom - oldBallPos.top) / 2);
+			auto normX = std::to_wstring(hitN.m128_f32[0]);
+			auto normY = std::to_wstring(hitN.m128_f32[1]);
+			auto text = std::wstring(L"Intersect with left paddle: " + ballX + L" x " + ballY + L" n: " + normX + L" x " + normY + L"\n");
+			OutputDebugString(text.c_str());
+
 			// move the ball as far as it reaches the paddle.
-			ballMovement = XMVectorScale(ballMovement, tmin - NUDGE);
+			ballMovement = XMVectorScale(ballMovement, tmin);
 			mBallRects[mBufferIdx] = MoveAABB(oldBallPos, ballMovement);
 
 			// let's increase ball velocity on each paddle hit.
 			mBallVelocity *= BALL_SPEEDUP_SCALAR;
 
 			// TODO check which side we hit --> i.e. resolve hit normal direction.
-			// if (abs(nx) > 0.f) mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
-			// if (abs(ny) > 0.f) mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
-			mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
+			if (abs(hitN.m128_f32[0]) > 0.f) mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
+			if (abs(hitN.m128_f32[1]) > 0.f) mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
 
 			// move the ball into reflected direction as far as there's time left.
 			ballMovement = XMVectorScale(mBallDirection, mBallVelocity);
-			ballMovement = XMVectorScale(ballMovement, 1.f - tmin + NUDGE);
+			ballMovement = XMVectorScale(ballMovement, 1.f); //  -tmin + 0.1f);
 			mBallRects[mBufferIdx] = MoveAABB(mBallRects[mBufferIdx], ballMovement);
+
+			// mBallDirection = XMVECTOR(); // TODO halt!
 
 			critical_section::scoped_lock lock{ mControllersLock };
 			if (mLeftPlayerController != nullptr) {
