@@ -54,13 +54,10 @@ constexpr auto GAMEPAD_FEEDBACK_STRENGTH = 0.75f;
 constexpr auto GAMEPAD_FEEDBACK_DURATION_MS = 200;
 // The amount of points player needs to collect to win the game.
 constexpr auto POINT_TARGET = 1;
-
-// =============
-// === Types ===
-// =============
-
-// An enumeration (and ordinal) of the players.
-enum class Player : uint8_t { Left = 0, Right = 1 };
+// The id and ordinal of the left player.
+constexpr uint8_t PLAYER_LEFT  = 0;
+// The id and ordinal of the right player.
+constexpr uint8_t PLAYER_RIGHT = 1;
 
 // =================
 // === Utilities ===
@@ -1022,14 +1019,14 @@ public:
 
 		// check whether the ball has reached a goal.
 		if (Contains(mLeftGoalRect, mBallRects[mBufferIdx])) {
-			handleGoal(Player::Right);
+			handleGoal(PLAYER_RIGHT);
 		} else if (Contains(mRightGoalRect, mBallRects[mBufferIdx])) {
-			handleGoal(Player::Left);
+			handleGoal(PLAYER_LEFT);
 		}
 	}
 
-	void handleGoal(Player player) {
-		if (player == Player::Left) {
+	void handleGoal(uint8_t player) {
+		if (player == PLAYER_LEFT) {
 			mLeftPoints++;
 		} else {
 			mRightPoints++;
