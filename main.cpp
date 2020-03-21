@@ -52,6 +52,8 @@ constexpr auto GAMEPAD_DEADZONE = 0.1f;
 constexpr auto GAMEPAD_FEEDBACK_STRENGTH = 0.75f;
 // The duration of the gamepad vibration when ball hits paddle.
 constexpr auto GAMEPAD_FEEDBACK_DURATION_MS = 200;
+// The amount of points player needs to collect to win the game.
+constexpr auto POINT_TARGET = 10;
 
 // =================
 // === Utilities ===
@@ -653,6 +655,48 @@ public:
 			mBallRects[i].left = horizontalCenter - (.5f * mCellSize) + mCellSize * ballRelMovementX;
 			mBallRects[i].right = mBallRects[i].left + mCellSize;
 		}
+
+		// build game over specific objects
+		ThrowIfFailed(mWritefactory->CreateTextFormat(
+			L"Calibri",
+			nullptr,
+			DWRITE_FONT_WEIGHT_REGULAR,
+			DWRITE_FONT_STYLE_NORMAL,
+			DWRITE_FONT_STRETCH_NORMAL,
+			mCellSize * 3,
+			L"en-us",
+			&mGameOverBigTextFormat
+			));
+		ThrowIfFailed(mGameOverBigTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER));
+		ThrowIfFailed(mWritefactory->CreateTextFormat(
+			L"Calibri",
+			nullptr,
+			DWRITE_FONT_WEIGHT_REGULAR,
+			DWRITE_FONT_STYLE_NORMAL,
+			DWRITE_FONT_STRETCH_NORMAL,
+			mCellSize * 0.75f,
+			L"en-us",
+			&mGameOverSmallTextFormat
+			));
+		ThrowIfFailed(mGameOverSmallTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER));
+		mGameOverRect = {
+			horizontalCenter - 9 * mCellSize,
+			verticalCenter   - 3 * mCellSize,
+			horizontalCenter + 9 * mCellSize,
+			verticalCenter   + 3 * mCellSize
+		};
+		mGameOverBigTextRect = {
+			horizontalCenter - 9 * mCellSize,
+			verticalCenter   - 3 * mCellSize,
+			horizontalCenter + 9 * mCellSize,
+			verticalCenter   + 3 * mCellSize
+		};
+		mGameOverSmallTextRect = {
+			horizontalCenter - 10 * mCellSize,
+			verticalCenter + mCellSize,
+			horizontalCenter + 10 * mCellSize,
+			verticalCenter   + 2 * mCellSize
+		};
 	}
 
 	void ResetMovingObjects()
@@ -820,6 +864,11 @@ public:
 
 	void Update(int dt)
 	{
+		// don't update anything while the game is over.
+		if (mLeftPoints >= POINT_TARGET || mRightPoints >= POINT_TARGET) {
+			return;
+		}
+
 		// don't update anything while there's still countdown millis left.
 		mCountdown = max(0, mCountdown - dt);
 		if (mCountdown > 0) {
@@ -1031,7 +1080,28 @@ public:
 		m2dCtx->FillRectangle(Interpolate(mLeftPaddleRects[prevBufferIdx], mLeftPaddleRects[mBufferIdx], alpha), mWhiteBrush.Get());
 		m2dCtx->FillRectangle(Interpolate(mRightPaddleRects[prevBufferIdx], mRightPaddleRects[mBufferIdx], alpha), mWhiteBrush.Get());
 		m2dCtx->FillRectangle(Interpolate(mBallRects[prevBufferIdx], mBallRects[mBufferIdx], alpha), mWhiteBrush.Get());
-		
+
+		// draw the game over box if the game is over
+		if (mRightPoints >= POINT_TARGET || mLeftPoints >= POINT_TARGET) {
+			m2dCtx->FillRectangle(mGameOverRect, mWhiteBrush.Get());
+			m2dCtx->DrawText(
+				L"GAME OVER",
+				9,
+				mGameOverBigTextFormat.Get(),
+				mGameOverBigTextRect,
+				mBlackBrush.Get(),
+				nullptr
+				);
+			m2dCtx->DrawText(
+				L"Press Gamepad X or Keyboard Enter To Continue",
+				46,
+				mGameOverSmallTextFormat.Get(),
+				mGameOverSmallTextRect,
+				mBlackBrush.Get(),
+				nullptr
+				);
+		}
+
 		ThrowIfFailed(m2dCtx->EndDraw());
 		ThrowIfFailed(mSwapChain->Present(1, 0));
 	}
@@ -1099,6 +1169,12 @@ private:
 	D2D1_RECT_F mBallRects[2];
 	D2D1_RECT_F mLeftGoalRect;
 	D2D1_RECT_F mRightGoalRect;
+
+	D2D1_RECT_F mGameOverRect;
+	D2D1_RECT_F mGameOverBigTextRect;
+	D2D1_RECT_F mGameOverSmallTextRect;
+	ComPtr<IDWriteTextFormat> mGameOverBigTextFormat;
+	ComPtr<IDWriteTextFormat> mGameOverSmallTextFormat;
 
 	int mBufferIdx = 0;
 };
