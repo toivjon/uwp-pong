@@ -726,8 +726,8 @@ public:
 
 			// specify swap chain configuration.
 			DXGI_SWAP_CHAIN_DESC1 desc = {};
-			desc.Width = windowSize.Width;
-			desc.Height = windowSize.Height;
+			desc.Width = static_cast<UINT>(windowSize.Width);
+			desc.Height = static_cast<UINT>(windowSize.Height);
 			desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 			desc.BufferCount = 2;
 			desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
@@ -810,11 +810,11 @@ public:
 		critical_section::scoped_lock lock{ mControllersLock };
 		if (mLeftPlayerController != nullptr) {
 			auto reading = mLeftPlayerController->GetCurrentReading();
-			mLeftPaddleVelocity = abs(reading.LeftThumbstickY) < GAMEPAD_DEADZONE ? 0.f : reading.LeftThumbstickY * -mPaddleVelocity;
+			mLeftPaddleVelocity = abs(reading.LeftThumbstickY) < GAMEPAD_DEADZONE ? 0.f : static_cast<float>(reading.LeftThumbstickY) * -mPaddleVelocity;
 		}
 		if (mRightPlayerController != nullptr) {
 			auto reading = mRightPlayerController->GetCurrentReading();
-			mRightPaddleVelocity = abs(reading.LeftThumbstickY) < GAMEPAD_DEADZONE ? 0.f : reading.LeftThumbstickY * -mPaddleVelocity;
+			mRightPaddleVelocity = abs(reading.LeftThumbstickY) < GAMEPAD_DEADZONE ? 0.f : static_cast<float>(reading.LeftThumbstickY) * -mPaddleVelocity;
 		}
 	}
 
