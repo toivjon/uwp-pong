@@ -53,7 +53,14 @@ constexpr auto GAMEPAD_FEEDBACK_STRENGTH = 0.75f;
 // The duration of the gamepad vibration when ball hits paddle.
 constexpr auto GAMEPAD_FEEDBACK_DURATION_MS = 200;
 // The amount of points player needs to collect to win the game.
-constexpr auto POINT_TARGET = 10;
+constexpr auto POINT_TARGET = 1;
+
+// =============
+// === Types ===
+// =============
+
+// An enumeration (and ordinal) of the players.
+enum class Player : uint8_t { Left = 0, Right = 1 };
 
 // =================
 // === Utilities ===
@@ -1015,16 +1022,21 @@ public:
 
 		// check whether the ball has reached a goal.
 		if (Contains(mLeftGoalRect, mBallRects[mBufferIdx])) {
-			mRightPoints++;
-			mCountdown = COUNTDOWN_MS;
-			ResetMovingObjects();
-			RandomizeBallDirection();
+			handleGoal(Player::Right);
 		} else if (Contains(mRightGoalRect, mBallRects[mBufferIdx])) {
-			mLeftPoints++;
-			mCountdown = COUNTDOWN_MS;
-			ResetMovingObjects();
-			RandomizeBallDirection();
+			handleGoal(Player::Left);
 		}
+	}
+
+	void handleGoal(Player player) {
+		if (player == Player::Left) {
+			mLeftPoints++;
+		} else {
+			mRightPoints++;
+		}
+		mCountdown = COUNTDOWN_MS;
+		ResetMovingObjects();
+		RandomizeBallDirection();
 	}
 
 	void Render(float alpha)
