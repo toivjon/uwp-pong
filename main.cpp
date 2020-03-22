@@ -10,6 +10,7 @@
 #include <random>
 #include <string>
 #include <wrl.h>
+#include <xaudio2.h>
 
 using namespace concurrency;
 using namespace DirectX;
@@ -268,8 +269,15 @@ public:
 		view->Activated += ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &Pong::Activated);
 		Gamepad::GamepadAdded += ref new EventHandler<Gamepad^>(this, &Pong::GamepadAdded);
 		Gamepad::GamepadRemoved += ref new EventHandler<Gamepad^>(this, &Pong::GamepadRemoved);
+		InitializeAudio();
 		InitializeGraphics();
 		InitializeGame();
+	}
+
+	void InitializeAudio()
+	{
+		ThrowIfFailed(XAudio2Create(&mXAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR));
+		ThrowIfFailed(mXAudio2->CreateMasteringVoice(&mMasterVoice));
 	}
 
 	void InitializeGraphics()
@@ -1210,6 +1218,11 @@ private:
 	ComPtr<IDWriteTextFormat> mGameOverSmallTextFormat;
 
 	int mBufferIdx = 0;
+
+	// A COM smart pointer reference to XAudio2 sound engine.
+	Microsoft::WRL::ComPtr<IXAudio2> mXAudio2;
+	// The main master voice used to playback sounds.
+	IXAudio2MasteringVoice* mMasterVoice;
 };
 
 [Platform::MTAThread]
