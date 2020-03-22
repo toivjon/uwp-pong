@@ -415,6 +415,11 @@ public:
 				mLeftPaddleVelocity = 0.f;
 			}
 			break;
+		case VirtualKey::Enter:
+			if (mLeftPoints >= POINT_TARGET || mRightPoints >= POINT_TARGET) {
+				ResetGame();
+			}
+			break;
 		}
 	}
 
@@ -859,11 +864,30 @@ public:
 		if (mLeftPlayerController != nullptr) {
 			auto reading = mLeftPlayerController->GetCurrentReading();
 			mLeftPaddleVelocity = abs(reading.LeftThumbstickY) < GAMEPAD_DEADZONE ? 0.f : static_cast<float>(reading.LeftThumbstickY) * -mPaddleVelocity;
+			if (mLeftPoints >= POINT_TARGET || mRightPoints >= POINT_TARGET) {
+				if (GamepadButtons::X == (reading.Buttons & GamepadButtons::X)) {
+					ResetGame();
+				}
+			}
 		}
 		if (mRightPlayerController != nullptr) {
 			auto reading = mRightPlayerController->GetCurrentReading();
 			mRightPaddleVelocity = abs(reading.LeftThumbstickY) < GAMEPAD_DEADZONE ? 0.f : static_cast<float>(reading.LeftThumbstickY) * -mPaddleVelocity;
+			if (mLeftPoints >= POINT_TARGET || mRightPoints >= POINT_TARGET) {
+				if (GamepadButtons::X == (reading.Buttons & GamepadButtons::X)) {
+					ResetGame();
+				}
+			}
 		}
+	}
+
+	void ResetGame()
+	{
+		mLeftPoints = 0;
+		mRightPoints = 0;
+		mCountdown = COUNTDOWN_MS;
+		ResetMovingObjects();
+		RandomizeBallDirection();
 	}
 
 	void Update(int dt)
