@@ -54,7 +54,7 @@ constexpr auto GAMEPAD_FEEDBACK_STRENGTH = 0.75f;
 // The duration of the gamepad vibration when ball hits paddle.
 constexpr auto GAMEPAD_FEEDBACK_DURATION_MS = 200;
 // The amount of points player needs to collect to win the game.
-constexpr auto POINT_TARGET = 1;
+constexpr auto POINT_TARGET = 10;
 // The id and ordinal of the left player.
 constexpr uint8_t PLAYER_LEFT  = 0;
 // The id and ordinal of the right player.
@@ -76,6 +76,17 @@ inline void ThrowIfFailed(HRESULT hr) {
 		throw Platform::Exception::CreateException(hr);
 	}
 }
+
+struct Sound {
+	XAUDIO2_BUFFER	 	 buffer = {};
+	IXAudio2SourceVoice* sourceVoice = nullptr;
+
+	void Play() {
+		assert(sourceVoice != nullptr);
+		ThrowIfFailed(sourceVoice->SubmitSourceBuffer(&buffer));
+		ThrowIfFailed(sourceVoice->Start());
+	}
+};
 
 // A utility function to convert device-independent pixels to physical pixels.
 inline float ConvertDipsToPixels(float dips, float dpi) {
@@ -252,6 +263,125 @@ inline D2D1_RECT_F MoveAABB(const D2D1_RECT_F& aabb, const XMVECTOR& movement) {
 	};
 }
 
+#ifdef _XBOX // Big-Endian
+#define fourccRIFF 'RIFF'
+#define fourccWAVE 'WAVE'
+#define fourccFMT 'fmt '
+#define fourccDATA 'data'
+#else // Little-Endian
+#define fourccRIFF 'FFIR'
+#define fourccWAVE 'EVAW'
+#define fourccFMT ' tmf'
+#define fourccDATA 'atad'
+#endif
+
+inline HRESULT FindChunk(HANDLE file, DWORD fourcc, DWORD& chunkSize, DWORD& chunkDataPosition)
+{
+	// return error whether an invalid file pointer was given.
+	if (INVALID_SET_FILE_POINTER == SetFilePointer(file, 0, NULL, FILE_BEGIN))
+		return HRESULT_FROM_WIN32(GetLastError());
+
+	DWORD chunkType = 0;
+	DWORD chunkDataSize = 0;
+	DWORD rIFFDataSize = 0;
+	DWORD fileType = 0;
+	DWORD bytesRead = 0;
+	DWORD offset = 0;
+
+	HRESULT hr = S_OK;
+	while (hr == S_OK) {
+		DWORD dwRead = 0;
+		if (0 == ReadFile(file, &chunkType, sizeof(DWORD), &dwRead, NULL))
+			hr = HRESULT_FROM_WIN32(GetLastError());
+
+		if (0 == ReadFile(file, &chunkDataSize, sizeof(DWORD), &dwRead, NULL))
+			hr = HRESULT_FROM_WIN32(GetLastError());
+
+		switch (chunkType)
+		{
+		case fourccRIFF:
+			rIFFDataSize = chunkDataSize;
+			chunkDataSize = 4;
+			if (0 == ReadFile(file, &fileType, sizeof(DWORD), &dwRead, NULL))
+				hr = HRESULT_FROM_WIN32(GetLastError());
+			break;
+		default:
+			if (INVALID_SET_FILE_POINTER == SetFilePointer(file, chunkDataSize, NULL, FILE_CURRENT))
+				return HRESULT_FROM_WIN32(GetLastError());
+			break;
+		}
+		offset += sizeof(DWORD) * 2;
+		if (chunkType == fourcc)
+		{
+			chunkSize = chunkDataSize;
+			chunkDataPosition = offset;
+			return S_OK;
+		}
+		offset += chunkDataSize;
+		if (bytesRead >= rIFFDataSize) return S_FALSE;
+	}
+	return S_OK;
+}
+
+HRESULT ReadChunkData(HANDLE file, void* buffer, DWORD buffersize, DWORD bufferOffset)
+{
+	HRESULT hr = S_OK;
+	if (INVALID_SET_FILE_POINTER == SetFilePointer(file, bufferOffset, NULL, FILE_BEGIN))
+		return HRESULT_FROM_WIN32(GetLastError());
+
+	DWORD dwRead;
+	if (0 == ReadFile(file, buffer, buffersize, &dwRead, NULL))
+		hr = HRESULT_FROM_WIN32(GetLastError());
+	return hr;
+}
+
+
+HRESULT ReadSound(const std::wstring& filename, Microsoft::WRL::ComPtr<IXAudio2>xaudio2, Sound& sound)
+{
+	WAVEFORMATEXTENSIBLE wfx = {};
+
+	// open the file for reading.
+	auto file = CreateFile2(
+		filename.c_str(),
+		GENERIC_READ,
+		FILE_SHARE_READ,
+		OPEN_EXISTING,
+		nullptr
+	);
+
+	if (INVALID_HANDLE_VALUE == file)
+		return HRESULT_FROM_WIN32(GetLastError());
+
+	if (INVALID_SET_FILE_POINTER == SetFilePointer(file, 0, NULL, FILE_BEGIN))
+		return HRESULT_FROM_WIN32(GetLastError());
+
+	DWORD chunkSize;
+	DWORD chunkPosition;
+
+	//check the file type, should be fourccWAVE or 'XWMA'
+	FindChunk(file, fourccRIFF, chunkSize, chunkPosition);
+	DWORD filetype;
+	ReadChunkData(file, &filetype, sizeof(DWORD), chunkPosition);
+	if (filetype != fourccWAVE)
+		return S_FALSE;
+
+	FindChunk(file, fourccFMT, chunkSize, chunkPosition);
+	ReadChunkData(file, &wfx, chunkSize, chunkPosition);
+
+	//fill out the audio data buffer with the contents of the fourccDATA chunk
+	FindChunk(file, fourccDATA, chunkSize, chunkPosition);
+	BYTE* dataBuffer = new BYTE[chunkSize];
+	ReadChunkData(file, dataBuffer, chunkSize, chunkPosition);
+
+	sound.buffer.AudioBytes = chunkSize;  //buffer containing audio data
+	sound.buffer.pAudioData = dataBuffer;  //size of the audio buffer in bytes
+	sound.buffer.Flags = XAUDIO2_END_OF_STREAM; // tell the source voice not to expect any data after this buffer
+
+	// build a source voice from the data.
+	ThrowIfFailed(xaudio2->CreateSourceVoice(&sound.sourceVoice, (WAVEFORMATEX*)&wfx));
+	return S_OK;
+}
+
 // ============
 // === Game ===
 // ============
@@ -278,6 +408,8 @@ public:
 	{
 		ThrowIfFailed(XAudio2Create(&mXAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR));
 		ThrowIfFailed(mXAudio2->CreateMasteringVoice(&mMasterVoice));
+		ThrowIfFailed(ReadSound(L"Assets/beep.wav", mXAudio2, mBeepSound));
+		int i = 10;
 	}
 
 	void InitializeGraphics()
@@ -966,6 +1098,7 @@ public:
 
 				// decrease the amount of usable time for ball movement.
 				tBall -= hitTime;
+				mBeepSound.Play();
 			} else if (mBallDirection.m128_f32[1] > 0.f && Intersect(ballPosition, mBottomWallRect, movement, XMVECTOR(), hitTime, hitNormal)) {
 				// move the ball straight to the hit point.
 				movement = XMVectorScale(movement, hitTime);
@@ -981,6 +1114,7 @@ public:
 
 				// decrease the amount of usable time for ball movement.
 				tBall -= hitTime;
+				mBeepSound.Play();
 			} else if (mBallDirection.m128_f32[0] < 0.f && Intersect(ballPosition, mLeftPaddleRects[prevBufferIdx], movement, leftPaddleMovement, hitTime, hitNormal)) {
 				// move the ball straight to the hit point.
 				movement = XMVectorScale(movement, hitTime);
@@ -1011,6 +1145,7 @@ public:
 						controller->Vibration = vibration;
 						});
 				}
+				mBeepSound.Play();
 			} else if (mBallDirection.m128_f32[0] > 0.f && Intersect(ballPosition, mRightPaddleRects[prevBufferIdx], movement, rightPaddleMovement, hitTime, hitNormal)) {
 				// move the ball straight to the hit point.
 				movement = XMVectorScale(movement, hitTime);
@@ -1041,6 +1176,7 @@ public:
 						controller->Vibration = vibration;
 						});
 				}
+				mBeepSound.Play();
 			} else {
 				// move the ball as far as possible.
 				ballPosition = MoveAABB(ballPosition, movement);
@@ -1223,6 +1359,8 @@ private:
 	Microsoft::WRL::ComPtr<IXAudio2> mXAudio2;
 	// The main master voice used to playback sounds.
 	IXAudio2MasteringVoice* mMasterVoice;
+	// The beep sound used with collisions.
+	Sound mBeepSound;
 };
 
 [Platform::MTAThread]

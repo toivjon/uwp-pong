@@ -55,4 +55,7 @@
     <ClInclude Include="graphics.h" />
     <ClInclude Include="component.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Media Include="Assets\beep.wav" />
+  </ItemGroup>
 </Project>
