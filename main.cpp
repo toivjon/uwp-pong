@@ -11,6 +11,7 @@
 
 #include <Audio.h> // DirectXTK
 
+#include "geometry.h"
 #include "util.h"
 
 #include <cassert>
@@ -94,20 +95,6 @@ inline bool Collides(const D2D1_RECT_F& a, const D2D1_RECT_F& b)
 		a.bottom < b.top   ||
 		a.left   > b.right ||
 		a.top    > b.bottom);
-}
-
-// A utility to check whether target rect contains the target point.
-inline bool Contains(const D2D1_RECT_F& rect, float x, float y) {
-	return rect.left <= x && x <= rect.right
-		&& rect.top  <= y && y <= rect.bottom;
-}
-
-// A utility to check whether a-rect contains the target b-rect.
-inline bool Contains(const D2D1_RECT_F& a, const D2D1_RECT_F& b) {
-	return Contains(a, b.left, b.top)
-		&& Contains(a, b.left, b.bottom)
-		&& Contains(a, b.right, b.top)
-		&& Contains(a, b.right, b.bottom);
 }
 
 inline D2D1_RECT_F MergeAABB(const D2D1_RECT_F& a, const D2D1_RECT_F& b) {
@@ -222,15 +209,6 @@ inline bool Intersect(const D2D1_RECT_F& a, const D2D1_RECT_F& b, const XMVECTOR
 		if (tmin > tmax) return false;
 	}
 	return true;
-}
-
-inline D2D1_RECT_F MoveAABB(const D2D1_RECT_F& aabb, const XMVECTOR& movement) {
-	return {
-		aabb.left   + movement.m128_f32[0],
-		aabb.top    + movement.m128_f32[1],
-		aabb.right  + movement.m128_f32[0],
-		aabb.bottom + movement.m128_f32[1]
-	};
 }
 
 // ============
@@ -904,8 +882,12 @@ public:
 		// apply movement to paddles.
 		auto leftPaddleMovement = XMVectorSet(0.f, mLeftPaddleVelocity, 0.f, 0.f);
 		auto rightPaddleMovement = XMVectorSet(0.f, mRightPaddleVelocity, 0.f, 0.f);
-		mLeftPaddleRects[mBufferIdx] = MoveAABB(mLeftPaddleRects[prevBufferIdx], leftPaddleMovement);
-		mRightPaddleRects[mBufferIdx] = MoveAABB(mRightPaddleRects[prevBufferIdx], rightPaddleMovement);
+		auto leftPaddlePosition = mLeftPaddleRects[prevBufferIdx];
+		auto rightPaddlePosition = mRightPaddleRects[prevBufferIdx];
+		leftPaddlePosition.Move(leftPaddleMovement.m128_f32[0], leftPaddleMovement.m128_f32[1]);
+		rightPaddlePosition.Move(rightPaddleMovement.m128_f32[0], rightPaddleMovement.m128_f32[1]);
+		mLeftPaddleRects[mBufferIdx] = leftPaddlePosition;
+		mRightPaddleRects[mBufferIdx] = rightPaddlePosition;
 
 		// check that the left paddle stays between the top and bottom wall.
 		if (Collides(mLeftPaddleRects[mBufferIdx], mBottomWallRect)) {
@@ -959,7 +941,7 @@ public:
 				// TODO old... movement = XMVectorScale(movement, hitTime);
 				// movement = XMVectorScale(mBallDirection, mBallVelocity * tBall * hitTime);
 				movement = XMVectorScale(movement, hitTime);
-				ballPosition = MoveAABB(ballPosition, movement);
+				ballPosition.Move(movement.m128_f32[0], movement.m128_f32[1]);
 
 				// inverse balls vertical movement direction.
 				mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
@@ -981,7 +963,7 @@ public:
 			} else if (mBallDirection.m128_f32[1] > 0.f && Intersect(ballPosition, mBottomWallRect, movement, XMVECTOR(), hitTime, hitNormal)) {
 				// move the ball straight to the hit point.
 				movement = XMVectorScale(movement, hitTime);
-				ballPosition = MoveAABB(ballPosition, movement);
+				ballPosition.Move(movement.m128_f32[0], movement.m128_f32[1]);
 
 				// inverse balls vertical movement direction.
 				mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
@@ -989,7 +971,7 @@ public:
 				// apply a small nudge to make the ball to leave collision area.
 				movement = XMVectorScale(mBallDirection, mBallVelocity);
 				movement = XMVectorScale(movement, NUDGE);
-				ballPosition = MoveAABB(ballPosition, movement);
+				ballPosition.Move(movement.m128_f32[0], movement.m128_f32[1]);
 
 				// decrease the amount of usable time for ball movement.
 				tBall -= hitTime;
@@ -997,7 +979,7 @@ public:
 			} else if (mBallDirection.m128_f32[0] < 0.f && Intersect(ballPosition, mLeftPaddleRects[prevBufferIdx], movement, leftPaddleMovement, hitTime, hitNormal)) {
 				// move the ball straight to the hit point.
 				movement = XMVectorScale(movement, hitTime);
-				ballPosition = MoveAABB(ballPosition, movement);
+				ballPosition.Move(movement.m128_f32[0], movement.m128_f32[1]);
 
 				// inverse balls horizontal movement direction.
 				mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
@@ -1028,7 +1010,7 @@ public:
 			} else if (mBallDirection.m128_f32[0] > 0.f && Intersect(ballPosition, mRightPaddleRects[prevBufferIdx], movement, rightPaddleMovement, hitTime, hitNormal)) {
 				// move the ball straight to the hit point.
 				movement = XMVectorScale(movement, hitTime);
-				ballPosition = MoveAABB(ballPosition, movement);
+				ballPosition.Move(movement.m128_f32[0], movement.m128_f32[1]);
 
 				// inverse balls horizontal movement direction.
 				mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
@@ -1058,16 +1040,16 @@ public:
 				mBeepSound->Play();
 			} else {
 				// move the ball as far as possible.
-				ballPosition = MoveAABB(ballPosition, movement);
+				ballPosition.Move(movement.m128_f32[0], movement.m128_f32[1]);
 				tBall = 0.f;
 			}
 		}
 		mBallRects[mBufferIdx] = ballPosition;
 
 		// check whether the ball has reached a goal.
-		if (Contains(mLeftGoalRect, mBallRects[mBufferIdx])) {
+		if (mLeftGoalRect.Contains(mBallRects[mBufferIdx])) {
 			handleGoal(PLAYER_RIGHT);
-		} else if (Contains(mRightGoalRect, mBallRects[mBufferIdx])) {
+		} else if (mRightGoalRect.Contains(mBallRects[mBufferIdx])) {
 			handleGoal(PLAYER_LEFT);
 		}
 	}
@@ -1213,22 +1195,22 @@ private:
 	ComPtr<IDWriteTextFormat> mLeftPlayerNameTextFormat;
 	ComPtr<IDWriteTextFormat> mRightPlayerNameTextFormat;
 
-	D2D1_RECT_F mCenterlineRects[CENTERLINE_DOTS];
-	D2D1_RECT_F mTopWallRect;
-	D2D1_RECT_F mBottomWallRect;
-	D2D1_RECT_F mLeftPointsRect;
-	D2D1_RECT_F mRightPointsRect;
-	D2D1_RECT_F mLeftPlayerNameRect;
-	D2D1_RECT_F mRightPlayerNameRect;
-	D2D1_RECT_F mLeftPaddleRects[2];
-	D2D1_RECT_F mRightPaddleRects[2];
-	D2D1_RECT_F mBallRects[2];
-	D2D1_RECT_F mLeftGoalRect;
-	D2D1_RECT_F mRightGoalRect;
+	geometry::Rectangle mCenterlineRects[CENTERLINE_DOTS];
+	geometry::Rectangle mTopWallRect;
+	geometry::Rectangle mBottomWallRect;
+	geometry::Rectangle mLeftPointsRect;
+	geometry::Rectangle mRightPointsRect;
+	geometry::Rectangle mLeftPlayerNameRect;
+	geometry::Rectangle mRightPlayerNameRect;
+	geometry::Rectangle mLeftPaddleRects[2];
+	geometry::Rectangle mRightPaddleRects[2];
+	geometry::Rectangle mBallRects[2];
+	geometry::Rectangle mLeftGoalRect;
+	geometry::Rectangle mRightGoalRect;
 
-	D2D1_RECT_F mGameOverRect;
-	D2D1_RECT_F mGameOverBigTextRect;
-	D2D1_RECT_F mGameOverSmallTextRect;
+	geometry::Rectangle mGameOverRect;
+	geometry::Rectangle mGameOverBigTextRect;
+	geometry::Rectangle mGameOverSmallTextRect;
 	ComPtr<IDWriteTextFormat> mGameOverBigTextFormat;
 	ComPtr<IDWriteTextFormat> mGameOverSmallTextFormat;
 
