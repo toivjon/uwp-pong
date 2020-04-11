@@ -261,8 +261,6 @@ public:
 		assert(mBeepSound == nullptr);
 
 		mAudioEngine = std::make_unique<AudioEngine>();
-		mAudioEngine->Update();
-
 		mBeepSound = std::make_unique<SoundEffect>(mAudioEngine.get(), L"Assets/beep.wav");
 	}
 
@@ -441,6 +439,7 @@ public:
 			if (mWindowVisible) {
 				window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
 				CheckInput();
+				mAudioEngine->Update();
 
 				// calculate the time usable for the current frame.
 				auto newMillis = util::GetCurrentMilliseconds();
