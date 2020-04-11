@@ -13,6 +13,10 @@ bool Rectangle::Contains(const Rectangle& rect) const {
 		&& Contains(rect.right, rect.bottom);
 }
 
+bool Rectangle::Collides(const Rectangle& rect) const {
+	return !(right < rect.left || bottom < rect.top || left > rect.right || top > rect.bottom);
+}
+
 void Rectangle::Set(float left, float top, float right, float bottom) {
 	this->left = left;
 	this->top = top;

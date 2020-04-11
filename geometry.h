@@ -9,6 +9,7 @@ namespace pong::geometry
 	public:
 		bool Contains(float x, float y) const;
 		bool Contains(const Rectangle& rect) const;
+		bool Collides(const Rectangle& rect) const;
 		void Set(float left, float top, float right, float bottom);
 		void Move(float x, float y);
 	};

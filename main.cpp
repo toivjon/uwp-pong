@@ -87,16 +87,6 @@ inline D2D1_RECT_F Interpolate(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float
 	return result;
 }
 
-// A utility function to perform a simple AABB intersection test.
-inline bool Collides(const D2D1_RECT_F& a, const D2D1_RECT_F& b)
-{
-	return !(
-		a.right  < b.left  ||
-		a.bottom < b.top   ||
-		a.left   > b.right ||
-		a.top    > b.bottom);
-}
-
 inline D2D1_RECT_F MergeAABB(const D2D1_RECT_F& a, const D2D1_RECT_F& b) {
 	D2D1_RECT_F aabb;
 	aabb.bottom = max(a.bottom, b.bottom);
@@ -890,22 +880,22 @@ public:
 		mRightPaddleRects[mBufferIdx] = rightPaddlePosition;
 
 		// check that the left paddle stays between the top and bottom wall.
-		if (Collides(mLeftPaddleRects[mBufferIdx], mBottomWallRect)) {
+		if (mLeftPaddleRects[mBufferIdx].Collides(mBottomWallRect)) {
 			auto paddleHeight = mLeftPaddleRects[mBufferIdx].bottom - mLeftPaddleRects[mBufferIdx].top;
 			mLeftPaddleRects[mBufferIdx].bottom = mBottomWallRect.top;
 			mLeftPaddleRects[mBufferIdx].top = mBottomWallRect.top - paddleHeight;
-		} else if (Collides(mLeftPaddleRects[mBufferIdx], mTopWallRect)) {
+		} else if (mLeftPaddleRects[mBufferIdx].Collides(mTopWallRect)) {
 			auto paddleHeight = mLeftPaddleRects[mBufferIdx].bottom - mLeftPaddleRects[mBufferIdx].top;
 			mLeftPaddleRects[mBufferIdx].bottom = mTopWallRect.bottom + paddleHeight;
 			mLeftPaddleRects[mBufferIdx].top = mTopWallRect.bottom;
 		}
 
 		// check that the right paddle stays between the top and bottom wall.
-		if (Collides(mRightPaddleRects[mBufferIdx], mBottomWallRect)) {
+		if (mRightPaddleRects[mBufferIdx].Collides(mBottomWallRect)) {
 			auto paddleHeight = mRightPaddleRects[mBufferIdx].bottom - mRightPaddleRects[mBufferIdx].top;
 			mRightPaddleRects[mBufferIdx].bottom = mBottomWallRect.top;
 			mRightPaddleRects[mBufferIdx].top = mBottomWallRect.top - paddleHeight;
-		} else if (Collides(mRightPaddleRects[mBufferIdx], mTopWallRect)) {
+		} else if (mRightPaddleRects[mBufferIdx].Collides(mTopWallRect)) {
 			auto paddleHeight = mRightPaddleRects[mBufferIdx].bottom - mRightPaddleRects[mBufferIdx].top;
 			mRightPaddleRects[mBufferIdx].bottom = mTopWallRect.bottom + paddleHeight;
 			mRightPaddleRects[mBufferIdx].top = mTopWallRect.bottom;
