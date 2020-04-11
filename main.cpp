@@ -84,12 +84,6 @@ struct Sound {
 	}
 };
 
-// A utility function to convert device-independent pixels to physical pixels.
-inline float ConvertDipsToPixels(float dips, float dpi) {
-	static const float dipsPerInch = 96.0f;
-	return floorf(dips * dpi / dipsPerInch + 0.5f);
-}
-
 inline D2D1_RECT_F Interpolate(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float alpha)
 {
 	D2D1_RECT_F result;
@@ -880,8 +874,8 @@ public:
 		auto dpi = currentDisplayInformation->LogicalDpi;
 
 		auto windowSize = Size(window->Bounds.Width, window->Bounds.Height);
-		windowSize.Width = ConvertDipsToPixels(windowSize.Width, dpi);
-		windowSize.Height = ConvertDipsToPixels(windowSize.Height, dpi);
+		windowSize.Width = util::ConvertDipsToPixels(windowSize.Width, dpi);
+		windowSize.Height = util::ConvertDipsToPixels(windowSize.Height, dpi);
 
 		// release old render target if any.
 		m2dCtx->SetTarget(nullptr);

@@ -15,3 +15,8 @@ int pong::util::GetRandomIntBetween(int min, int max) {
 	std::uniform_int_distribution<int> dist(min, max);
 	return dist(mt);
 }
+
+float pong::util::ConvertDipsToPixels(float dips, float dpi) {
+	static const float dipsPerInch = 96.f;
+	return floorf(dips * dpi / dipsPerInch + 0.5f);
+}
