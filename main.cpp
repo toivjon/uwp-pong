@@ -211,42 +211,37 @@ inline float SweptAABB(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float vx, flo
 
 
 inline bool Intersect(const D2D1_RECT_F& a, const D2D1_RECT_F& b, const XMVECTOR& av, const XMVECTOR& bv, float& tmin, XMVECTOR& n) {
-	tmin = 0.f;
-	if (Collides(a, b)) {
-		SweptAABB(a, b, av.m128_f32[0], av.m128_f32[1], n.m128_f32[0], n.m128_f32[1]);
-		return true;
-	}
-
+	tmin = -FLT_MAX;
 	auto tmax = 1.f;
-	auto v = XMVectorSubtract(bv, av);
+	auto v = (abs(bv.m128_f32[1]) > 0.f ? XMVectorSubtract(bv, av) : av);
 	for (auto i = 0u; i < 2; i++) {
 		auto amax = (i == 0 ? a.right : a.bottom);
 		auto amin = (i == 0 ? a.left : a.top);
 		auto bmax = (i == 0 ? b.right : b.bottom);
 		auto bmin = (i == 0 ? b.left : b.top);
-		auto t1 = (amax - bmin) / v.m128_f32[i];
-		auto t2 = (amin - bmax) / v.m128_f32[i];
+		auto t1 = (amax - bmin) / v.m128_f32[i]; // the time to a to collide with b (on direct collision, this is zero or negative)
+		auto t2 = (amin - bmax) / v.m128_f32[i]; // the time to a to exit from b
 		if (v.m128_f32[i] <= 0.f) {
-			if (bmax < amin) return false;
-			if (amax <= bmin) {
+			if (bmax < amin) return false; // no overlap and moving away from each other
+			// if (amax <= bmin) {
 				if (i == 0u) {
 					n = XMVectorSet(-1.f, 0.f, 0.f, 0.f);
 				} else if (t1 > tmin) {
 					n = XMVectorSet(0.f, -1.f, 0.f, 0.f);
 				}
 				tmin = max(t1, tmin);
-			}
+			// }
 			if (bmax > amin) tmax = min(t2, tmax);
 		} else if (v.m128_f32[i] > 0.f) {
-			if (bmin > amax) return false;
-			if (bmax < amin) {
+			if (bmin > amax) return false; // no overlap and moving away from each other
+			// if (bmax < amin) {
 				if (i == 0u) {
 					n = XMVectorSet(1.f, 0.f, 0.f, 0.f);
 				} else if (t1 > tmin) {
 					n = XMVectorSet(0.f, 1.f, 0.f, 0.f);
 				}
 				tmin = max(t1, tmin);
-			}
+			// }
 			if (amax > bmin) tmax = min(t2, tmax);
 		}
 		if (tmin > tmax) return false;
@@ -886,6 +881,8 @@ public:
 			0.f
 		);
 		mBallDirection = XMVector2Normalize(mBallDirection);
+		// TODO debug solution
+		mBallDirection = XMVector2Normalize(XMVectorSet(-.5f, -.5f, 0.f, 0.f));
 	}
 
 	void ResizeSwapchain(CoreWindow^ window)
@@ -1074,23 +1071,46 @@ public:
 			mRightPaddleRects[mBufferIdx].top = mTopWallRect.bottom;
 		}
 
+		/*
+		// TODO temporary test solution
+		mBallDirection = XMVector2Normalize(XMVectorSet(.5f, .5f, 0.f, 0.f));
 		auto tBall = 1.f;
+		auto ballPosition = mBallRects[prevBufferIdx];
+		auto movement = XMVectorScale(mBallDirection, mBallVelocity);
+		movement = XMVectorScale(movement, tBall);
+		auto hitTime = 0.f;
+		auto hitNormal = XMVectorSet(0.f, 0.f, 0.f, 0.f);
+		if (mBallDirection.m128_f32[1] > 0.f && Intersect(ballPosition, mBottomWallRect, movement, XMVECTOR(), hitTime, hitNormal)) {
+			mBallDirection = XMVectorSet(0.f, 0.f, 0.f, 0.f);
+			return;
+		}
+		ballPosition = MoveAABB(ballPosition, movement);
+		mBallRects[mBufferIdx] = ballPosition;
+		*/
+		auto tBall = static_cast<float>(dt);
 		auto ballPosition = mBallRects[prevBufferIdx];
 		while (tBall > 0.f) {
 			// create a movement vector scaled with the time left for the ball.
-			auto movement = XMVectorScale(mBallDirection, mBallVelocity);
-			movement = XMVectorScale(movement, tBall);
+			auto movement = XMVectorScale(mBallDirection, mBallVelocity * tBall);
+			// movement = XMVectorScale(movement, tBall);
 
 			auto hitTime = 0.f;
 			auto hitNormal = XMVectorSet(0.f, 0.f, 0.f, 0.f);
 			if (mBallDirection.m128_f32[1] < 0.f && Intersect(ballPosition, mTopWallRect, movement, XMVECTOR(), hitTime, hitNormal)) {
 				// move the ball straight to the hit point.
+				// TODO old... movement = XMVectorScale(movement, hitTime);
+				// movement = XMVectorScale(mBallDirection, mBallVelocity * tBall * hitTime);
 				movement = XMVectorScale(movement, hitTime);
 				ballPosition = MoveAABB(ballPosition, movement);
 
 				// inverse balls vertical movement direction.
 				mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
 
+				mBallDirection = XMVECTOR();
+				tBall = 0.f;
+				// ballPosition = mBallRects[prevBufferIdx];
+
+				/*
 				// apply a small nudge to make the ball to leave collision area.
 				movement = XMVectorScale(mBallDirection, mBallVelocity);
 				movement = XMVectorScale(movement, NUDGE);
@@ -1099,6 +1119,7 @@ public:
 				// decrease the amount of usable time for ball movement.
 				tBall -= hitTime;
 				mBeepSound.Play();
+				*/
 			} else if (mBallDirection.m128_f32[1] > 0.f && Intersect(ballPosition, mBottomWallRect, movement, XMVECTOR(), hitTime, hitNormal)) {
 				// move the ball straight to the hit point.
 				movement = XMVectorScale(movement, hitTime);

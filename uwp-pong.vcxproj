@@ -254,32 +254,12 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="audio.cpp" />
-    <ClCompile Include="component.cpp" />
-    <ClCompile Include="context.cpp" />
-    <ClCompile Include="entity.cpp" />
-    <ClCompile Include="game.cpp" />
-    <ClCompile Include="graphics.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="player.cpp" />
-    <ClCompile Include="scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="audio.h" />
-    <ClInclude Include="component.h" />
-    <ClInclude Include="context.h" />
-    <ClInclude Include="entity.h" />
-    <ClInclude Include="event.h" />
-    <ClInclude Include="game.h" />
-    <ClInclude Include="graphics.h" />
-    <ClInclude Include="player.h" />
-    <ClInclude Include="scene.h" />
-    <ClInclude Include="util.h" />
   </ItemGroup>
   <ItemGroup>
     <Media Include="Assets\beep.wav" />

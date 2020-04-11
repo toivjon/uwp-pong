@@ -34,26 +34,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="game.cpp" />
-    <ClCompile Include="audio.cpp" />
-    <ClCompile Include="context.cpp" />
-    <ClCompile Include="scene.cpp" />
-    <ClCompile Include="player.cpp" />
-    <ClCompile Include="entity.cpp" />
-    <ClCompile Include="graphics.cpp" />
-    <ClCompile Include="component.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="game.h" />
-    <ClInclude Include="audio.h" />
-    <ClInclude Include="util.h" />
-    <ClInclude Include="context.h" />
-    <ClInclude Include="scene.h" />
-    <ClInclude Include="event.h" />
-    <ClInclude Include="player.h" />
-    <ClInclude Include="entity.h" />
-    <ClInclude Include="graphics.h" />
-    <ClInclude Include="component.h" />
   </ItemGroup>
   <ItemGroup>
     <Media Include="Assets\beep.wav" />
