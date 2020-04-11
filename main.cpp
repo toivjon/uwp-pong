@@ -1,4 +1,3 @@
-#include <chrono>
 #include <concrt.h>
 #include <cwchar>
 #include <d2d1_3.h>
@@ -7,10 +6,13 @@
 #include <dxgi1_6.h>
 #include <DirectXMath.h>
 #include <ppltasks.h>
-#include <random>
 #include <string>
 #include <wrl.h>
 #include <xaudio2.h>
+
+#include "util.h"
+
+using namespace pong;
 
 using namespace concurrency;
 using namespace DirectX;
@@ -64,12 +66,6 @@ constexpr uint8_t PLAYER_RIGHT = 1;
 // === Utilities ===
 // =================
 
-// A utility function to get current time in milliseconds.
-inline unsigned long CurrentMillis() {
-	using namespace std::chrono;
-	return (unsigned long)duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-}
-
 // A utility function to throw an exception if HRESULT was failed.
 inline void ThrowIfFailed(HRESULT hr) {
 	if (FAILED(hr)) {
@@ -92,13 +88,6 @@ struct Sound {
 inline float ConvertDipsToPixels(float dips, float dpi) {
 	static const float dipsPerInch = 96.0f;
 	return floorf(dips * dpi / dipsPerInch + 0.5f);
-}
-
-inline int randomInt(int min, int max) {
-	static std::random_device rd;
-	static std::mt19937 mt(rd());
-	std::uniform_int_distribution<int> dist(min, max);
-	return dist(mt);
 }
 
 inline D2D1_RECT_F Interpolate(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float alpha)
@@ -575,8 +564,8 @@ public:
 
 	virtual void Run()
 	{
-		auto millisAccumulator = 0l;
-		auto oldMillis = CurrentMillis();
+		auto millisAccumulator = 0ll;
+		auto oldMillis = util::GetCurrentMilliseconds();
 		while (!mWindowClosed) {
 			auto window = CoreWindow::GetForCurrentThread();
 			if (mWindowVisible) {
@@ -584,7 +573,7 @@ public:
 				CheckInput();
 
 				// calculate the time usable for the current frame.
-				auto newMillis = CurrentMillis();
+				auto newMillis = util::GetCurrentMilliseconds();
 				auto delta = min(newMillis - oldMillis, 100ul);
 				oldMillis = newMillis;
 				millisAccumulator += delta;
@@ -875,8 +864,8 @@ public:
 	{
 		// randomize a new direction for the ball.
 		mBallDirection = XMVectorSet(
-			-1.f + (2.f * randomInt(0, 1)),
-			-1.f + (2.f * randomInt(0, 1)),
+			-1.f + (2.f * util::GetRandomIntBetween(0, 1)),
+			-1.f + (2.f * util::GetRandomIntBetween(0, 1)),
 			0.f,
 			0.f
 		);
