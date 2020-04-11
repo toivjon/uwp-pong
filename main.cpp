@@ -76,17 +76,6 @@ inline void ThrowIfFailed(HRESULT hr) {
 	}
 }
 
-struct Sound {
-	XAUDIO2_BUFFER	 	 buffer = {};
-	IXAudio2SourceVoice* sourceVoice = nullptr;
-
-	void Play() {
-		assert(sourceVoice != nullptr);
-		ThrowIfFailed(sourceVoice->SubmitSourceBuffer(&buffer));
-		ThrowIfFailed(sourceVoice->Start());
-	}
-};
-
 inline D2D1_RECT_F Interpolate(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float alpha)
 {
 	D2D1_RECT_F result;
