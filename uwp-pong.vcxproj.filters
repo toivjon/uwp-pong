@@ -42,4 +42,7 @@
   <ItemGroup>
     <ClInclude Include="util.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
 </Project>
