@@ -1,5 +1,6 @@
 #include "util.h"
 
+#include <cassert>
 #include <chrono>
 #include <random>
 
@@ -10,6 +11,7 @@ long long pong::util::GetCurrentMilliseconds() {
 }
 
 int pong::util::GetRandomIntBetween(int min, int max) {
+	assert(min <= max);
 	static std::random_device rd;
 	static std::mt19937 mt(rd());
 	std::uniform_int_distribution<int> dist(min, max);
@@ -17,6 +19,8 @@ int pong::util::GetRandomIntBetween(int min, int max) {
 }
 
 float pong::util::ConvertDipsToPixels(float dips, float dpi) {
+	assert(dpi > 0.f);
+	assert(dips > 0.f);
 	static const float dipsPerInch = 96.f;
 	return floorf(dips * dpi / dipsPerInch + 0.5f);
 }
