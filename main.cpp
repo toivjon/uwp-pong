@@ -692,16 +692,10 @@ public:
 
 	void RandomizeBallDirection()
 	{
-		// randomize a new direction for the ball.
-		mBallDirection = XMVectorSet(
-			-1.f + (2.f * util::GetRandomIntBetween(0, 1)),
-			-1.f + (2.f * util::GetRandomIntBetween(0, 1)),
-			0.f,
-			0.f
-		);
-		mBallDirection = XMVector2Normalize(mBallDirection);
-		// TODO debug solution
-		mBallDirection = XMVector2Normalize(XMVectorSet(-.5f, -.5f, 0.f, 0.f));
+		auto x = -1.f + (2.f * util::GetRandomIntBetween(0, 1));
+		auto y = -1.f + (2.f * util::GetRandomIntBetween(0, 1));
+		mBallDirection = Vector2(x, y);
+		mBallDirection.Normalize();
 	}
 
 	void ResizeSwapchain(CoreWindow^ window)
