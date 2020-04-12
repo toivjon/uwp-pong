@@ -4,12 +4,13 @@
 #include <d3d11.h>
 #include <dwrite.h>
 #include <dxgi1_6.h>
-#include <DirectXMath.h>
 #include <ppltasks.h>
 #include <string>
 #include <wrl.h>
 
-#include <Audio.h> // DirectXTK
+// DirectXTK
+#include <Audio.h>		
+#include <SimpleMath.h>
 
 #include "geometry.h"
 #include "util.h"
@@ -20,6 +21,7 @@ using namespace pong;
 
 using namespace concurrency;
 using namespace DirectX;
+using namespace DirectX::SimpleMath;
 using namespace Windows::ApplicationModel::Activation;
 using namespace Windows::ApplicationModel::Core;
 using namespace Windows::Foundation;
@@ -917,7 +919,7 @@ public:
 
 			auto hitTime = 0.f;
 			auto hitNormal = XMVectorSet(0.f, 0.f, 0.f, 0.f);
-			if (mBallDirection.m128_f32[1] < 0.f && Intersect(ballPosition, mTopWallRect, movement, XMVECTOR(), hitTime, hitNormal)) {
+			if (mBallDirection.y < 0.f && Intersect(ballPosition, mTopWallRect, movement, XMVECTOR(), hitTime, hitNormal)) {
 				// move the ball straight to the hit point.
 				// TODO old... movement = XMVectorScale(movement, hitTime);
 				// movement = XMVectorScale(mBallDirection, mBallVelocity * tBall * hitTime);
@@ -925,7 +927,7 @@ public:
 				ballPosition.Move(movement.m128_f32[0], movement.m128_f32[1]);
 
 				// inverse balls vertical movement direction.
-				mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
+				mBallDirection.y = -mBallDirection.y;
 
 				mBallDirection = XMVECTOR();
 				tBall = 0.f;
@@ -941,13 +943,13 @@ public:
 				tBall -= hitTime;
 				mBeepSound.Play();
 				*/
-			} else if (mBallDirection.m128_f32[1] > 0.f && Intersect(ballPosition, mBottomWallRect, movement, XMVECTOR(), hitTime, hitNormal)) {
+			} else if (mBallDirection.y > 0.f && Intersect(ballPosition, mBottomWallRect, movement, XMVECTOR(), hitTime, hitNormal)) {
 				// move the ball straight to the hit point.
 				movement = XMVectorScale(movement, hitTime);
 				ballPosition.Move(movement.m128_f32[0], movement.m128_f32[1]);
 
 				// inverse balls vertical movement direction.
-				mBallDirection.m128_f32[1] = -mBallDirection.m128_f32[1];
+				mBallDirection.y = -mBallDirection.y;
 
 				// apply a small nudge to make the ball to leave collision area.
 				movement = XMVectorScale(mBallDirection, mBallVelocity);
@@ -957,13 +959,13 @@ public:
 				// decrease the amount of usable time for ball movement.
 				tBall -= hitTime;
 				mBeepSound->Play();
-			} else if (mBallDirection.m128_f32[0] < 0.f && Intersect(ballPosition, mLeftPaddleRects[prevBufferIdx], movement, leftPaddleMovement, hitTime, hitNormal)) {
+			} else if (mBallDirection.y < 0.f && Intersect(ballPosition, mLeftPaddleRects[prevBufferIdx], movement, leftPaddleMovement, hitTime, hitNormal)) {
 				// move the ball straight to the hit point.
 				movement = XMVectorScale(movement, hitTime);
 				ballPosition.Move(movement.m128_f32[0], movement.m128_f32[1]);
 
 				// inverse balls horizontal movement direction.
-				mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
+				mBallDirection.y = -mBallDirection.y;
 
 				// let's increase ball velocity on each paddle hit.
 				mBallVelocity *= BALL_SPEEDUP_SCALAR;
@@ -988,13 +990,13 @@ public:
 						});
 				}
 				mBeepSound->Play();
-			} else if (mBallDirection.m128_f32[0] > 0.f && Intersect(ballPosition, mRightPaddleRects[prevBufferIdx], movement, rightPaddleMovement, hitTime, hitNormal)) {
+			} else if (mBallDirection.y > 0.f && Intersect(ballPosition, mRightPaddleRects[prevBufferIdx], movement, rightPaddleMovement, hitTime, hitNormal)) {
 				// move the ball straight to the hit point.
 				movement = XMVectorScale(movement, hitTime);
 				ballPosition.Move(movement.m128_f32[0], movement.m128_f32[1]);
 
 				// inverse balls horizontal movement direction.
-				mBallDirection.m128_f32[0] = -mBallDirection.m128_f32[0];
+				mBallDirection.y = -mBallDirection.y;
 
 				// let's increase ball velocity on each paddle hit.
 				mBallVelocity *= BALL_SPEEDUP_SCALAR;
@@ -1159,7 +1161,7 @@ private:
 	float mLeftPaddleVelocity = 0.f;
 	float mRightPaddleVelocity = 0.f;
 
-	XMVECTOR mBallDirection;
+	Vector2 mBallDirection;
 
 	ComPtr<ID3D11Device>		m3dDevice;
 	ComPtr<ID3D11DeviceContext>	m3dCtx;
