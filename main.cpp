@@ -1,3 +1,6 @@
+// a list of couple TODOs....
+// 1. [keyboard] When resuming from a pause or suspend, be sure to call Reset on the tracker object to clear the state history.
+
 #include <concrt.h>
 #include <cwchar>
 #include <d2d1_3.h>
@@ -9,7 +12,8 @@
 #include <wrl.h>
 
 // DirectXTK
-#include <Audio.h>		
+#include <Audio.h>
+#include <Keyboard.h>
 #include <SimpleMath.h>
 
 #include "geometry.h"
@@ -198,6 +202,7 @@ public:
 		InitializeAudio();
 		InitializeGraphics();
 		InitializeGame();
+		mKeyboard = std::make_unique<Keyboard>();
 	}
 
 	void InitializeAudio()
@@ -311,62 +316,12 @@ public:
 		RandomizeBallDirection();
 	}
 
-	void KeyDown(CoreWindow^ window, KeyEventArgs^ args)
-	{
-		switch (args->VirtualKey) {
-		case VirtualKey::Up:
-			mRightPaddleVelocity = -mPaddleVelocity;
-			break;
-		case VirtualKey::Down:
-			mRightPaddleVelocity = mPaddleVelocity;
-			break;
-		case VirtualKey::W:
-			mLeftPaddleVelocity = -mPaddleVelocity;
-			break;
-		case VirtualKey::S:
-			mLeftPaddleVelocity = mPaddleVelocity;
-			break;
-		}
-	}
-
-	void KeyUp(CoreWindow^ window, KeyEventArgs^ args)
-	{
-		switch (args->VirtualKey) {
-		case VirtualKey::Up:
-			if (mRightPaddleVelocity < 0.f) {
-				mRightPaddleVelocity = 0.f;
-			}
-			break;
-		case VirtualKey::Down:
-			if (mRightPaddleVelocity > 0.f) {
-				mRightPaddleVelocity = 0.f;
-			}
-			break;
-		case VirtualKey::W:
-			if (mLeftPaddleVelocity < 0.f) {
-				mLeftPaddleVelocity = 0.f;
-			}
-			break;
-		case VirtualKey::S:
-			if (mLeftPaddleVelocity > 0.f) {
-				mLeftPaddleVelocity = 0.f;
-			}
-			break;
-		case VirtualKey::Enter:
-			if (mLeftPoints >= POINT_TARGET || mRightPoints >= POINT_TARGET) {
-				ResetGame();
-			}
-			break;
-		}
-	}
-
 	virtual void SetWindow(CoreWindow^ window)
 	{
 		window->Closed += ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(this, &Pong::WindowClosed);
 		window->VisibilityChanged += ref new TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^>(this, &Pong::WindowVisibilityChanged);
 		window->SizeChanged += ref new TypedEventHandler<CoreWindow^, WindowSizeChangedEventArgs^>(this, &Pong::WindowSizeChanged);
-		window->KeyDown += ref new TypedEventHandler<CoreWindow^, KeyEventArgs^>(this, &Pong::KeyDown);
-		window->KeyUp += ref new TypedEventHandler<CoreWindow^, KeyEventArgs^>(this, &Pong::KeyUp);
+		mKeyboard->SetWindow(window);
 		ResizeContent();
 	}
 
@@ -791,8 +746,38 @@ public:
 		// TODO
 	}
 
+	void CheckKeyboard() {
+		assert(mKeyboard != nullptr);
+		if (!mKeyboard->IsConnected())
+			return;
+
+		mKeyboardTracker.Update(mKeyboard->GetState());
+		if (mKeyboardTracker.IsKeyPressed(Keyboard::Keys::Up))
+			mRightPaddleVelocity = -mPaddleVelocity;
+		if (mKeyboardTracker.IsKeyPressed(Keyboard::Keys::Down))
+			mRightPaddleVelocity = mPaddleVelocity;
+		if (mKeyboardTracker.IsKeyPressed(Keyboard::Keys::W))
+			mLeftPaddleVelocity = -mPaddleVelocity;
+		if (mKeyboardTracker.IsKeyPressed(Keyboard::Keys::S))
+			mLeftPaddleVelocity = mPaddleVelocity;
+		if (mKeyboardTracker.IsKeyReleased(Keyboard::Keys::Up))
+			mRightPaddleVelocity = max(mRightPaddleVelocity, 0.f);
+		if (mKeyboardTracker.IsKeyReleased(Keyboard::Keys::Down))
+			mRightPaddleVelocity = min(mRightPaddleVelocity, 0.f);
+		if (mKeyboardTracker.IsKeyReleased(Keyboard::Keys::W))
+			mLeftPaddleVelocity = max(mLeftPaddleVelocity, 0.f);
+		if (mKeyboardTracker.IsKeyReleased(Keyboard::Keys::S))
+			mLeftPaddleVelocity = min(mLeftPaddleVelocity, 0.f);
+		if (mKeyboardTracker.IsKeyReleased(Keyboard::Keys::Enter))
+			if (mLeftPoints >= POINT_TARGET || mRightPoints >= POINT_TARGET) {
+				ResetGame();
+			}
+	}
+
 	void CheckInput()
 	{
+		CheckKeyboard();
+
 		critical_section::scoped_lock lock{ mControllersLock };
 		if (mLeftPlayerController != nullptr) {
 			auto reading = mLeftPlayerController->GetCurrentReading();
@@ -1187,6 +1172,9 @@ private:
 	ComPtr<IDWriteTextFormat> mGameOverSmallTextFormat;
 
 	int mBufferIdx = 0;
+
+	std::unique_ptr<Keyboard> mKeyboard;
+	Keyboard::KeyboardStateTracker mKeyboardTracker;
 
 	std::unique_ptr<AudioEngine> mAudioEngine;
 	std::unique_ptr<SoundEffect> mBeepSound;
