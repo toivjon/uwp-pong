@@ -64,7 +64,7 @@ constexpr auto GAMEPAD_FEEDBACK_DURATION_MS = 200;
 // The amount of points player needs to collect to win the game.
 constexpr auto POINT_TARGET = 10;
 // The id and ordinal of the left player.
-constexpr uint8_t PLAYER_LEFT  = 0;
+constexpr uint8_t PLAYER_LEFT = 0;
 // The id and ordinal of the right player.
 constexpr uint8_t PLAYER_RIGHT = 1;
 
@@ -87,8 +87,7 @@ inline float SweptAABB(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float vx, flo
 		// -- calculate distance between farthest points (exit)
 		xInvEntry = b.left - a.right;
 		xInvExit = b.right - a.left;
-	}
-	else {
+	} else {
 		// if a-rect is moving left...
 		// -- calculate distance between closest points (entry)
 		// -- calculate distance between farthest points (exit)
@@ -100,8 +99,7 @@ inline float SweptAABB(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float vx, flo
 	if (vy > 0.f) {
 		yInvEntry = b.top - a.bottom;
 		yInvExit = b.bottom - a.top;
-	}
-	else {
+	} else {
 		yInvEntry = b.bottom - a.top;
 		yInvExit = b.top - a.bottom;
 	}
@@ -118,24 +116,20 @@ inline float SweptAABB(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float vx, flo
 		nx = 0.f;
 		ny = 0.f;
 		return 1.f;
-	}
-	else {
+	} else {
 		if (xEntry > yEntry) {
 			if (xInvEntry < 0.f) {
 				nx = 1.f;
 				ny = 0.f;
-			}
-			else {
+			} else {
 				nx = -1.f;
 				ny = 0.f;
 			}
-		}
-		else {
+		} else {
 			if (yInvEntry < 0.f) {
 				nx = 0.f;
 				ny = 1.f;
-			}
-			else {
+			} else {
 				nx = 0.f;
 				ny = -1.f;
 			}
@@ -159,23 +153,23 @@ inline bool Intersect(const D2D1_RECT_F& a, const D2D1_RECT_F& b, const XMVECTOR
 		if (v.m128_f32[i] <= 0.f) {
 			if (bmax < amin) return false; // no overlap and moving away from each other
 			// if (amax <= bmin) {
-				if (i == 0u) {
-					n = XMVectorSet(-1.f, 0.f, 0.f, 0.f);
-				} else if (t1 > tmin) {
-					n = XMVectorSet(0.f, -1.f, 0.f, 0.f);
-				}
-				tmin = max(t1, tmin);
+			if (i == 0u) {
+				n = XMVectorSet(-1.f, 0.f, 0.f, 0.f);
+			} else if (t1 > tmin) {
+				n = XMVectorSet(0.f, -1.f, 0.f, 0.f);
+			}
+			tmin = max(t1, tmin);
 			// }
 			if (bmax > amin) tmax = min(t2, tmax);
 		} else if (v.m128_f32[i] > 0.f) {
 			if (bmin > amax) return false; // no overlap and moving away from each other
 			// if (bmax < amin) {
-				if (i == 0u) {
-					n = XMVectorSet(1.f, 0.f, 0.f, 0.f);
-				} else if (t1 > tmin) {
-					n = XMVectorSet(0.f, 1.f, 0.f, 0.f);
-				}
-				tmin = max(t1, tmin);
+			if (i == 0u) {
+				n = XMVectorSet(1.f, 0.f, 0.f, 0.f);
+			} else if (t1 > tmin) {
+				n = XMVectorSet(0.f, 1.f, 0.f, 0.f);
+			}
+			tmin = max(t1, tmin);
 			// }
 			if (amax > bmin) tmax = min(t2, tmax);
 		}
@@ -229,9 +223,9 @@ public:
 		UINT flags = 0;
 		flags |= D3D11_CREATE_DEVICE_BGRA_SUPPORT; // for Direct2D compatibility
 		flags |= D3D11_CREATE_DEVICE_SINGLETHREADED;
-		#ifdef _DEBUG
+#ifdef _DEBUG
 		flags |= D3D11_CREATE_DEVICE_DEBUG;
-		#endif
+#endif
 
 		// specify the feature levels we want to support (ordering matters!).
 		D3D_FEATURE_LEVEL featureLevels[] =
@@ -263,9 +257,9 @@ public:
 	{
 		// specify creation configuration for a new Direct2D factory.
 		D2D1_FACTORY_OPTIONS options;
-		#ifdef _DEBUG
+#ifdef _DEBUG
 		options.debugLevel = D2D1_DEBUG_LEVEL_WARNING;
-		#endif
+#endif
 
 		// construct a new Direct2D factory to build Direct2D resources.
 		ThrowIfFailed(D2D1CreateFactory(
@@ -407,8 +401,7 @@ public:
 				// perform interpolated rendering of the game scene.
 				float alpha = float(millisAccumulator) / float(UPDATE_MILLIS);
 				Render(alpha);
-			}
-			else {
+			} else {
 				window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
 			}
 		}
@@ -568,7 +561,7 @@ public:
 		mRightPlayerNameRect.right = mWindowWidth - mWindowWidthSpacing / 2 - mCellSize * .5f;
 
 		for (auto i = 0; i < CENTERLINE_DOTS; i++) {
-			mCenterlineRects[i].top = mWindowHeightSpacing / 2 + (i*2 + 0.5f) * mCellSize;
+			mCenterlineRects[i].top = mWindowHeightSpacing / 2 + (i * 2 + 0.5f) * mCellSize;
 			mCenterlineRects[i].bottom = mCenterlineRects[i].top + mCellSize;
 			mCenterlineRects[i].left = horizontalCenter - (mCellSize / 2);
 			mCenterlineRects[i].right = mCenterlineRects[i].left + mCellSize;
@@ -591,7 +584,7 @@ public:
 			auto oldLeftRelMovement = abs(oldCellSize) <= EPSILON ? 0.f : (mLeftPaddleRects[i].top - (oldHalfHeight - (2.5f * oldCellSize))) / oldCellSize;
 			auto oldRightRelMovement = abs(oldCellSize) <= EPSILON ? 0.f : (mRightPaddleRects[i].top - (oldHalfHeight - (2.5f * oldCellSize))) / oldCellSize;
 			auto ballRelMovementY = abs(oldCellSize) <= EPSILON ? 0.f : (mBallRects[i].top - (oldHalfHeight - (.5f * oldCellSize))) / oldCellSize;
-			auto ballRelMovementX = abs(oldCellSize) <= EPSILON ? 0.f : (mBallRects[i].left - (oldHalfWidth- (.5f * oldCellSize))) / oldCellSize;
+			auto ballRelMovementX = abs(oldCellSize) <= EPSILON ? 0.f : (mBallRects[i].left - (oldHalfWidth - (.5f * oldCellSize))) / oldCellSize;
 
 			mLeftPaddleRects[i].top = verticalCenter - (2.5f * mCellSize) + mCellSize * oldLeftRelMovement;
 			mLeftPaddleRects[i].bottom = mLeftPaddleRects[i].top + 5 * mCellSize;
@@ -604,7 +597,7 @@ public:
 			mRightPaddleRects[i].right = mRightPaddleRects[i].left + mCellSize;
 
 			mBallRects[i].top = verticalCenter - (.5f * mCellSize) + mCellSize * ballRelMovementY;
-			mBallRects[i].bottom = mBallRects[i].top + mCellSize; 
+			mBallRects[i].bottom = mBallRects[i].top + mCellSize;
 			mBallRects[i].left = horizontalCenter - (.5f * mCellSize) + mCellSize * ballRelMovementX;
 			mBallRects[i].right = mBallRects[i].left + mCellSize;
 		}
@@ -619,7 +612,7 @@ public:
 			mCellSize * 3,
 			L"en-us",
 			&mGameOverBigTextFormat
-			));
+		));
 		ThrowIfFailed(mGameOverBigTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER));
 		ThrowIfFailed(mWritefactory->CreateTextFormat(
 			L"Calibri",
@@ -630,25 +623,25 @@ public:
 			mCellSize * 0.75f,
 			L"en-us",
 			&mGameOverSmallTextFormat
-			));
+		));
 		ThrowIfFailed(mGameOverSmallTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER));
 		mGameOverRect = {
 			horizontalCenter - 9 * mCellSize,
-			verticalCenter   - 3 * mCellSize,
+			verticalCenter - 3 * mCellSize,
 			horizontalCenter + 9 * mCellSize,
-			verticalCenter   + 3 * mCellSize
+			verticalCenter + 3 * mCellSize
 		};
 		mGameOverBigTextRect = {
 			horizontalCenter - 9 * mCellSize,
-			verticalCenter   - 3 * mCellSize,
+			verticalCenter - 3 * mCellSize,
 			horizontalCenter + 9 * mCellSize,
-			verticalCenter   + 3 * mCellSize
+			verticalCenter + 3 * mCellSize
 		};
 		mGameOverSmallTextRect = {
 			horizontalCenter - 10 * mCellSize,
 			verticalCenter + mCellSize,
 			horizontalCenter + 10 * mCellSize,
-			verticalCenter   + 2 * mCellSize
+			verticalCenter + 2 * mCellSize
 		};
 	}
 
@@ -1108,7 +1101,7 @@ public:
 				mGameOverBigTextRect,
 				mBlackBrush.Get(),
 				nullptr
-				);
+			);
 			m2dCtx->DrawText(
 				L"Press Gamepad X or Keyboard Enter To Continue",
 				46,
@@ -1116,7 +1109,7 @@ public:
 				mGameOverSmallTextRect,
 				mBlackBrush.Get(),
 				nullptr
-				);
+			);
 		}
 
 		ThrowIfFailed(m2dCtx->EndDraw());
@@ -1150,8 +1143,8 @@ private:
 	std::wstring mLeftPlayerName = LEFT_PLAYER_NAME_PLACEHOLDER;
 	std::wstring mRightPlayerName = RIGHT_PLAYER_NAME_PLACEHOLDER;
 
-	Gamepad^			mLeftPlayerController;
-	Gamepad^			mRightPlayerController;
+	Gamepad^ mLeftPlayerController;
+	Gamepad^ mRightPlayerController;
 	critical_section	mControllersLock;
 
 	float mLeftPaddleVelocity = 0.f;
