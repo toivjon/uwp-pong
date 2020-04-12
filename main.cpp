@@ -87,15 +87,6 @@ inline D2D1_RECT_F Interpolate(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float
 	return result;
 }
 
-inline D2D1_RECT_F MergeAABB(const D2D1_RECT_F& a, const D2D1_RECT_F& b) {
-	D2D1_RECT_F aabb;
-	aabb.bottom = max(a.bottom, b.bottom);
-	aabb.top = min(a.top, b.top);
-	aabb.right = max(a.right, b.right);
-	aabb.left = min(a.left, b.left);
-	return aabb;
-}
-
 inline float SweptAABB(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float vx, float vy, float& nx, float& ny) {
 	float xInvEntry, xInvExit, xEntry, xExit;
 	if (vx > 0.f) {
