@@ -4,9 +4,8 @@
 
 namespace pong::geometry
 {
-	class Rectangle final : public D2D1_RECT_F
+	struct Rectangle : public D2D1_RECT_F
 	{
-	public:
 		bool Contains(float x, float y) const;
 		bool Contains(const Rectangle& rect) const;
 		bool Collides(const Rectangle& rect) const;
