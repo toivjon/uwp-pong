@@ -11,5 +11,7 @@ namespace pong::geometry
 		bool Collides(const Rectangle& rect) const;
 		void Set(float left, float top, float right, float bottom);
 		void Move(float x, float y);
+
+		static Rectangle Lerp(const Rectangle& r1, const Rectangle& r2, float t);
 	};
 }

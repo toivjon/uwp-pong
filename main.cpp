@@ -79,16 +79,6 @@ inline void ThrowIfFailed(HRESULT hr) {
 	}
 }
 
-inline D2D1_RECT_F Interpolate(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float alpha)
-{
-	D2D1_RECT_F result;
-	result.top = a.top + (b.top - a.top) * alpha;
-	result.bottom = a.bottom + (b.bottom - a.bottom) * alpha;
-	result.left = a.left + (b.left - a.left) * alpha;
-	result.right = a.right + (b.right - a.right) * alpha;
-	return result;
-}
-
 inline float SweptAABB(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float vx, float vy, float& nx, float& ny) {
 	float xInvEntry, xInvExit, xEntry, xExit;
 	if (vx > 0.f) {
@@ -1092,9 +1082,21 @@ public:
 
 		auto prevBufferIdx = mBufferIdx == 0 ? 1 : 0;
 
-		m2dCtx->FillRectangle(Interpolate(mLeftPaddleRects[prevBufferIdx], mLeftPaddleRects[mBufferIdx], alpha), mWhiteBrush.Get());
-		m2dCtx->FillRectangle(Interpolate(mRightPaddleRects[prevBufferIdx], mRightPaddleRects[mBufferIdx], alpha), mWhiteBrush.Get());
-		m2dCtx->FillRectangle(Interpolate(mBallRects[prevBufferIdx], mBallRects[mBufferIdx], alpha), mWhiteBrush.Get());
+		m2dCtx->FillRectangle(geometry::Rectangle::Lerp(
+			mLeftPaddleRects[prevBufferIdx],
+			mLeftPaddleRects[mBufferIdx],
+			alpha),
+			mWhiteBrush.Get());
+		m2dCtx->FillRectangle(geometry::Rectangle::Lerp(
+			mRightPaddleRects[prevBufferIdx],
+			mRightPaddleRects[mBufferIdx],
+			alpha),
+			mWhiteBrush.Get());
+		m2dCtx->FillRectangle(geometry::Rectangle::Lerp(
+			mBallRects[prevBufferIdx],
+			mBallRects[mBufferIdx],
+			alpha),
+			mWhiteBrush.Get());
 
 		// draw the game over box if the game is over
 		if (mRightPoints >= POINT_TARGET || mLeftPoints >= POINT_TARGET) {

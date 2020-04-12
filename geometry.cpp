@@ -30,3 +30,12 @@ void Rectangle::Move(float x, float y) {
 	top += y;
 	bottom += y;
 }
+
+Rectangle Rectangle::Lerp(const Rectangle& r1, const Rectangle& r2, float t) {
+	return Rectangle{
+		r1.left + t * (r2.left - r1.left),
+		r1.top + t * (r2.top - r1.top),
+		r1.right + t *(r2.right - r1.right),
+		r1.bottom + t * (r2.bottom - r1.bottom),
+	};
+}
