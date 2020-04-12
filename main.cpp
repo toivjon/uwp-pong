@@ -752,26 +752,36 @@ public:
 			return;
 
 		mKeyboardTracker.Update(mKeyboard->GetState());
-		if (mKeyboardTracker.IsKeyPressed(Keyboard::Keys::Up))
-			mRightPaddleVelocity = -mPaddleVelocity;
-		if (mKeyboardTracker.IsKeyPressed(Keyboard::Keys::Down))
-			mRightPaddleVelocity = mPaddleVelocity;
-		if (mKeyboardTracker.IsKeyPressed(Keyboard::Keys::W))
-			mLeftPaddleVelocity = -mPaddleVelocity;
-		if (mKeyboardTracker.IsKeyPressed(Keyboard::Keys::S))
-			mLeftPaddleVelocity = mPaddleVelocity;
-		if (mKeyboardTracker.IsKeyReleased(Keyboard::Keys::Up))
-			mRightPaddleVelocity = max(mRightPaddleVelocity, 0.f);
-		if (mKeyboardTracker.IsKeyReleased(Keyboard::Keys::Down))
-			mRightPaddleVelocity = min(mRightPaddleVelocity, 0.f);
-		if (mKeyboardTracker.IsKeyReleased(Keyboard::Keys::W))
-			mLeftPaddleVelocity = max(mLeftPaddleVelocity, 0.f);
-		if (mKeyboardTracker.IsKeyReleased(Keyboard::Keys::S))
-			mLeftPaddleVelocity = min(mLeftPaddleVelocity, 0.f);
-		if (mKeyboardTracker.IsKeyReleased(Keyboard::Keys::Enter))
-			if (mLeftPoints >= POINT_TARGET || mRightPoints >= POINT_TARGET) {
+
+		if (mLeftPoints >= POINT_TARGET || mRightPoints >= POINT_TARGET) {
+			if (mKeyboardTracker.IsKeyReleased(Keyboard::Keys::Enter)) {
 				ResetGame();
 			}
+		} else {
+			if (mKeyboardTracker.IsKeyPressed(Keyboard::Keys::Up)) {
+				mRightPaddleVelocity = -mPaddleVelocity;
+			} else if (mKeyboardTracker.IsKeyReleased(Keyboard::Keys::Up)) {
+				mRightPaddleVelocity = max(mRightPaddleVelocity, 0.f);
+			}
+
+			if (mKeyboardTracker.IsKeyPressed(Keyboard::Keys::Down)) {
+				mRightPaddleVelocity = mPaddleVelocity;
+			} else if (mKeyboardTracker.IsKeyReleased(Keyboard::Keys::Down)) {
+				mRightPaddleVelocity = min(mRightPaddleVelocity, 0.f);
+			}
+
+			if (mKeyboardTracker.IsKeyPressed(Keyboard::Keys::W)) {
+				mLeftPaddleVelocity = -mPaddleVelocity;
+			} else if (mKeyboardTracker.IsKeyReleased(Keyboard::Keys::W)) {
+				mLeftPaddleVelocity = max(mLeftPaddleVelocity, 0.f);
+			}
+
+			if (mKeyboardTracker.IsKeyPressed(Keyboard::Keys::S)) {
+				mLeftPaddleVelocity = mPaddleVelocity;
+			} else if (mKeyboardTracker.IsKeyReleased(Keyboard::Keys::S)) {
+				mLeftPaddleVelocity = min(mLeftPaddleVelocity, 0.f);
+			}
+		}
 	}
 
 	void CheckInput()
