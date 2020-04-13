@@ -753,7 +753,7 @@ public:
 
 		mKeyboardTracker.Update(mKeyboard->GetState());
 
-		if (mLeftPoints >= POINT_TARGET || mRightPoints >= POINT_TARGET) {
+		if (IsGameOver()) {
 			if (mKeyboardTracker.IsKeyReleased(Keyboard::Keys::Enter)) {
 				ResetGame();
 			}
@@ -792,7 +792,7 @@ public:
 		if (mLeftPlayerController != nullptr) {
 			auto reading = mLeftPlayerController->GetCurrentReading();
 			mLeftPaddleVelocity.y = abs(reading.LeftThumbstickY) < GAMEPAD_DEADZONE ? 0.f : static_cast<float>(reading.LeftThumbstickY) * -mPaddleVelocity;
-			if (mLeftPoints >= POINT_TARGET || mRightPoints >= POINT_TARGET) {
+			if (IsGameOver()) {
 				if (GamepadButtons::X == (reading.Buttons & GamepadButtons::X)) {
 					ResetGame();
 				}
@@ -801,7 +801,7 @@ public:
 		if (mRightPlayerController != nullptr) {
 			auto reading = mRightPlayerController->GetCurrentReading();
 			mRightPaddleVelocity.y = abs(reading.LeftThumbstickY) < GAMEPAD_DEADZONE ? 0.f : static_cast<float>(reading.LeftThumbstickY) * -mPaddleVelocity;
-			if (mLeftPoints >= POINT_TARGET || mRightPoints >= POINT_TARGET) {
+			if (IsGameOver()) {
 				if (GamepadButtons::X == (reading.Buttons & GamepadButtons::X)) {
 					ResetGame();
 				}
@@ -818,10 +818,14 @@ public:
 		RandomizeBallDirection();
 	}
 
+	bool IsGameOver() {
+		return mLeftPoints >= POINT_TARGET || mRightPoints >= POINT_TARGET;
+	}
+
 	void Update(int dt)
 	{
 		// don't update anything while the game is over.
-		if (mLeftPoints >= POINT_TARGET || mRightPoints >= POINT_TARGET) {
+		if (IsGameOver()) {
 			return;
 		}
 
