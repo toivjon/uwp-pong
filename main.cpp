@@ -433,13 +433,13 @@ public:
 		}
 
 		// correct left paddle velocity if currently applied.
-		if (mLeftPaddleVelocity > EPSILON || mLeftPaddleVelocity < -EPSILON) {
-			mLeftPaddleVelocity = mPaddleVelocity;
+		if (mLeftPaddleVelocity.y > EPSILON || mLeftPaddleVelocity.y < -EPSILON) {
+			mLeftPaddleVelocity.y = mPaddleVelocity;
 		}
 
 		// correct right paddle velocity if currently applied.
-		if (mRightPaddleVelocity > EPSILON || mRightPaddleVelocity < -EPSILON) {
-			mRightPaddleVelocity = mPaddleVelocity;
+		if (mRightPaddleVelocity.y > EPSILON || mRightPaddleVelocity.y < -EPSILON) {
+			mRightPaddleVelocity.y = mPaddleVelocity;
 		}
 
 		// calculate view center points.
@@ -731,12 +731,12 @@ public:
 		if (mLeftPlayerController == gamepad) {
 			mLeftPlayerController = nullptr;
 			mLeftPlayerName = LEFT_PLAYER_NAME_PLACEHOLDER;
-			mLeftPaddleVelocity = 0.f;
+			mLeftPaddleVelocity.y = 0.f;
 			Pause();
 		} else if (mRightPlayerController == gamepad) {
 			mRightPlayerController = nullptr;
 			mRightPlayerName = RIGHT_PLAYER_NAME_PLACEHOLDER;
-			mRightPaddleVelocity = 0.f;
+			mRightPaddleVelocity.y = 0.f;
 			Pause();
 		}
 	}
@@ -759,27 +759,27 @@ public:
 			}
 		} else {
 			if (mKeyboardTracker.IsKeyPressed(Keyboard::Keys::Up)) {
-				mRightPaddleVelocity = -mPaddleVelocity;
+				mRightPaddleVelocity.y = -mPaddleVelocity;
 			} else if (mKeyboardTracker.IsKeyReleased(Keyboard::Keys::Up)) {
-				mRightPaddleVelocity = max(mRightPaddleVelocity, 0.f);
+				mRightPaddleVelocity.y = max(mRightPaddleVelocity.y, 0.f);
 			}
 
 			if (mKeyboardTracker.IsKeyPressed(Keyboard::Keys::Down)) {
-				mRightPaddleVelocity = mPaddleVelocity;
+				mRightPaddleVelocity.y = mPaddleVelocity;
 			} else if (mKeyboardTracker.IsKeyReleased(Keyboard::Keys::Down)) {
-				mRightPaddleVelocity = min(mRightPaddleVelocity, 0.f);
+				mRightPaddleVelocity.y = min(mRightPaddleVelocity.y, 0.f);
 			}
 
 			if (mKeyboardTracker.IsKeyPressed(Keyboard::Keys::W)) {
-				mLeftPaddleVelocity = -mPaddleVelocity;
+				mLeftPaddleVelocity.y = -mPaddleVelocity;
 			} else if (mKeyboardTracker.IsKeyReleased(Keyboard::Keys::W)) {
-				mLeftPaddleVelocity = max(mLeftPaddleVelocity, 0.f);
+				mLeftPaddleVelocity.y = max(mLeftPaddleVelocity.y, 0.f);
 			}
 
 			if (mKeyboardTracker.IsKeyPressed(Keyboard::Keys::S)) {
-				mLeftPaddleVelocity = mPaddleVelocity;
+				mLeftPaddleVelocity.y = mPaddleVelocity;
 			} else if (mKeyboardTracker.IsKeyReleased(Keyboard::Keys::S)) {
-				mLeftPaddleVelocity = min(mLeftPaddleVelocity, 0.f);
+				mLeftPaddleVelocity.y = min(mLeftPaddleVelocity.y, 0.f);
 			}
 		}
 	}
@@ -791,7 +791,7 @@ public:
 		critical_section::scoped_lock lock{ mControllersLock };
 		if (mLeftPlayerController != nullptr) {
 			auto reading = mLeftPlayerController->GetCurrentReading();
-			mLeftPaddleVelocity = abs(reading.LeftThumbstickY) < GAMEPAD_DEADZONE ? 0.f : static_cast<float>(reading.LeftThumbstickY) * -mPaddleVelocity;
+			mLeftPaddleVelocity.y = abs(reading.LeftThumbstickY) < GAMEPAD_DEADZONE ? 0.f : static_cast<float>(reading.LeftThumbstickY) * -mPaddleVelocity;
 			if (mLeftPoints >= POINT_TARGET || mRightPoints >= POINT_TARGET) {
 				if (GamepadButtons::X == (reading.Buttons & GamepadButtons::X)) {
 					ResetGame();
@@ -800,7 +800,7 @@ public:
 		}
 		if (mRightPlayerController != nullptr) {
 			auto reading = mRightPlayerController->GetCurrentReading();
-			mRightPaddleVelocity = abs(reading.LeftThumbstickY) < GAMEPAD_DEADZONE ? 0.f : static_cast<float>(reading.LeftThumbstickY) * -mPaddleVelocity;
+			mRightPaddleVelocity.y = abs(reading.LeftThumbstickY) < GAMEPAD_DEADZONE ? 0.f : static_cast<float>(reading.LeftThumbstickY) * -mPaddleVelocity;
 			if (mLeftPoints >= POINT_TARGET || mRightPoints >= POINT_TARGET) {
 				if (GamepadButtons::X == (reading.Buttons & GamepadButtons::X)) {
 					ResetGame();
@@ -835,12 +835,10 @@ public:
 		auto prevBufferIdx = (mBufferIdx + 1) % 2;
 
 		// apply movement to paddles.
-		auto leftPaddleMovement = XMVectorSet(0.f, mLeftPaddleVelocity, 0.f, 0.f);
-		auto rightPaddleMovement = XMVectorSet(0.f, mRightPaddleVelocity, 0.f, 0.f);
 		auto leftPaddlePosition = mLeftPaddleRects[prevBufferIdx];
 		auto rightPaddlePosition = mRightPaddleRects[prevBufferIdx];
-		leftPaddlePosition.Move(leftPaddleMovement.m128_f32[0], leftPaddleMovement.m128_f32[1]);
-		rightPaddlePosition.Move(rightPaddleMovement.m128_f32[0], rightPaddleMovement.m128_f32[1]);
+		leftPaddlePosition.Move(mLeftPaddleVelocity.x, mLeftPaddleVelocity.y);
+		rightPaddlePosition.Move(mRightPaddleVelocity.x, mRightPaddleVelocity.y);
 		mLeftPaddleRects[mBufferIdx] = leftPaddlePosition;
 		mRightPaddleRects[mBufferIdx] = rightPaddlePosition;
 
@@ -931,7 +929,7 @@ public:
 				// decrease the amount of usable time for ball movement.
 				tBall -= hitTime;
 				mBeepSound->Play();
-			} else if (mBallDirection.y < 0.f && Intersect(ballPosition, mLeftPaddleRects[prevBufferIdx], movement, leftPaddleMovement, hitTime, hitNormal)) {
+			} else if (mBallDirection.y < 0.f && Intersect(ballPosition, mLeftPaddleRects[prevBufferIdx], movement, mLeftPaddleVelocity, hitTime, hitNormal)) {
 				// move the ball straight to the hit point.
 				movement = XMVectorScale(movement, hitTime);
 				ballPosition.Move(movement.m128_f32[0], movement.m128_f32[1]);
@@ -962,7 +960,7 @@ public:
 						});
 				}
 				mBeepSound->Play();
-			} else if (mBallDirection.y > 0.f && Intersect(ballPosition, mRightPaddleRects[prevBufferIdx], movement, rightPaddleMovement, hitTime, hitNormal)) {
+			} else if (mBallDirection.y > 0.f && Intersect(ballPosition, mRightPaddleRects[prevBufferIdx], movement, mLeftPaddleVelocity, hitTime, hitNormal)) {
 				// move the ball straight to the hit point.
 				movement = XMVectorScale(movement, hitTime);
 				ballPosition.Move(movement.m128_f32[0], movement.m128_f32[1]);
@@ -1142,8 +1140,8 @@ private:
 	Gamepad^ mRightPlayerController;
 	critical_section	mControllersLock;
 
-	float mLeftPaddleVelocity = 0.f;
-	float mRightPaddleVelocity = 0.f;
+	Vector2 mLeftPaddleVelocity;
+	Vector2 mRightPaddleVelocity;
 
 	Vector2 mBallDirection;
 
