@@ -165,7 +165,7 @@ inline bool Intersect(const D2D1_RECT_F& a, const D2D1_RECT_F& b, const XMVECTOR
 			tmin = max(t1, tmin);
 			// }
 			if (bmax > amin) tmax = min(t2, tmax);
-		} else if (v.m128_f32[i] > 0.f) {
+		} else {
 			if (bmin > amax) return false; // no overlap and moving away from each other
 			// if (bmax < amin) {
 			if (i == 0u) {
