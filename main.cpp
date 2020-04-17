@@ -538,8 +538,8 @@ public:
 		for (auto i = 0; i < 2; i++) {
 			auto oldLeftRelMovement = abs(oldCellSize) <= EPSILON ? 0.f : (mLeftPaddle[i].top - (oldHalfHeight - (2.5f * oldCellSize))) / oldCellSize;
 			auto oldRightRelMovement = abs(oldCellSize) <= EPSILON ? 0.f : (mRightPaddle[i].top - (oldHalfHeight - (2.5f * oldCellSize))) / oldCellSize;
-			auto ballRelMovementY = abs(oldCellSize) <= EPSILON ? 0.f : (mBallRects[i].top - (oldHalfHeight - (.5f * oldCellSize))) / oldCellSize;
-			auto ballRelMovementX = abs(oldCellSize) <= EPSILON ? 0.f : (mBallRects[i].left - (oldHalfWidth - (.5f * oldCellSize))) / oldCellSize;
+			auto ballRelMovementY = abs(oldCellSize) <= EPSILON ? 0.f : (mBall[i].top - (oldHalfHeight - (.5f * oldCellSize))) / oldCellSize;
+			auto ballRelMovementX = abs(oldCellSize) <= EPSILON ? 0.f : (mBall[i].left - (oldHalfWidth - (.5f * oldCellSize))) / oldCellSize;
 
 			mLeftPaddle[i].top = verticalCenter - (2.5f * mCellSize) + mCellSize * oldLeftRelMovement;
 			mLeftPaddle[i].bottom = mLeftPaddle[i].top + 5 * mCellSize;
@@ -551,10 +551,10 @@ public:
 			mRightPaddle[i].left = mWindowWidth - (2 * mCellSize + mWindowWidthSpacing / 2);
 			mRightPaddle[i].right = mRightPaddle[i].left + mCellSize;
 
-			mBallRects[i].top = verticalCenter - (.5f * mCellSize) + mCellSize * ballRelMovementY;
-			mBallRects[i].bottom = mBallRects[i].top + mCellSize;
-			mBallRects[i].left = horizontalCenter - (.5f * mCellSize) + mCellSize * ballRelMovementX;
-			mBallRects[i].right = mBallRects[i].left + mCellSize;
+			mBall[i].top = verticalCenter - (.5f * mCellSize) + mCellSize * ballRelMovementY;
+			mBall[i].bottom = mBall[i].top + mCellSize;
+			mBall[i].left = horizontalCenter - (.5f * mCellSize) + mCellSize * ballRelMovementX;
+			mBall[i].right = mBall[i].left + mCellSize;
 		}
 
 		// build game over specific objects
@@ -618,10 +618,10 @@ public:
 			mRightPaddle[i].left = mWindowWidth - (2 * mCellSize + mWindowWidthSpacing / 2);
 			mRightPaddle[i].right = mRightPaddle[i].left + mCellSize;
 
-			mBallRects[i].top = halfHeight - (.5f * mCellSize);
-			mBallRects[i].bottom = mBallRects[i].top + mCellSize;
-			mBallRects[i].left = halfWidth - (.5f * mCellSize);
-			mBallRects[i].right = mBallRects[i].left + mCellSize;
+			mBall[i].top = halfHeight - (.5f * mCellSize);
+			mBall[i].bottom = mBall[i].top + mCellSize;
+			mBall[i].left = halfWidth - (.5f * mCellSize);
+			mBall[i].right = mBall[i].left + mCellSize;
 		}
 
 		// reset ball velocity.
@@ -872,7 +872,7 @@ public:
 		// TODO temporary test solution
 		mBallDirection = XMVector2Normalize(XMVectorSet(.5f, .5f, 0.f, 0.f));
 		auto tBall = 1.f;
-		auto ballPosition = mBallRects[prevBufferIdx];
+		auto ballPosition = mBall[prevBufferIdx];
 		auto movement = XMVectorScale(mBallDirection, mBallVelocity);
 		movement = XMVectorScale(movement, tBall);
 		auto hitTime = 0.f;
@@ -882,10 +882,10 @@ public:
 			return;
 		}
 		ballPosition = MoveAABB(ballPosition, movement);
-		mBallRects[mBufferIdx] = ballPosition;
+		mBall[mBufferIdx] = ballPosition;
 		*/
 		auto tBall = static_cast<float>(dt);
-		auto ballPosition = mBallRects[prevBufferIdx];
+		auto ballPosition = mBall[prevBufferIdx];
 		while (tBall > 0.f) {
 			// create a movement vector scaled with the time left for the ball.
 			auto movement = XMVectorScale(mBallDirection, mBallVelocity * tBall);
@@ -905,7 +905,7 @@ public:
 
 				mBallDirection = XMVECTOR();
 				tBall = 0.f;
-				// ballPosition = mBallRects[prevBufferIdx];
+				// ballPosition = mBall[prevBufferIdx];
 
 				/*
 				// apply a small nudge to make the ball to leave collision area.
@@ -1001,12 +1001,12 @@ public:
 				tBall = 0.f;
 			}
 		}
-		mBallRects[mBufferIdx] = ballPosition;
+		mBall[mBufferIdx] = ballPosition;
 
 		// check whether the ball has reached a goal.
-		if (mLeftGoalRect.Contains(mBallRects[mBufferIdx])) {
+		if (mLeftGoalRect.Contains(mBall[mBufferIdx])) {
 			handleGoal(PLAYER_RIGHT);
-		} else if (mRightGoalRect.Contains(mBallRects[mBufferIdx])) {
+		} else if (mRightGoalRect.Contains(mBall[mBufferIdx])) {
 			handleGoal(PLAYER_LEFT);
 		}
 	}
@@ -1083,8 +1083,8 @@ public:
 			alpha),
 			mWhiteBrush.Get());
 		m2dCtx->FillRectangle(geometry::Rectangle::Lerp(
-			mBallRects[prevBufferIdx],
-			mBallRects[mBufferIdx],
+			mBall[prevBufferIdx],
+			mBall[mBufferIdx],
 			alpha),
 			mWhiteBrush.Get());
 
@@ -1173,7 +1173,7 @@ private:
 	geometry::Rectangle mRightPlayerNameRect;
 	geometry::Rectangle mLeftPaddle[2];
 	geometry::Rectangle mRightPaddle[2];
-	geometry::Rectangle mBallRects[2];
+	geometry::Rectangle mBall[2];
 	geometry::Rectangle mLeftGoalRect;
 	geometry::Rectangle mRightGoalRect;
 
