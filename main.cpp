@@ -536,20 +536,20 @@ public:
 		auto oldHalfHeight = oldHeight / 2.f;
 
 		for (auto i = 0; i < 2; i++) {
-			auto oldLeftRelMovement = abs(oldCellSize) <= EPSILON ? 0.f : (mLeftPaddleRects[i].top - (oldHalfHeight - (2.5f * oldCellSize))) / oldCellSize;
-			auto oldRightRelMovement = abs(oldCellSize) <= EPSILON ? 0.f : (mRightPaddleRects[i].top - (oldHalfHeight - (2.5f * oldCellSize))) / oldCellSize;
+			auto oldLeftRelMovement = abs(oldCellSize) <= EPSILON ? 0.f : (mLeftPaddle[i].top - (oldHalfHeight - (2.5f * oldCellSize))) / oldCellSize;
+			auto oldRightRelMovement = abs(oldCellSize) <= EPSILON ? 0.f : (mRightPaddle[i].top - (oldHalfHeight - (2.5f * oldCellSize))) / oldCellSize;
 			auto ballRelMovementY = abs(oldCellSize) <= EPSILON ? 0.f : (mBallRects[i].top - (oldHalfHeight - (.5f * oldCellSize))) / oldCellSize;
 			auto ballRelMovementX = abs(oldCellSize) <= EPSILON ? 0.f : (mBallRects[i].left - (oldHalfWidth - (.5f * oldCellSize))) / oldCellSize;
 
-			mLeftPaddleRects[i].top = verticalCenter - (2.5f * mCellSize) + mCellSize * oldLeftRelMovement;
-			mLeftPaddleRects[i].bottom = mLeftPaddleRects[i].top + 5 * mCellSize;
-			mLeftPaddleRects[i].left = mWindowWidthSpacing / 2 + mCellSize;
-			mLeftPaddleRects[i].right = mLeftPaddleRects[i].left + mCellSize;
+			mLeftPaddle[i].top = verticalCenter - (2.5f * mCellSize) + mCellSize * oldLeftRelMovement;
+			mLeftPaddle[i].bottom = mLeftPaddle[i].top + 5 * mCellSize;
+			mLeftPaddle[i].left = mWindowWidthSpacing / 2 + mCellSize;
+			mLeftPaddle[i].right = mLeftPaddle[i].left + mCellSize;
 
-			mRightPaddleRects[i].top = verticalCenter - (2.5f * mCellSize) + mCellSize * oldRightRelMovement;
-			mRightPaddleRects[i].bottom = mRightPaddleRects[i].top + 5 * mCellSize;
-			mRightPaddleRects[i].left = mWindowWidth - (2 * mCellSize + mWindowWidthSpacing / 2);
-			mRightPaddleRects[i].right = mRightPaddleRects[i].left + mCellSize;
+			mRightPaddle[i].top = verticalCenter - (2.5f * mCellSize) + mCellSize * oldRightRelMovement;
+			mRightPaddle[i].bottom = mRightPaddle[i].top + 5 * mCellSize;
+			mRightPaddle[i].left = mWindowWidth - (2 * mCellSize + mWindowWidthSpacing / 2);
+			mRightPaddle[i].right = mRightPaddle[i].left + mCellSize;
 
 			mBallRects[i].top = verticalCenter - (.5f * mCellSize) + mCellSize * ballRelMovementY;
 			mBallRects[i].bottom = mBallRects[i].top + mCellSize;
@@ -608,15 +608,15 @@ public:
 
 		// reset both buffers for each moving object.
 		for (auto i = 0; i < 2; i++) {
-			mLeftPaddleRects[i].top = halfHeight - (2.5f * mCellSize);
-			mLeftPaddleRects[i].bottom = mLeftPaddleRects[i].top + 5 * mCellSize;
-			mLeftPaddleRects[i].left = mWindowWidthSpacing / 2 + mCellSize;
-			mLeftPaddleRects[i].right = mLeftPaddleRects[i].left + mCellSize;
+			mLeftPaddle[i].top = halfHeight - (2.5f * mCellSize);
+			mLeftPaddle[i].bottom = mLeftPaddle[i].top + 5 * mCellSize;
+			mLeftPaddle[i].left = mWindowWidthSpacing / 2 + mCellSize;
+			mLeftPaddle[i].right = mLeftPaddle[i].left + mCellSize;
 
-			mRightPaddleRects[i].top = halfHeight - (2.5f * mCellSize);
-			mRightPaddleRects[i].bottom = mRightPaddleRects[i].top + 5 * mCellSize;
-			mRightPaddleRects[i].left = mWindowWidth - (2 * mCellSize + mWindowWidthSpacing / 2);
-			mRightPaddleRects[i].right = mRightPaddleRects[i].left + mCellSize;
+			mRightPaddle[i].top = halfHeight - (2.5f * mCellSize);
+			mRightPaddle[i].bottom = mRightPaddle[i].top + 5 * mCellSize;
+			mRightPaddle[i].left = mWindowWidth - (2 * mCellSize + mWindowWidthSpacing / 2);
+			mRightPaddle[i].right = mRightPaddle[i].left + mCellSize;
 
 			mBallRects[i].top = halfHeight - (.5f * mCellSize);
 			mBallRects[i].bottom = mBallRects[i].top + mCellSize;
@@ -839,33 +839,33 @@ public:
 		auto prevBufferIdx = (mBufferIdx + 1) % 2;
 
 		// apply movement to paddles.
-		auto leftPaddlePosition = mLeftPaddleRects[prevBufferIdx];
-		auto rightPaddlePosition = mRightPaddleRects[prevBufferIdx];
+		auto leftPaddlePosition = mLeftPaddle[prevBufferIdx];
+		auto rightPaddlePosition = mRightPaddle[prevBufferIdx];
 		leftPaddlePosition.Move(mLeftPaddleVelocity.x, mLeftPaddleVelocity.y);
 		rightPaddlePosition.Move(mRightPaddleVelocity.x, mRightPaddleVelocity.y);
-		mLeftPaddleRects[mBufferIdx] = leftPaddlePosition;
-		mRightPaddleRects[mBufferIdx] = rightPaddlePosition;
+		mLeftPaddle[mBufferIdx] = leftPaddlePosition;
+		mRightPaddle[mBufferIdx] = rightPaddlePosition;
 
 		// check that the left paddle stays between the top and bottom wall.
-		if (mLeftPaddleRects[mBufferIdx].Collides(mBottomWallRect)) {
-			auto paddleHeight = mLeftPaddleRects[mBufferIdx].bottom - mLeftPaddleRects[mBufferIdx].top;
-			mLeftPaddleRects[mBufferIdx].bottom = mBottomWallRect.top;
-			mLeftPaddleRects[mBufferIdx].top = mBottomWallRect.top - paddleHeight;
-		} else if (mLeftPaddleRects[mBufferIdx].Collides(mTopWallRect)) {
-			auto paddleHeight = mLeftPaddleRects[mBufferIdx].bottom - mLeftPaddleRects[mBufferIdx].top;
-			mLeftPaddleRects[mBufferIdx].bottom = mTopWallRect.bottom + paddleHeight;
-			mLeftPaddleRects[mBufferIdx].top = mTopWallRect.bottom;
+		if (mLeftPaddle[mBufferIdx].Collides(mBottomWallRect)) {
+			auto paddleHeight = mLeftPaddle[mBufferIdx].bottom - mLeftPaddle[mBufferIdx].top;
+			mLeftPaddle[mBufferIdx].bottom = mBottomWallRect.top;
+			mLeftPaddle[mBufferIdx].top = mBottomWallRect.top - paddleHeight;
+		} else if (mLeftPaddle[mBufferIdx].Collides(mTopWallRect)) {
+			auto paddleHeight = mLeftPaddle[mBufferIdx].bottom - mLeftPaddle[mBufferIdx].top;
+			mLeftPaddle[mBufferIdx].bottom = mTopWallRect.bottom + paddleHeight;
+			mLeftPaddle[mBufferIdx].top = mTopWallRect.bottom;
 		}
 
 		// check that the right paddle stays between the top and bottom wall.
-		if (mRightPaddleRects[mBufferIdx].Collides(mBottomWallRect)) {
-			auto paddleHeight = mRightPaddleRects[mBufferIdx].bottom - mRightPaddleRects[mBufferIdx].top;
-			mRightPaddleRects[mBufferIdx].bottom = mBottomWallRect.top;
-			mRightPaddleRects[mBufferIdx].top = mBottomWallRect.top - paddleHeight;
-		} else if (mRightPaddleRects[mBufferIdx].Collides(mTopWallRect)) {
-			auto paddleHeight = mRightPaddleRects[mBufferIdx].bottom - mRightPaddleRects[mBufferIdx].top;
-			mRightPaddleRects[mBufferIdx].bottom = mTopWallRect.bottom + paddleHeight;
-			mRightPaddleRects[mBufferIdx].top = mTopWallRect.bottom;
+		if (mRightPaddle[mBufferIdx].Collides(mBottomWallRect)) {
+			auto paddleHeight = mRightPaddle[mBufferIdx].bottom - mRightPaddle[mBufferIdx].top;
+			mRightPaddle[mBufferIdx].bottom = mBottomWallRect.top;
+			mRightPaddle[mBufferIdx].top = mBottomWallRect.top - paddleHeight;
+		} else if (mRightPaddle[mBufferIdx].Collides(mTopWallRect)) {
+			auto paddleHeight = mRightPaddle[mBufferIdx].bottom - mRightPaddle[mBufferIdx].top;
+			mRightPaddle[mBufferIdx].bottom = mTopWallRect.bottom + paddleHeight;
+			mRightPaddle[mBufferIdx].top = mTopWallRect.bottom;
 		}
 
 		/*
@@ -933,7 +933,7 @@ public:
 				// decrease the amount of usable time for ball movement.
 				tBall -= hitTime;
 				mBeepSound->Play();
-			} else if (mBallDirection.y < 0.f && Intersect(ballPosition, mLeftPaddleRects[prevBufferIdx], movement, mLeftPaddleVelocity, hitTime, hitNormal)) {
+			} else if (mBallDirection.y < 0.f && Intersect(ballPosition, mLeftPaddle[prevBufferIdx], movement, mLeftPaddleVelocity, hitTime, hitNormal)) {
 				// move the ball straight to the hit point.
 				movement = XMVectorScale(movement, hitTime);
 				ballPosition.Move(movement.m128_f32[0], movement.m128_f32[1]);
@@ -964,7 +964,7 @@ public:
 						});
 				}
 				mBeepSound->Play();
-			} else if (mBallDirection.y > 0.f && Intersect(ballPosition, mRightPaddleRects[prevBufferIdx], movement, mLeftPaddleVelocity, hitTime, hitNormal)) {
+			} else if (mBallDirection.y > 0.f && Intersect(ballPosition, mRightPaddle[prevBufferIdx], movement, mLeftPaddleVelocity, hitTime, hitNormal)) {
 				// move the ball straight to the hit point.
 				movement = XMVectorScale(movement, hitTime);
 				ballPosition.Move(movement.m128_f32[0], movement.m128_f32[1]);
@@ -1073,13 +1073,13 @@ public:
 		auto prevBufferIdx = mBufferIdx == 0 ? 1 : 0;
 
 		m2dCtx->FillRectangle(geometry::Rectangle::Lerp(
-			mLeftPaddleRects[prevBufferIdx],
-			mLeftPaddleRects[mBufferIdx],
+			mLeftPaddle[prevBufferIdx],
+			mLeftPaddle[mBufferIdx],
 			alpha),
 			mWhiteBrush.Get());
 		m2dCtx->FillRectangle(geometry::Rectangle::Lerp(
-			mRightPaddleRects[prevBufferIdx],
-			mRightPaddleRects[mBufferIdx],
+			mRightPaddle[prevBufferIdx],
+			mRightPaddle[mBufferIdx],
 			alpha),
 			mWhiteBrush.Get());
 		m2dCtx->FillRectangle(geometry::Rectangle::Lerp(
@@ -1171,8 +1171,8 @@ private:
 	geometry::Rectangle mRightPointsRect;
 	geometry::Rectangle mLeftPlayerNameRect;
 	geometry::Rectangle mRightPlayerNameRect;
-	geometry::Rectangle mLeftPaddleRects[2];
-	geometry::Rectangle mRightPaddleRects[2];
+	geometry::Rectangle mLeftPaddle[2];
+	geometry::Rectangle mRightPaddle[2];
 	geometry::Rectangle mBallRects[2];
 	geometry::Rectangle mLeftGoalRect;
 	geometry::Rectangle mRightGoalRect;
