@@ -67,6 +67,10 @@ constexpr auto POINT_TARGET = 10;
 constexpr uint8_t PLAYER_LEFT = 0;
 // The id and ordinal of the right player.
 constexpr uint8_t PLAYER_RIGHT = 1;
+// The title shown in the game over dialog.
+constexpr auto GAME_OVER_TITLE = L"GAME OVER";
+// The description shown in the game over dialog.
+constexpr auto GAME_OVER_DESCRIPTON = L"Press Gamepad X or Keyboard Enter To Continue";
 
 // =================
 // === Utilities ===
@@ -887,8 +891,8 @@ public:
 		// draw the game over box if the game is over
 		if (mRightPoints >= POINT_TARGET || mLeftPoints >= POINT_TARGET) {
 			mGraphics->FillWhiteRect(mGameOverRect);
-			mGraphics->DrawBlackText(L"GAME OVER", mGameOverBigTextRect, mGameOverBigTextFormat);
-			mGraphics->DrawBlackText(L"Press Gamepad X or Keyboard Enter To Continue", mGameOverSmallTextRect, mGameOverSmallTextFormat);
+			mGraphics->DrawBlackText(GAME_OVER_TITLE, mGameOverBigTextRect, mGameOverBigTextFormat);
+			mGraphics->DrawBlackText(GAME_OVER_DESCRIPTON, mGameOverSmallTextRect, mGameOverSmallTextFormat);
 		}
 		mGraphics->EndDrawAndPresent();
 	}
