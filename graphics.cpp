@@ -91,8 +91,6 @@ void Graphics::InitDirect2D() {
 
 void Graphics::InitDirectWrite() {
 	assert(mDWritefactory == nullptr);
-
-	// construct a new DirectWrite factory to build text resources.
 	ThrowIfFailed(DWriteCreateFactory(
 		DWRITE_FACTORY_TYPE_SHARED,
 		__uuidof(IDWriteFactory),
