@@ -19,7 +19,6 @@ namespace pong::graphics
 		void FillWhiteRect(const D2D1_RECT_F& rect);
 		void DrawWhiteText(const std::wstring& text, const D2D1_RECT_F& rect, Microsoft::WRL::ComPtr<IDWriteTextFormat> format);
 		void DrawBlackText(const std::wstring& text, const D2D1_RECT_F& rect, Microsoft::WRL::ComPtr<IDWriteTextFormat> format);
-		Microsoft::WRL::ComPtr<ID2D1DeviceContext5> GetD2DDeviceCtx() { return mD2DDeviceCtx; }
 		Microsoft::WRL::ComPtr<IDWriteFactory> GetWriteFactory() { return mDWritefactory; }
 	private:
 		void InitDirect3D();
