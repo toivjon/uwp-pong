@@ -320,7 +320,7 @@ public:
 		mCellSize = (mWindowHeight - mWindowHeightSpacing) / 30;
 
 		ResizeGameObjects(oldWidth, oldHeight, oldCellSize, window);
-		ResizeSwapchain(window);
+		mGraphics->SetCoreWindow(window);
 	}
 
 	void ResizeGameObjects(float oldWidth, float oldHeight, float oldCellSize, CoreWindow^ window)
@@ -537,84 +537,6 @@ public:
 		auto y = -1.f + (2.f * util::GetRandomIntBetween(0, 1));
 		mBallDirection = Vector2(x, y);
 		mBallDirection.Normalize();
-	}
-
-	void ResizeSwapchain(CoreWindow^ window)
-	{
-		DisplayInformation^ currentDisplayInformation = DisplayInformation::GetForCurrentView();
-		auto dpi = currentDisplayInformation->LogicalDpi;
-
-		auto windowSize = Size(window->Bounds.Width, window->Bounds.Height);
-		windowSize.Width = util::ConvertDipsToPixels(windowSize.Width, dpi);
-		windowSize.Height = util::ConvertDipsToPixels(windowSize.Height, dpi);
-
-		// release old render target if any.
-		auto m2dCtx = mGraphics->GetD2DDeviceCtx();
-		m2dCtx->SetTarget(nullptr);
-
-		if (mSwapChain) {
-			mSwapChain->ResizeBuffers(
-				2,
-				static_cast<UINT>(windowSize.Width),
-				static_cast<UINT>(windowSize.Height),
-				DXGI_FORMAT_B8G8R8A8_UNORM,
-				0
-			);
-		} else {
-			auto m3dDevice = mGraphics->GetD3DDevice();
-
-			// query the DXGI factory from our DirectX 11 device.
-			ComPtr<IDXGIDevice1> dxgiDevice;
-			ThrowIfFailed(m3dDevice.As(&dxgiDevice));
-			ComPtr<IDXGIAdapter> dxgiAdapter;
-			ThrowIfFailed(dxgiDevice->GetAdapter(&dxgiAdapter));
-			ComPtr<IDXGIFactory2> dxgiFactory;
-			dxgiAdapter->GetParent(__uuidof(IDXGIFactory2), &dxgiFactory);
-
-			// specify swap chain configuration.
-			DXGI_SWAP_CHAIN_DESC1 desc = {};
-			desc.Width = static_cast<UINT>(windowSize.Width);
-			desc.Height = static_cast<UINT>(windowSize.Height);
-			desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-			desc.BufferCount = 2;
-			desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-			desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-			desc.SampleDesc.Count = 1;
-
-			// create the swap chain.
-			ThrowIfFailed(dxgiFactory->CreateSwapChainForCoreWindow(
-				m3dDevice.Get(),
-				reinterpret_cast<IUnknown*>(window),
-				&desc,
-				nullptr,
-				&mSwapChain
-			));
-		}
-
-		// construct a bitmap descriptor that is used with Direct2D rendering.
-		D2D1_BITMAP_PROPERTIES1 properties = {};
-		properties.bitmapOptions |= D2D1_BITMAP_OPTIONS_TARGET;
-		properties.bitmapOptions |= D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
-		properties.pixelFormat.format = DXGI_FORMAT_B8G8R8A8_UNORM;
-		properties.pixelFormat.alphaMode = D2D1_ALPHA_MODE_IGNORE;
-		properties.dpiX = dpi;
-		properties.dpiY = dpi;
-
-		// query the DXGI version of the back buffer surface.
-		ComPtr<IDXGISurface> dxgiBackBuffer;
-		ThrowIfFailed(mSwapChain->GetBuffer(0, IID_PPV_ARGS(&dxgiBackBuffer)));
-
-		// create a new bitmap that's going to be used by the Direct2D.
-		ComPtr<ID2D1Bitmap1> bitmap;
-		ThrowIfFailed(m2dCtx->CreateBitmapFromDxgiSurface(
-			dxgiBackBuffer.Get(),
-			&properties,
-			&bitmap
-		));
-
-		// assign the created bitmap as Direct2D render target.
-		m2dCtx->SetTarget(bitmap.Get());
-		m2dCtx->SetDpi(dpi, dpi);
 	}
 
 	void GamepadAdded(Object^ o, Gamepad^ gamepad)
@@ -1021,7 +943,7 @@ public:
 		}
 
 		ThrowIfFailed(m2dCtx->EndDraw());
-		ThrowIfFailed(mSwapChain->Present(1, 0));
+		ThrowIfFailed(mGraphics->GetSwapChain()->Present(1, 0));
 	}
 private:
 	// The flag used to stop execution of the application's main loop when the main window is closed.
@@ -1061,8 +983,6 @@ private:
 	Vector2 mBallDirection;
 
 	std::unique_ptr<graphics::Graphics> mGraphics;
-
-	ComPtr<IDXGISwapChain1>		mSwapChain;
 
 	ComPtr<IDWriteTextFormat> mPointsTextFormat;
 	ComPtr<IDWriteTextFormat> mLeftPlayerNameTextFormat;

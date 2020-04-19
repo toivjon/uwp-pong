@@ -1,10 +1,14 @@
 #include "graphics.h"
+#include "util.h"
 
 #include <cassert>
 
-using namespace pong::graphics;
-using namespace Microsoft::WRL;
 using namespace D2D1;
+using namespace Microsoft::WRL;
+using namespace pong;
+using namespace pong::graphics;
+using namespace Windows::Graphics::Display;
+using namespace Windows::UI::Core;
 
 // TODO move to utils?
 inline void ThrowIfFailed(HRESULT hr) {
@@ -102,4 +106,75 @@ void Graphics::InitBrushes() {
 	assert(mD2DDeviceCtx != nullptr);
 	ThrowIfFailed(mD2DDeviceCtx->CreateSolidColorBrush(ColorF(ColorF::White), &mWhiteBrush));
 	ThrowIfFailed(mD2DDeviceCtx->CreateSolidColorBrush(ColorF(ColorF::Black), &mBlackBrush));
+}
+
+void Graphics::SetCoreWindow(CoreWindow^ window) {
+	assert(window != nullptr);
+	auto dpi = DisplayInformation::GetForCurrentView()->LogicalDpi;
+	auto width = util::ConvertDipsToPixels(window->Bounds.Width, dpi);
+	auto height = util::ConvertDipsToPixels(window->Bounds.Height, dpi);
+
+	mD2DDeviceCtx->SetTarget(nullptr);
+
+	if (mSwapChain) {
+		mSwapChain->ResizeBuffers(
+			2,
+			static_cast<UINT>(width),
+			static_cast<UINT>(height),
+			DXGI_FORMAT_B8G8R8A8_UNORM,
+			0
+		);
+	} else {
+		// query the DXGI factory from our DirectX 11 device.
+		ComPtr<IDXGIDevice1> dxgiDevice;
+		ThrowIfFailed(mD3DDevice.As(&dxgiDevice));
+		ComPtr<IDXGIAdapter> dxgiAdapter;
+		ThrowIfFailed(dxgiDevice->GetAdapter(&dxgiAdapter));
+		ComPtr<IDXGIFactory2> dxgiFactory;
+		dxgiAdapter->GetParent(__uuidof(IDXGIFactory2), &dxgiFactory);
+
+		// specify swap chain configuration.
+		DXGI_SWAP_CHAIN_DESC1 desc = {};
+		desc.Width = static_cast<UINT>(width);
+		desc.Height = static_cast<UINT>(height);
+		desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		desc.BufferCount = 2;
+		desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+		desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+		desc.SampleDesc.Count = 1;
+
+		// create the swap chain.
+		ThrowIfFailed(dxgiFactory->CreateSwapChainForCoreWindow(
+			mD3DDevice.Get(),
+			reinterpret_cast<IUnknown*>(window),
+			&desc,
+			nullptr,
+			&mSwapChain
+		));
+	}
+
+	// construct a bitmap descriptor that is used with Direct2D rendering.
+	D2D1_BITMAP_PROPERTIES1 properties = {};
+	properties.bitmapOptions |= D2D1_BITMAP_OPTIONS_TARGET;
+	properties.bitmapOptions |= D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
+	properties.pixelFormat.format = DXGI_FORMAT_B8G8R8A8_UNORM;
+	properties.pixelFormat.alphaMode = D2D1_ALPHA_MODE_IGNORE;
+	properties.dpiX = dpi;
+	properties.dpiY = dpi;
+
+	// query the DXGI version of the back buffer surface.
+	ComPtr<IDXGISurface> dxgiBackBuffer;
+	ThrowIfFailed(mSwapChain->GetBuffer(0, IID_PPV_ARGS(&dxgiBackBuffer)));
+
+	// create a new bitmap that's going to be used by the Direct2D.
+	ComPtr<ID2D1Bitmap1> bitmap;
+	ThrowIfFailed(mD2DDeviceCtx->CreateBitmapFromDxgiSurface(
+		dxgiBackBuffer.Get(),
+		&properties,
+		&bitmap
+	));
+
+	// assign the created bitmap as Direct2D render target.
+	mD2DDeviceCtx->SetTarget(bitmap.Get());
+	mD2DDeviceCtx->SetDpi(dpi, dpi);
 }

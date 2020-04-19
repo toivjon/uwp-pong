@@ -12,11 +12,12 @@ namespace pong::graphics
 	{
 	public:
 		Graphics();
+		void SetCoreWindow(Windows::UI::Core::CoreWindow^ window);
 		Microsoft::WRL::ComPtr<ID2D1DeviceContext5> GetD2DDeviceCtx() { return mD2DDeviceCtx; }
-		Microsoft::WRL::ComPtr<ID3D11Device> GetD3DDevice() { return mD3DDevice; }
 		Microsoft::WRL::ComPtr<IDWriteFactory> GetWriteFactory() { return mDWritefactory; }
 		Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> GetWhiteBrush() { return mWhiteBrush; }
 		Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> GetBlackBrush() { return mBlackBrush; }
+		Microsoft::WRL::ComPtr<IDXGISwapChain1> GetSwapChain() { return mSwapChain; }
 	private:
 		void InitDirect3D();
 		void InitDirect2D();
@@ -34,5 +35,7 @@ namespace pong::graphics
 
 		Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> mWhiteBrush;
 		Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> mBlackBrush;
+
+		ComPtr<IDXGISwapChain1>	mSwapChain;
 	};
 }
