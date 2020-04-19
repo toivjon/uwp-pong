@@ -3,21 +3,17 @@
 
 #include <concrt.h>
 #include <cwchar>
-#include <d2d1_3.h>
-#include <d3d11.h>
-#include <dwrite.h>
-#include <dxgi1_6.h>
 #include <ppltasks.h>
 #include <string>
-#include <wrl.h>
+
+#include "geometry.h"
+#include "graphics.h"
+#include "util.h"
 
 // DirectXTK
 #include <Audio.h>
 #include <Keyboard.h>
 #include <SimpleMath.h>
-
-#include "geometry.h"
-#include "util.h"
 
 #include <cassert>
 
@@ -205,110 +201,16 @@ public:
 		mKeyboard = std::make_unique<Keyboard>();
 	}
 
-	void InitializeAudio()
-	{
+	void InitializeAudio() {
 		assert(mAudioEngine == nullptr);
 		assert(mBeepSound == nullptr);
-
 		mAudioEngine = std::make_unique<AudioEngine>();
 		mBeepSound = std::make_unique<SoundEffect>(mAudioEngine.get(), L"Assets/beep.wav");
 	}
 
-	void InitializeGraphics()
-	{
-		InitializeDirect3D();
-		InitializeDirect2D();
-		InitializeDirectWrite();
-		InitializeBrushes();
-	}
-
-	void InitializeDirect3D()
-	{
-		// specify the desired additional behavior how the device will be created.
-		UINT flags = 0;
-		flags |= D3D11_CREATE_DEVICE_BGRA_SUPPORT; // for Direct2D compatibility
-		flags |= D3D11_CREATE_DEVICE_SINGLETHREADED;
-#ifdef _DEBUG
-		flags |= D3D11_CREATE_DEVICE_DEBUG;
-#endif
-
-		// specify the feature levels we want to support (ordering matters!).
-		D3D_FEATURE_LEVEL featureLevels[] =
-		{
-		  D3D_FEATURE_LEVEL_11_1,
-		  D3D_FEATURE_LEVEL_11_0,
-		  D3D_FEATURE_LEVEL_10_1,
-		  D3D_FEATURE_LEVEL_10_0,
-		  D3D_FEATURE_LEVEL_9_3,
-		  D3D_FEATURE_LEVEL_9_2,
-		  D3D_FEATURE_LEVEL_9_1
-		};
-
-		// create a DirectX 11 device item.
-		ThrowIfFailed(D3D11CreateDevice(
-			nullptr,
-			D3D_DRIVER_TYPE_HARDWARE,
-			nullptr,
-			flags,
-			featureLevels,
-			ARRAYSIZE(featureLevels),
-			D3D11_SDK_VERSION,
-			&m3dDevice,
-			nullptr,
-			&m3dCtx));
-	}
-
-	void InitializeDirect2D()
-	{
-		// specify creation configuration for a new Direct2D factory.
-		D2D1_FACTORY_OPTIONS options;
-#ifdef _DEBUG
-		options.debugLevel = D2D1_DEBUG_LEVEL_WARNING;
-#endif
-
-		// construct a new Direct2D factory to build Direct2D resources.
-		ThrowIfFailed(D2D1CreateFactory(
-			D2D1_FACTORY_TYPE_SINGLE_THREADED,
-			options,
-			m2dFactory.GetAddressOf()
-		));
-
-		// query the underlying DXGI device from the Direct3D device.
-		ComPtr<IDXGIDevice3> dxgiDevice;
-		ThrowIfFailed(m3dDevice.As(&dxgiDevice));
-
-		// create a Direct2D device and device context items.
-		ThrowIfFailed(m2dFactory->CreateDevice(dxgiDevice.Get(), m2dDevice.GetAddressOf()));
-		ThrowIfFailed(m2dDevice->CreateDeviceContext(
-			D2D1_DEVICE_CONTEXT_OPTIONS_NONE,
-			&m2dCtx
-		));
-
-	}
-
-	void InitializeDirectWrite()
-	{
-		// construct a new DirectWrite factory to build text resources.
-		ThrowIfFailed(DWriteCreateFactory(
-			DWRITE_FACTORY_TYPE_SHARED,
-			__uuidof(IDWriteFactory),
-			reinterpret_cast<IUnknown**>(mWritefactory.GetAddressOf())
-		));
-	}
-
-	void InitializeBrushes()
-	{
-		// create a white brush to be used when drawing white objects.
-		ThrowIfFailed(m2dCtx->CreateSolidColorBrush(
-			D2D1::ColorF(D2D1::ColorF::White),
-			&mWhiteBrush
-		));
-
-		// create a black brush to be used when drawing black objects.
-		ThrowIfFailed(m2dCtx->CreateSolidColorBrush(
-			D2D1::ColorF(D2D1::ColorF::Black),
-			&mBlackBrush
-		));
+	void InitializeGraphics() {
+		assert(mGraphics == nullptr);
+		mGraphics = std::make_unique<graphics::Graphics>();
 	}
 
 	void InitializeGame()
@@ -456,6 +358,7 @@ public:
 		mBottomWallRect.left = mWindowWidthSpacing / 2;
 		mBottomWallRect.right = mWindowWidth - mWindowWidthSpacing / 2;
 
+		auto mWritefactory = mGraphics->GetWriteFactory();
 		ThrowIfFailed(mWritefactory->CreateTextFormat(
 			L"Calibri",
 			nullptr,
@@ -646,6 +549,7 @@ public:
 		windowSize.Height = util::ConvertDipsToPixels(windowSize.Height, dpi);
 
 		// release old render target if any.
+		auto m2dCtx = mGraphics->GetD2DDeviceCtx();
 		m2dCtx->SetTarget(nullptr);
 
 		if (mSwapChain) {
@@ -657,6 +561,8 @@ public:
 				0
 			);
 		} else {
+			auto m3dDevice = mGraphics->GetD3DDevice();
+
 			// query the DXGI factory from our DirectX 11 device.
 			ComPtr<IDXGIDevice1> dxgiDevice;
 			ThrowIfFailed(m3dDevice.As(&dxgiDevice));
@@ -1024,6 +930,11 @@ public:
 
 	void Render(float alpha)
 	{
+		// temporary accessors... this logic will be moved into graphics
+		auto m2dCtx = mGraphics->GetD2DDeviceCtx();
+		auto mWhiteBrush = mGraphics->GetWhiteBrush();
+		auto mBlackBrush = mGraphics->GetBlackBrush();
+
 		m2dCtx->BeginDraw();
 		m2dCtx->Clear(D2D1::ColorF(D2D1::ColorF::Black));
 
@@ -1149,16 +1060,9 @@ private:
 
 	Vector2 mBallDirection;
 
-	ComPtr<ID3D11Device>		m3dDevice;
-	ComPtr<ID3D11DeviceContext>	m3dCtx;
-	ComPtr<ID2D1Factory6>		m2dFactory;
-	ComPtr<ID2D1Device5>		m2dDevice;
-	ComPtr<ID2D1DeviceContext5>	m2dCtx;
-	ComPtr<IDXGISwapChain1>		mSwapChain;
-	ComPtr<IDWriteFactory>		mWritefactory;
+	std::unique_ptr<graphics::Graphics> mGraphics;
 
-	ComPtr<ID2D1SolidColorBrush> mWhiteBrush;
-	ComPtr<ID2D1SolidColorBrush> mBlackBrush;
+	ComPtr<IDXGISwapChain1>		mSwapChain;
 
 	ComPtr<IDWriteTextFormat> mPointsTextFormat;
 	ComPtr<IDWriteTextFormat> mLeftPlayerNameTextFormat;

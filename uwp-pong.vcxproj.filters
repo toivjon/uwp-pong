@@ -36,6 +36,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="geometry.cpp" />
+    <ClCompile Include="graphics.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Media Include="Assets\beep.wav" />
@@ -43,6 +44,7 @@
   <ItemGroup>
     <ClInclude Include="util.h" />
     <ClInclude Include="geometry.h" />
+    <ClInclude Include="graphics.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
