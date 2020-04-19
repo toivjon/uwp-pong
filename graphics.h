@@ -4,6 +4,7 @@
 #include <d3d11.h>
 #include <dwrite.h>
 #include <dxgi1_6.h>
+#include <string>
 #include <wrl.h>
 
 namespace pong::graphics
@@ -16,6 +17,8 @@ namespace pong::graphics
 		void BeginDrawAndClear();
 		void EndDrawAndPresent();
 		void FillWhiteRect(const D2D1_RECT_F& rect);
+		void DrawWhiteText(const std::wstring& text, const D2D1_RECT_F& rect, Microsoft::WRL::ComPtr<IDWriteTextFormat> format);
+		void DrawBlackText(const std::wstring& text, const D2D1_RECT_F& rect, Microsoft::WRL::ComPtr<IDWriteTextFormat> format);
 		Microsoft::WRL::ComPtr<ID2D1DeviceContext5> GetD2DDeviceCtx() { return mD2DDeviceCtx; }
 		Microsoft::WRL::ComPtr<IDWriteFactory> GetWriteFactory() { return mDWritefactory; }
 		Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> GetWhiteBrush() { return mWhiteBrush; }
@@ -39,6 +42,6 @@ namespace pong::graphics
 		Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> mWhiteBrush;
 		Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> mBlackBrush;
 
-		ComPtr<IDXGISwapChain1>	mSwapChain;
+		Microsoft::WRL::ComPtr<IDXGISwapChain1>	mSwapChain;
 	};
 }

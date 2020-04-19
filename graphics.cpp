@@ -192,3 +192,23 @@ void Graphics::EndDrawAndPresent() {
 void Graphics::FillWhiteRect(const D2D1_RECT_F& rect) {
 	mD2DDeviceCtx->FillRectangle(rect, mWhiteBrush.Get());
 }
+
+void Graphics::DrawWhiteText(const std::wstring& text, const D2D1_RECT_F& rect, ComPtr<IDWriteTextFormat> format) {
+	mD2DDeviceCtx->DrawText(
+		text.c_str(),
+		static_cast<UINT32>(text.size()),
+		format.Get(),
+		rect,
+		mWhiteBrush.Get()
+	);
+}
+
+void Graphics::DrawBlackText(const std::wstring& text, const D2D1_RECT_F& rect, ComPtr<IDWriteTextFormat> format) {
+	mD2DDeviceCtx->DrawText(
+		text.c_str(),
+		static_cast<UINT32>(text.size()),
+		format.Get(),
+		rect,
+		mBlackBrush.Get()
+	);
+}

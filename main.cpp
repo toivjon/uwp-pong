@@ -854,11 +854,6 @@ public:
 	{
 		mGraphics->BeginDrawAndClear();
 
-		// temporary accessors... this logic will be moved into graphics
-		auto m2dCtx = mGraphics->GetD2DDeviceCtx();
-		auto mWhiteBrush = mGraphics->GetWhiteBrush();
-		auto mBlackBrush = mGraphics->GetBlackBrush();
-
 		// static objects
 
 		for (auto i = 0; i < CENTERLINE_DOTS; i++) {
@@ -866,38 +861,10 @@ public:
 		}
 		mGraphics->FillWhiteRect(mTopWallRect);
 		mGraphics->FillWhiteRect(mBottomWallRect);
-		m2dCtx->DrawText(
-			std::to_wstring(mLeftPoints).c_str(),
-			1,
-			mPointsTextFormat.Get(),
-			mLeftPointsRect,
-			mWhiteBrush.Get(),
-			nullptr
-		);
-		m2dCtx->DrawText(
-			std::to_wstring(mRightPoints).c_str(),
-			1,
-			mPointsTextFormat.Get(),
-			mRightPointsRect,
-			mWhiteBrush.Get(),
-			nullptr
-		);
-		m2dCtx->DrawText(
-			mLeftPlayerName.c_str(),
-			static_cast<UINT32>(mLeftPlayerName.size()),
-			mLeftPlayerNameTextFormat.Get(),
-			mLeftPlayerNameRect,
-			mBlackBrush.Get(),
-			nullptr
-		);
-		m2dCtx->DrawText(
-			mRightPlayerName.c_str(),
-			static_cast<UINT32>(mRightPlayerName.size()),
-			mRightPlayerNameTextFormat.Get(),
-			mRightPlayerNameRect,
-			mBlackBrush.Get(),
-			nullptr
-		);
+		mGraphics->DrawWhiteText(std::to_wstring(mLeftPoints), mLeftPointsRect, mPointsTextFormat);
+		mGraphics->DrawWhiteText(std::to_wstring(mRightPoints), mRightPointsRect, mPointsTextFormat);
+		mGraphics->DrawBlackText(mLeftPlayerName, mLeftPlayerNameRect, mLeftPlayerNameTextFormat);
+		mGraphics->DrawBlackText(mRightPlayerName, mRightPlayerNameRect, mRightPlayerNameTextFormat);
 		mGraphics->FillWhiteRect(mRightGoalRect);
 
 		// dynamic objects
@@ -920,22 +887,8 @@ public:
 		// draw the game over box if the game is over
 		if (mRightPoints >= POINT_TARGET || mLeftPoints >= POINT_TARGET) {
 			mGraphics->FillWhiteRect(mGameOverRect);
-			m2dCtx->DrawText(
-				L"GAME OVER",
-				9,
-				mGameOverBigTextFormat.Get(),
-				mGameOverBigTextRect,
-				mBlackBrush.Get(),
-				nullptr
-			);
-			m2dCtx->DrawText(
-				L"Press Gamepad X or Keyboard Enter To Continue",
-				46,
-				mGameOverSmallTextFormat.Get(),
-				mGameOverSmallTextRect,
-				mBlackBrush.Get(),
-				nullptr
-			);
+			mGraphics->DrawBlackText(L"GAME OVER", mGameOverBigTextRect, mGameOverBigTextFormat);
+			mGraphics->DrawBlackText(L"Press Gamepad X or Keyboard Enter To Continue", mGameOverSmallTextRect, mGameOverSmallTextFormat);
 		}
 		mGraphics->EndDrawAndPresent();
 	}
