@@ -188,3 +188,7 @@ void Graphics::EndDrawAndPresent() {
 	ThrowIfFailed(mD2DDeviceCtx->EndDraw());
 	ThrowIfFailed(mSwapChain->Present(1, 0));
 }
+
+void Graphics::FillWhiteRect(const D2D1_RECT_F& rect) {
+	mD2DDeviceCtx->FillRectangle(rect, mWhiteBrush.Get());
+}

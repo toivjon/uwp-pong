@@ -862,10 +862,10 @@ public:
 		// static objects
 
 		for (auto i = 0; i < CENTERLINE_DOTS; i++) {
-			m2dCtx->FillRectangle(mCenterlineRects[i], mWhiteBrush.Get());
+			mGraphics->FillWhiteRect(mCenterlineRects[i]);
 		}
-		m2dCtx->FillRectangle(mTopWallRect, mWhiteBrush.Get());
-		m2dCtx->FillRectangle(mBottomWallRect, mWhiteBrush.Get());
+		mGraphics->FillWhiteRect(mTopWallRect);
+		mGraphics->FillWhiteRect(mBottomWallRect);
 		m2dCtx->DrawText(
 			std::to_wstring(mLeftPoints).c_str(),
 			1,
@@ -898,31 +898,28 @@ public:
 			mBlackBrush.Get(),
 			nullptr
 		);
+		mGraphics->FillWhiteRect(mRightGoalRect);
 
-		m2dCtx->FillRectangle(mRightGoalRect, mWhiteBrush.Get());
 		// dynamic objects
 
 		auto prevBufferIdx = mBufferIdx == 0 ? 1 : 0;
 
-		m2dCtx->FillRectangle(geometry::Rectangle::Lerp(
+		mGraphics->FillWhiteRect(geometry::Rectangle::Lerp(
 			mLeftPaddle[prevBufferIdx],
 			mLeftPaddle[mBufferIdx],
-			alpha),
-			mWhiteBrush.Get());
-		m2dCtx->FillRectangle(geometry::Rectangle::Lerp(
+			alpha));
+		mGraphics->FillWhiteRect(geometry::Rectangle::Lerp(
 			mRightPaddle[prevBufferIdx],
 			mRightPaddle[mBufferIdx],
-			alpha),
-			mWhiteBrush.Get());
-		m2dCtx->FillRectangle(geometry::Rectangle::Lerp(
+			alpha));
+		mGraphics->FillWhiteRect(geometry::Rectangle::Lerp(
 			mBall[prevBufferIdx],
 			mBall[mBufferIdx],
-			alpha),
-			mWhiteBrush.Get());
+			alpha));
 
 		// draw the game over box if the game is over
 		if (mRightPoints >= POINT_TARGET || mLeftPoints >= POINT_TARGET) {
-			m2dCtx->FillRectangle(mGameOverRect, mWhiteBrush.Get());
+			mGraphics->FillWhiteRect(mGameOverRect);
 			m2dCtx->DrawText(
 				L"GAME OVER",
 				9,
