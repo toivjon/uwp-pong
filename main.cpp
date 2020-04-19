@@ -889,7 +889,7 @@ public:
 			alpha));
 
 		// draw the game over box if the game is over
-		if (mRightPoints >= POINT_TARGET || mLeftPoints >= POINT_TARGET) {
+		if (IsGameOver()) {
 			mGraphics->FillWhiteRect(mGameOverRect);
 			mGraphics->DrawBlackText(GAME_OVER_TITLE, mGameOverBigTextRect, mGameOverBigTextFormat);
 			mGraphics->DrawBlackText(GAME_OVER_DESCRIPTON, mGameOverSmallTextRect, mGameOverSmallTextFormat);
