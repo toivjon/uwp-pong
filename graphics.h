@@ -21,7 +21,6 @@ namespace pong::graphics
 		void DrawBlackText(const std::wstring& text, const D2D1_RECT_F& rect, Microsoft::WRL::ComPtr<IDWriteTextFormat> format);
 		Microsoft::WRL::ComPtr<ID2D1DeviceContext5> GetD2DDeviceCtx() { return mD2DDeviceCtx; }
 		Microsoft::WRL::ComPtr<IDWriteFactory> GetWriteFactory() { return mDWritefactory; }
-		Microsoft::WRL::ComPtr<IDXGISwapChain1> GetSwapChain() { return mSwapChain; }
 	private:
 		void InitDirect3D();
 		void InitDirect2D();
