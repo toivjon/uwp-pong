@@ -852,13 +852,12 @@ public:
 
 	void Render(float alpha)
 	{
+		mGraphics->BeginDrawAndClear();
+
 		// temporary accessors... this logic will be moved into graphics
 		auto m2dCtx = mGraphics->GetD2DDeviceCtx();
 		auto mWhiteBrush = mGraphics->GetWhiteBrush();
 		auto mBlackBrush = mGraphics->GetBlackBrush();
-
-		m2dCtx->BeginDraw();
-		m2dCtx->Clear(D2D1::ColorF(D2D1::ColorF::Black));
 
 		// static objects
 
@@ -941,9 +940,7 @@ public:
 				nullptr
 			);
 		}
-
-		ThrowIfFailed(m2dCtx->EndDraw());
-		ThrowIfFailed(mGraphics->GetSwapChain()->Present(1, 0));
+		mGraphics->EndDrawAndPresent();
 	}
 private:
 	// The flag used to stop execution of the application's main loop when the main window is closed.

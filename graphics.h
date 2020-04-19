@@ -13,6 +13,8 @@ namespace pong::graphics
 	public:
 		Graphics();
 		void SetCoreWindow(Windows::UI::Core::CoreWindow^ window);
+		void BeginDrawAndClear();
+		void EndDrawAndPresent();
 		Microsoft::WRL::ComPtr<ID2D1DeviceContext5> GetD2DDeviceCtx() { return mD2DDeviceCtx; }
 		Microsoft::WRL::ComPtr<IDWriteFactory> GetWriteFactory() { return mDWritefactory; }
 		Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> GetWhiteBrush() { return mWhiteBrush; }

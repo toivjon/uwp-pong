@@ -178,3 +178,13 @@ void Graphics::SetCoreWindow(CoreWindow^ window) {
 	mD2DDeviceCtx->SetTarget(bitmap.Get());
 	mD2DDeviceCtx->SetDpi(dpi, dpi);
 }
+
+void Graphics::BeginDrawAndClear() {
+	mD2DDeviceCtx->BeginDraw();
+	mD2DDeviceCtx->Clear(D2D1::ColorF(D2D1::ColorF::Black));
+}
+
+void Graphics::EndDrawAndPresent() {
+	ThrowIfFailed(mD2DDeviceCtx->EndDraw());
+	ThrowIfFailed(mSwapChain->Present(1, 0));
+}
