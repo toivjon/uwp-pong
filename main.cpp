@@ -280,7 +280,6 @@ public:
 
 	void Activated(CoreApplicationView^, IActivatedEventArgs^)
 	{
-		CoreWindow::GetForCurrentThread()->Activate();
 		auto window = CoreWindow::GetForCurrentThread();
 		window->Activate();
 		auto windowBounds = window->Bounds;
