@@ -278,13 +278,8 @@ public:
 		mWindowClosed = true;
 	}
 
-	void Activated(CoreApplicationView^, IActivatedEventArgs^)
-	{
-		auto window = CoreWindow::GetForCurrentThread();
-		window->Activate();
-		auto windowBounds = window->Bounds;
-		auto width = windowBounds.Width;
-		auto height = windowBounds.Height;
+	void Activated(CoreApplicationView^, IActivatedEventArgs^) {
+		CoreWindow::GetForCurrentThread()->Activate();
 	}
 
 	void WindowVisibilityChanged(CoreWindow^, VisibilityChangedEventArgs^ args)
