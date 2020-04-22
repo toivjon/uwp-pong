@@ -9,6 +9,9 @@
 
 namespace pong::graphics
 {
+	// 0.75f
+	// 6
+	// 3
 	class Graphics final
 	{
 	public:
@@ -17,14 +20,15 @@ namespace pong::graphics
 		void BeginDrawAndClear();
 		void EndDrawAndPresent();
 		void FillWhiteRect(const D2D1_RECT_F& rect);
-		void DrawWhiteText(const std::wstring& text, const D2D1_RECT_F& rect, Microsoft::WRL::ComPtr<IDWriteTextFormat> format);
-		void DrawBlackText(const std::wstring& text, const D2D1_RECT_F& rect, Microsoft::WRL::ComPtr<IDWriteTextFormat> format);
-		Microsoft::WRL::ComPtr<IDWriteFactory> GetWriteFactory() { return mDWritefactory; }
+		void DrawWhiteBigText(const std::wstring& text, const D2D1_RECT_F& rect);
+		void DrawBlackSmallText(const std::wstring& text, const D2D1_RECT_F& rect);
+		void DrawBlackMediumText(const std::wstring& text, const D2D1_RECT_F& rect);
 	private:
 		void InitDirect3D();
 		void InitDirect2D();
 		void InitDirectWrite();
 		void InitBrushes();
+		void BuildTextFormat(float size, Microsoft::WRL::ComPtr<IDWriteTextFormat>& format);
 	private:
 		Microsoft::WRL::ComPtr<ID3D11Device>		mD3DDevice;
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext>	mD3DDeviceCtx;
@@ -39,5 +43,9 @@ namespace pong::graphics
 		Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> mBlackBrush;
 
 		Microsoft::WRL::ComPtr<IDXGISwapChain1>	mSwapChain;
+
+		Microsoft::WRL::ComPtr<IDWriteTextFormat> mSmallTextFormat;
+		Microsoft::WRL::ComPtr<IDWriteTextFormat> mMediumTextFormat;
+		Microsoft::WRL::ComPtr<IDWriteTextFormat> mBigTextFormat;
 	};
 }

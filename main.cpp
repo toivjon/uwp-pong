@@ -362,20 +362,6 @@ public:
 		mBottomWallRect.left = mWindowWidthSpacing / 2;
 		mBottomWallRect.right = mWindowWidth - mWindowWidthSpacing / 2;
 
-		auto mWritefactory = mGraphics->GetWriteFactory();
-		ThrowIfFailed(mWritefactory->CreateTextFormat(
-			L"Calibri",
-			nullptr,
-			DWRITE_FONT_WEIGHT_REGULAR,
-			DWRITE_FONT_STYLE_NORMAL,
-			DWRITE_FONT_STRETCH_NORMAL,
-			mCellSize * 6,
-			L"en-us",
-			&mPointsTextFormat
-		));
-		ThrowIfFailed(mPointsTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER));
-		ThrowIfFailed(mPointsTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER));
-
 		mLeftPointsRect.top = mWindowHeightSpacing / 2 + mCellSize * 2;
 		mLeftPointsRect.bottom = mLeftPointsRect.top + mCellSize * 6;
 		mLeftPointsRect.left = horizontalCenter - mCellSize * 5;
@@ -385,32 +371,6 @@ public:
 		mRightPointsRect.bottom = mRightPointsRect.top + mCellSize * 6;
 		mRightPointsRect.left = horizontalCenter + mCellSize * 4;
 		mRightPointsRect.right = mRightPointsRect.left + mCellSize;
-
-		ThrowIfFailed(mWritefactory->CreateTextFormat(
-			L"Calibri",
-			nullptr,
-			DWRITE_FONT_WEIGHT_REGULAR,
-			DWRITE_FONT_STYLE_NORMAL,
-			DWRITE_FONT_STRETCH_NORMAL,
-			mCellSize * 0.75f,
-			L"en-us",
-			&mLeftPlayerNameTextFormat
-		));
-		ThrowIfFailed(mLeftPlayerNameTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING));
-		ThrowIfFailed(mLeftPlayerNameTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER));
-
-		ThrowIfFailed(mWritefactory->CreateTextFormat(
-			L"Calibri",
-			nullptr,
-			DWRITE_FONT_WEIGHT_REGULAR,
-			DWRITE_FONT_STYLE_NORMAL,
-			DWRITE_FONT_STRETCH_NORMAL,
-			mCellSize * 0.75f,
-			L"en-us",
-			&mRightPlayerNameTextFormat
-		));
-		ThrowIfFailed(mRightPlayerNameTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING));
-		ThrowIfFailed(mRightPlayerNameTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER));
 
 		mLeftPlayerNameRect.top = mWindowHeightSpacing / 2;
 		mLeftPlayerNameRect.bottom = mLeftPlayerNameRect.top + mCellSize;
@@ -463,30 +423,6 @@ public:
 			mBall[i].left = horizontalCenter - (.5f * mCellSize) + mCellSize * ballRelMovementX;
 			mBall[i].right = mBall[i].left + mCellSize;
 		}
-
-		// build game over specific objects
-		ThrowIfFailed(mWritefactory->CreateTextFormat(
-			L"Calibri",
-			nullptr,
-			DWRITE_FONT_WEIGHT_REGULAR,
-			DWRITE_FONT_STYLE_NORMAL,
-			DWRITE_FONT_STRETCH_NORMAL,
-			mCellSize * 3,
-			L"en-us",
-			&mGameOverBigTextFormat
-		));
-		ThrowIfFailed(mGameOverBigTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER));
-		ThrowIfFailed(mWritefactory->CreateTextFormat(
-			L"Calibri",
-			nullptr,
-			DWRITE_FONT_WEIGHT_REGULAR,
-			DWRITE_FONT_STYLE_NORMAL,
-			DWRITE_FONT_STRETCH_NORMAL,
-			mCellSize * 0.75f,
-			L"en-us",
-			&mGameOverSmallTextFormat
-		));
-		ThrowIfFailed(mGameOverSmallTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER));
 		mGameOverRect = {
 			horizontalCenter - 9 * mCellSize,
 			verticalCenter - 3 * mCellSize,
@@ -865,10 +801,10 @@ public:
 		}
 		mGraphics->FillWhiteRect(mTopWallRect);
 		mGraphics->FillWhiteRect(mBottomWallRect);
-		mGraphics->DrawWhiteText(std::to_wstring(mLeftPoints), mLeftPointsRect, mPointsTextFormat);
-		mGraphics->DrawWhiteText(std::to_wstring(mRightPoints), mRightPointsRect, mPointsTextFormat);
-		mGraphics->DrawBlackText(mLeftPlayerName, mLeftPlayerNameRect, mLeftPlayerNameTextFormat);
-		mGraphics->DrawBlackText(mRightPlayerName, mRightPlayerNameRect, mRightPlayerNameTextFormat);
+		mGraphics->DrawWhiteBigText(std::to_wstring(mLeftPoints), mLeftPointsRect);
+		mGraphics->DrawWhiteBigText(std::to_wstring(mRightPoints), mRightPointsRect);
+		mGraphics->DrawBlackSmallText(mLeftPlayerName, mLeftPlayerNameRect);
+		mGraphics->DrawBlackSmallText(mRightPlayerName, mRightPlayerNameRect);
 		mGraphics->FillWhiteRect(mRightGoalRect);
 
 		// dynamic objects
@@ -891,8 +827,8 @@ public:
 		// draw the game over box if the game is over
 		if (IsGameOver()) {
 			mGraphics->FillWhiteRect(mGameOverRect);
-			mGraphics->DrawBlackText(GAME_OVER_TITLE, mGameOverBigTextRect, mGameOverBigTextFormat);
-			mGraphics->DrawBlackText(GAME_OVER_DESCRIPTON, mGameOverSmallTextRect, mGameOverSmallTextFormat);
+			mGraphics->DrawBlackMediumText(GAME_OVER_TITLE, mGameOverBigTextRect);
+			mGraphics->DrawBlackSmallText(GAME_OVER_DESCRIPTON, mGameOverSmallTextRect);
 		}
 		mGraphics->EndDrawAndPresent();
 	}
@@ -935,10 +871,6 @@ private:
 
 	std::unique_ptr<graphics::Graphics> mGraphics;
 
-	ComPtr<IDWriteTextFormat> mPointsTextFormat;
-	ComPtr<IDWriteTextFormat> mLeftPlayerNameTextFormat;
-	ComPtr<IDWriteTextFormat> mRightPlayerNameTextFormat;
-
 	geometry::Rectangle mCenterlineRects[CENTERLINE_DOTS];
 	geometry::Rectangle mTopWallRect;
 	geometry::Rectangle mBottomWallRect;
@@ -955,8 +887,6 @@ private:
 	geometry::Rectangle mGameOverRect;
 	geometry::Rectangle mGameOverBigTextRect;
 	geometry::Rectangle mGameOverSmallTextRect;
-	ComPtr<IDWriteTextFormat> mGameOverBigTextFormat;
-	ComPtr<IDWriteTextFormat> mGameOverSmallTextFormat;
 
 	int mBufferIdx = 0;
 

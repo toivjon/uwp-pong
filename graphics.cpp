@@ -10,6 +10,9 @@ using namespace pong::graphics;
 using namespace Windows::Graphics::Display;
 using namespace Windows::UI::Core;
 
+constexpr auto FONT_FAMILY = L"Calibri";
+constexpr auto ASPECT_RATIO = (800.f / 600.f);
+
 // TODO move to utils?
 inline void ThrowIfFailed(HRESULT hr) {
 	if (FAILED(hr)) {
@@ -32,9 +35,9 @@ void Graphics::InitDirect3D() {
 	UINT flags = 0;
 	flags |= D3D11_CREATE_DEVICE_BGRA_SUPPORT; // for Direct2D compatibility
 	flags |= D3D11_CREATE_DEVICE_SINGLETHREADED;
-	#ifdef _DEBUG
+#ifdef _DEBUG
 	flags |= D3D11_CREATE_DEVICE_DEBUG;
-	#endif
+#endif
 
 	// specify the feature levels we want to support (ordering matters!).
 	D3D_FEATURE_LEVEL featureLevels[] = {
@@ -70,9 +73,9 @@ void Graphics::InitDirect2D() {
 
 	// specify creation configuration for a new Direct2D factory.
 	D2D1_FACTORY_OPTIONS options;
-	#ifdef _DEBUG
+#ifdef _DEBUG
 	options.debugLevel = D2D1_DEBUG_LEVEL_WARNING;
-	#endif
+#endif
 
 	// construct a new Direct2D factory to build Direct2D resources.
 	ThrowIfFailed(D2D1CreateFactory(
@@ -177,6 +180,25 @@ void Graphics::SetCoreWindow(CoreWindow^ window) {
 	// assign the created bitmap as Direct2D render target.
 	mD2DDeviceCtx->SetTarget(bitmap.Get());
 	mD2DDeviceCtx->SetDpi(dpi, dpi);
+
+	// FIXME duplicate code
+
+	// calculate aspect ratio correction spacing values.
+	auto currentAspectRatio = (width / height);
+	auto widthSpacing = 0.f, heightSpacing = 0.f;
+	if (currentAspectRatio > ASPECT_RATIO) {
+		auto widthEdge = height * ASPECT_RATIO;
+		widthSpacing = width - widthEdge;
+	} else if (currentAspectRatio < ASPECT_RATIO) {
+		auto heightEdge = width / ASPECT_RATIO;
+		heightSpacing = height - heightEdge;
+	}
+
+	// (re)create text formats.
+	auto cellSize = (height - heightSpacing) / 30;
+	BuildTextFormat(cellSize * 6.00f, mBigTextFormat);
+	BuildTextFormat(cellSize * 3.00f, mMediumTextFormat);
+	BuildTextFormat(cellSize * 0.75f, mSmallTextFormat);
 }
 
 void Graphics::BeginDrawAndClear() {
@@ -193,22 +215,56 @@ void Graphics::FillWhiteRect(const D2D1_RECT_F& rect) {
 	mD2DDeviceCtx->FillRectangle(rect, mWhiteBrush.Get());
 }
 
-void Graphics::DrawWhiteText(const std::wstring& text, const D2D1_RECT_F& rect, ComPtr<IDWriteTextFormat> format) {
+void Graphics::DrawWhiteBigText(const std::wstring& text, const D2D1_RECT_F& rect) {
+	assert(mD2DDeviceCtx != nullptr);
+	assert(mBigTextFormat != nullptr);
+	assert(mWhiteBrush != nullptr);
 	mD2DDeviceCtx->DrawText(
 		text.c_str(),
 		static_cast<UINT32>(text.size()),
-		format.Get(),
+		mBigTextFormat.Get(),
 		rect,
 		mWhiteBrush.Get()
 	);
 }
 
-void Graphics::DrawBlackText(const std::wstring& text, const D2D1_RECT_F& rect, ComPtr<IDWriteTextFormat> format) {
+void Graphics::DrawBlackSmallText(const std::wstring& text, const D2D1_RECT_F& rect) {
+	assert(mD2DDeviceCtx != nullptr);
+	assert(mSmallTextFormat != nullptr);
+	assert(mBlackBrush != nullptr);
 	mD2DDeviceCtx->DrawText(
 		text.c_str(),
 		static_cast<UINT32>(text.size()),
-		format.Get(),
+		mSmallTextFormat.Get(),
 		rect,
 		mBlackBrush.Get()
 	);
+}
+
+void Graphics::DrawBlackMediumText(const std::wstring& text, const D2D1_RECT_F& rect) {
+	assert(mD2DDeviceCtx != nullptr);
+	assert(mMediumTextFormat != nullptr);
+	assert(mBlackBrush != nullptr);
+	mD2DDeviceCtx->DrawText(
+		text.c_str(),
+		static_cast<UINT32>(text.size()),
+		mMediumTextFormat.Get(),
+		rect,
+		mBlackBrush.Get()
+	);
+}
+
+void Graphics::BuildTextFormat(float size, ComPtr<IDWriteTextFormat>& format) {
+	assert(mDWritefactory != nullptr);
+	ThrowIfFailed(mDWritefactory->CreateTextFormat(
+		FONT_FAMILY,
+		nullptr,
+		DWRITE_FONT_WEIGHT_REGULAR,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		size,
+		L"en-us",
+		&format
+	));
+	ThrowIfFailed(format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER));
 }
