@@ -189,13 +189,11 @@ inline bool Intersect(const D2D1_RECT_F& a, const D2D1_RECT_F& b, const XMVECTOR
 ref class Pong sealed : public IFrameworkView, IFrameworkViewSource
 {
 public:
-	virtual IFrameworkView^ CreateView()
-	{
+	virtual IFrameworkView^ CreateView() {
 		return ref new Pong();
 	}
 
-	virtual void Initialize(CoreApplicationView^ view)
-	{
+	virtual void Initialize(CoreApplicationView^ view) {
 		view->Activated += ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &Pong::Activated);
 		Gamepad::GamepadAdded += ref new EventHandler<Gamepad^>(this, &Pong::GamepadAdded);
 		Gamepad::GamepadRemoved += ref new EventHandler<Gamepad^>(this, &Pong::GamepadRemoved);
@@ -217,13 +215,11 @@ public:
 		mGraphics = std::make_unique<graphics::Graphics>();
 	}
 
-	void InitializeGame()
-	{
+	void InitializeGame() {
 		RandomizeBallDirection();
 	}
 
-	virtual void SetWindow(CoreWindow^ window)
-	{
+	virtual void SetWindow(CoreWindow^ window) {
 		window->Closed += ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(this, &Pong::WindowClosed);
 		window->VisibilityChanged += ref new TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^>(this, &Pong::WindowVisibilityChanged);
 		window->SizeChanged += ref new TypedEventHandler<CoreWindow^, WindowSizeChangedEventArgs^>(this, &Pong::WindowSizeChanged);
@@ -231,13 +227,11 @@ public:
 		ResizeContent();
 	}
 
-	virtual void Load(Platform::String^)
-	{
+	virtual void Load(Platform::String^) {
 		// ... no operations required
 	}
 
-	virtual void Run()
-	{
+	virtual void Run() {
 		auto millisAccumulator = 0ll;
 		auto oldMillis = util::GetCurrentMilliseconds();
 		while (!mWindowClosed) {
@@ -268,8 +262,7 @@ public:
 		}
 	}
 
-	virtual void Uninitialize()
-	{
+	virtual void Uninitialize() {
 		// ... no operations required
 	}
 
@@ -289,8 +282,7 @@ public:
 		ResizeContent();
 	}
 
-	void ResizeContent()
-	{
+	void ResizeContent() {
 		auto oldWidth = mWindowWidth;
 		auto oldHeight = mWindowHeight;
 		auto oldCellSize = mCellSize;
@@ -318,8 +310,7 @@ public:
 		mGraphics->SetCoreWindow(window);
 	}
 
-	void ResizeGameObjects(float oldWidth, float oldHeight, float oldCellSize, CoreWindow^ window)
-	{
+	void ResizeGameObjects(float oldWidth, float oldHeight, float oldCellSize, CoreWindow^ window) {
 		// calculate physical coefficients.
 		mPaddleVelocity = (mWindowHeight - mWindowHeightSpacing) / 30;
 		if (oldCellSize > EPSILON) {
@@ -434,8 +425,7 @@ public:
 		};
 	}
 
-	void ResetMovingObjects()
-	{
+	void ResetMovingObjects() {
 		// precalculate the half window dimensions.
 		auto halfWidth = mWindowWidth / 2;
 		auto halfHeight = mWindowHeight / 2;
@@ -462,16 +452,14 @@ public:
 		mBallVelocity = (mWindowHeight - mWindowHeightSpacing) / 30 / 4;
 	}
 
-	void RandomizeBallDirection()
-	{
+	void RandomizeBallDirection() {
 		auto x = -1.f + (2.f * util::GetRandomIntBetween(0, 1));
 		auto y = -1.f + (2.f * util::GetRandomIntBetween(0, 1));
 		mBallDirection = Vector2(x, y);
 		mBallDirection.Normalize();
 	}
 
-	void GamepadAdded(Object^ o, Gamepad^ gamepad)
-	{
+	void GamepadAdded(Object^ o, Gamepad^ gamepad) {
 		critical_section::scoped_lock lock{ mControllersLock };
 		if (mLeftPlayerController == nullptr) {
 			mLeftPlayerController = gamepad;
@@ -484,8 +472,7 @@ public:
 		}
 	}
 
-	void GamepadRemoved(Object^ o, Gamepad^ gamepad)
-	{
+	void GamepadRemoved(Object^ o, Gamepad^ gamepad) {
 		critical_section::scoped_lock lock{ mControllersLock };
 		if (mLeftPlayerController == gamepad) {
 			mLeftPlayerController = nullptr;
@@ -500,8 +487,7 @@ public:
 		}
 	}
 
-	void Pause()
-	{
+	void Pause() {
 		// TODO
 	}
 
@@ -543,8 +529,7 @@ public:
 		}
 	}
 
-	void CheckInput()
-	{
+	void CheckInput() {
 		CheckKeyboard();
 
 		critical_section::scoped_lock lock{ mControllersLock };
@@ -568,8 +553,7 @@ public:
 		}
 	}
 
-	void ResetGame()
-	{
+	void ResetGame() {
 		mLeftPoints = 0;
 		mRightPoints = 0;
 		mCountdown = COUNTDOWN_MS;
@@ -581,8 +565,7 @@ public:
 		return mLeftPoints >= POINT_TARGET || mRightPoints >= POINT_TARGET;
 	}
 
-	void Update(int dt)
-	{
+	void Update(int dt) {
 		// don't update anything while the game is over.
 		if (IsGameOver()) {
 			return;
@@ -781,8 +764,7 @@ public:
 		RandomizeBallDirection();
 	}
 
-	void Render(float alpha)
-	{
+	void Render(float alpha) {
 		mGraphics->BeginDrawAndClear();
 
 		// static objects
