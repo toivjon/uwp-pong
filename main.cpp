@@ -273,8 +273,7 @@ public:
 		// ... no operations required
 	}
 
-	void WindowClosed(CoreWindow^, CoreWindowEventArgs^)
-	{
+	void WindowClosed(CoreWindow^, CoreWindowEventArgs^) {
 		mWindowClosed = true;
 	}
 
@@ -282,13 +281,11 @@ public:
 		CoreWindow::GetForCurrentThread()->Activate();
 	}
 
-	void WindowVisibilityChanged(CoreWindow^, VisibilityChangedEventArgs^ args)
-	{
+	void WindowVisibilityChanged(CoreWindow^, VisibilityChangedEventArgs^ args) {
 		mWindowVisible = args->Visible;
 	}
 
-	void WindowSizeChanged(CoreWindow^, WindowSizeChangedEventArgs^ args)
-	{
+	void WindowSizeChanged(CoreWindow^, WindowSizeChangedEventArgs^ args) {
 		ResizeContent();
 	}
 
