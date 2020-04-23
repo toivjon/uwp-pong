@@ -23,7 +23,7 @@ namespace pong::graphics
 		void BeginDrawAndClear();
 		void EndDrawAndPresent();
 		void DrawWhiteRects(const std::vector<geometry::Rectangle> rects);
-		void FillWhiteRect(const D2D1_RECT_F& rect);
+		void DrawWhiteRect(const D2D1_RECT_F& rect);
 		void DrawWhiteBigText(const std::wstring& text, const D2D1_RECT_F& rect);
 		void DrawBlackSmallText(const std::wstring& text, const D2D1_RECT_F& rect);
 		void DrawBlackMediumText(const std::wstring& text, const D2D1_RECT_F& rect);

@@ -213,11 +213,11 @@ void Graphics::EndDrawAndPresent() {
 
 void Graphics::DrawWhiteRects(const std::vector<geometry::Rectangle> rects) {
 	for (auto& rect : rects) {
-		FillWhiteRect(rect);
+		DrawWhiteRect(rect);
 	}
 }
 
-void Graphics::FillWhiteRect(const D2D1_RECT_F& rect) {
+void Graphics::DrawWhiteRect(const D2D1_RECT_F& rect) {
 	mD2DDeviceCtx->FillRectangle(rect, mWhiteBrush.Get());
 }
 

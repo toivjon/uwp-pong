@@ -761,37 +761,35 @@ public:
 	void Render(float alpha) {
 		mGraphics->BeginDrawAndClear();
 
-		// static objects
-
 		mGraphics->DrawWhiteRects(mCenterlineRects);
-		mGraphics->FillWhiteRect(mTopWallRect);
-		mGraphics->FillWhiteRect(mBottomWallRect);
+		mGraphics->DrawWhiteRect(mTopWallRect);
+		mGraphics->DrawWhiteRect(mBottomWallRect);
 		mGraphics->DrawWhiteBigText(std::to_wstring(mLeftPoints), mLeftPointsRect);
 		mGraphics->DrawWhiteBigText(std::to_wstring(mRightPoints), mRightPointsRect);
 		mGraphics->DrawBlackSmallText(mLeftPlayerName, mLeftPlayerNameRect);
 		mGraphics->DrawBlackSmallText(mRightPlayerName, mRightPlayerNameRect);
-		mGraphics->FillWhiteRect(mRightGoalRect);
+		mGraphics->DrawWhiteRect(mRightGoalRect);
 
 		// dynamic objects
 
 		auto prevBufferIdx = mBufferIdx == 0 ? 1 : 0;
 
-		mGraphics->FillWhiteRect(geometry::Rectangle::Lerp(
+		mGraphics->DrawWhiteRect(geometry::Rectangle::Lerp(
 			mLeftPaddle[prevBufferIdx],
 			mLeftPaddle[mBufferIdx],
 			alpha));
-		mGraphics->FillWhiteRect(geometry::Rectangle::Lerp(
+		mGraphics->DrawWhiteRect(geometry::Rectangle::Lerp(
 			mRightPaddle[prevBufferIdx],
 			mRightPaddle[mBufferIdx],
 			alpha));
-		mGraphics->FillWhiteRect(geometry::Rectangle::Lerp(
+		mGraphics->DrawWhiteRect(geometry::Rectangle::Lerp(
 			mBall[prevBufferIdx],
 			mBall[mBufferIdx],
 			alpha));
 
 		// draw the game over box if the game is over
 		if (IsGameOver()) {
-			mGraphics->FillWhiteRect(mGameOverRect);
+			mGraphics->DrawWhiteRect(mGameOverRect);
 			mGraphics->DrawBlackMediumText(GAME_OVER_TITLE, mGameOverBigTextRect);
 			mGraphics->DrawBlackSmallText(GAME_OVER_DESCRIPTON, mGameOverSmallTextRect);
 		}
