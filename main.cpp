@@ -553,10 +553,18 @@ public:
 		}
 	}
 
-	void ResetGame() {
+	void ClearPoints() {
 		mLeftPoints = 0;
 		mRightPoints = 0;
+	}
+
+	void StartCountdown() {
 		mCountdown = COUNTDOWN_MS;
+	}
+
+	void ResetGame() {
+		ClearPoints();
+		StartCountdown();
 		ResetMovingObjects();
 		RandomizeBallDirection();
 	}
