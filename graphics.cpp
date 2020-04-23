@@ -211,6 +211,12 @@ void Graphics::EndDrawAndPresent() {
 	ThrowIfFailed(mSwapChain->Present(1, 0));
 }
 
+void Graphics::DrawWhiteRects(const std::vector<geometry::Rectangle> rects) {
+	for (auto& rect : rects) {
+		FillWhiteRect(rect);
+	}
+}
+
 void Graphics::FillWhiteRect(const D2D1_RECT_F& rect) {
 	mD2DDeviceCtx->FillRectangle(rect, mWhiteBrush.Get());
 }

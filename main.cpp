@@ -349,6 +349,7 @@ public:
 		mRightPlayerNameRect.left = horizontalCenter + mCellSize * 3;
 		mRightPlayerNameRect.right = mWindowWidth - mWindowWidthSpacing / 2 - mCellSize * .5f;
 
+		mCenterlineRects.resize(CENTERLINE_DOTS);
 		for (auto i = 0; i < CENTERLINE_DOTS; i++) {
 			mCenterlineRects[i].top = mWindowHeightSpacing / 2 + (i * 2 + 0.5f) * mCellSize;
 			mCenterlineRects[i].bottom = mCenterlineRects[i].top + mCellSize;
@@ -762,9 +763,7 @@ public:
 
 		// static objects
 
-		for (auto i = 0; i < CENTERLINE_DOTS; i++) {
-			mGraphics->FillWhiteRect(mCenterlineRects[i]);
-		}
+		mGraphics->DrawWhiteRects(mCenterlineRects);
 		mGraphics->FillWhiteRect(mTopWallRect);
 		mGraphics->FillWhiteRect(mBottomWallRect);
 		mGraphics->DrawWhiteBigText(std::to_wstring(mLeftPoints), mLeftPointsRect);
@@ -837,7 +836,7 @@ private:
 
 	std::unique_ptr<graphics::Graphics> mGraphics;
 
-	geometry::Rectangle mCenterlineRects[CENTERLINE_DOTS];
+	std::vector<geometry::Rectangle> mCenterlineRects;
 	geometry::Rectangle mTopWallRect;
 	geometry::Rectangle mBottomWallRect;
 	geometry::Rectangle mLeftPointsRect;

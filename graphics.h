@@ -1,10 +1,13 @@
 #pragma once
 
+#include "geometry.h"
+
 #include <d2d1_3.h>
 #include <d3d11.h>
 #include <dwrite.h>
 #include <dxgi1_6.h>
 #include <string>
+#include <vector>
 #include <wrl.h>
 
 namespace pong::graphics
@@ -19,6 +22,7 @@ namespace pong::graphics
 		void SetCoreWindow(Windows::UI::Core::CoreWindow^ window);
 		void BeginDrawAndClear();
 		void EndDrawAndPresent();
+		void DrawWhiteRects(const std::vector<geometry::Rectangle> rects);
 		void FillWhiteRect(const D2D1_RECT_F& rect);
 		void DrawWhiteBigText(const std::wstring& text, const D2D1_RECT_F& rect);
 		void DrawBlackSmallText(const std::wstring& text, const D2D1_RECT_F& rect);
