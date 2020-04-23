@@ -197,21 +197,11 @@ public:
 		view->Activated += ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &Pong::Activated);
 		Gamepad::GamepadAdded += ref new EventHandler<Gamepad^>(this, &Pong::GamepadAdded);
 		Gamepad::GamepadRemoved += ref new EventHandler<Gamepad^>(this, &Pong::GamepadRemoved);
-		InitializeAudio();
-		mGraphics = std::make_unique<graphics::Graphics>();
-		InitializeGame();
-		mKeyboard = std::make_unique<Keyboard>();
-	}
-
-	void InitializeAudio() {
-		assert(mAudioEngine == nullptr);
-		assert(mBeepSound == nullptr);
 		mAudioEngine = std::make_unique<AudioEngine>();
 		mBeepSound = std::make_unique<SoundEffect>(mAudioEngine.get(), L"Assets/beep.wav");
-	}
-
-	void InitializeGame() {
+		mGraphics = std::make_unique<graphics::Graphics>();
 		RandomizeBallDirection();
+		mKeyboard = std::make_unique<Keyboard>();
 	}
 
 	virtual void SetWindow(CoreWindow^ window) {
