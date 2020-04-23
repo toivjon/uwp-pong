@@ -76,13 +76,6 @@ constexpr auto GAME_OVER_DESCRIPTON = L"Press Gamepad X or Keyboard Enter To Con
 // === Utilities ===
 // =================
 
-// A utility function to throw an exception if HRESULT was failed.
-inline void ThrowIfFailed(HRESULT hr) {
-	if (FAILED(hr)) {
-		throw Platform::Exception::CreateException(hr);
-	}
-}
-
 inline float SweptAABB(const D2D1_RECT_F& a, const D2D1_RECT_F& b, float vx, float vy, float& nx, float& ny) {
 	float xInvEntry, xInvExit, xEntry, xExit;
 	if (vx > 0.f) {

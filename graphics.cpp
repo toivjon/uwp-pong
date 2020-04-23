@@ -7,18 +7,12 @@ using namespace D2D1;
 using namespace Microsoft::WRL;
 using namespace pong;
 using namespace pong::graphics;
+using namespace pong::util;
 using namespace Windows::Graphics::Display;
 using namespace Windows::UI::Core;
 
 constexpr auto FONT_FAMILY = L"Calibri";
 constexpr auto ASPECT_RATIO = (800.f / 600.f);
-
-// TODO move to utils?
-inline void ThrowIfFailed(HRESULT hr) {
-	if (FAILED(hr)) {
-		throw Platform::Exception::CreateException(hr);
-	}
-}
 
 Graphics::Graphics() {
 	InitDirect3D();
@@ -114,8 +108,8 @@ void Graphics::InitBrushes() {
 void Graphics::SetCoreWindow(CoreWindow^ window) {
 	assert(window != nullptr);
 	auto dpi = DisplayInformation::GetForCurrentView()->LogicalDpi;
-	auto width = util::ConvertDipsToPixels(window->Bounds.Width, dpi);
-	auto height = util::ConvertDipsToPixels(window->Bounds.Height, dpi);
+	auto width = ConvertDipsToPixels(window->Bounds.Width, dpi);
+	auto height = ConvertDipsToPixels(window->Bounds.Height, dpi);
 
 	mD2DDeviceCtx->SetTarget(nullptr);
 

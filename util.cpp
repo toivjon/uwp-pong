@@ -24,3 +24,9 @@ float pong::util::ConvertDipsToPixels(float dips, float dpi) {
 	static const float dipsPerInch = 96.f;
 	return floorf(dips * dpi / dipsPerInch + 0.5f);
 }
+
+void pong::util::ThrowIfFailed(HRESULT hresult) {
+	if (FAILED(hresult)) {
+		throw Platform::Exception::CreateException(hresult);
+	}
+}
