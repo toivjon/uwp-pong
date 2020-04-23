@@ -12,9 +12,6 @@
 
 namespace pong::graphics
 {
-	// 0.75f
-	// 6
-	// 3
 	class Graphics final
 	{
 	public:
