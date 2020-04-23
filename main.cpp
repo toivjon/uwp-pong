@@ -198,7 +198,7 @@ public:
 		Gamepad::GamepadAdded += ref new EventHandler<Gamepad^>(this, &Pong::GamepadAdded);
 		Gamepad::GamepadRemoved += ref new EventHandler<Gamepad^>(this, &Pong::GamepadRemoved);
 		InitializeAudio();
-		InitializeGraphics();
+		mGraphics = std::make_unique<graphics::Graphics>();
 		InitializeGame();
 		mKeyboard = std::make_unique<Keyboard>();
 	}
@@ -208,11 +208,6 @@ public:
 		assert(mBeepSound == nullptr);
 		mAudioEngine = std::make_unique<AudioEngine>();
 		mBeepSound = std::make_unique<SoundEffect>(mAudioEngine.get(), L"Assets/beep.wav");
-	}
-
-	void InitializeGraphics() {
-		assert(mGraphics == nullptr);
-		mGraphics = std::make_unique<graphics::Graphics>();
 	}
 
 	void InitializeGame() {
