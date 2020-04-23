@@ -202,7 +202,7 @@ public:
 		window->VisibilityChanged += ref new TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^>(this, &Pong::WindowVisibilityChanged);
 		window->SizeChanged += ref new TypedEventHandler<CoreWindow^, WindowSizeChangedEventArgs^>(this, &Pong::WindowSizeChanged);
 		mKeyboard->SetWindow(window);
-		ResizeContent();
+		ResizeContent(window);
 	}
 
 	virtual void Load(Platform::String^) {
@@ -256,17 +256,16 @@ public:
 		mWindowVisible = args->Visible;
 	}
 
-	void WindowSizeChanged(CoreWindow^, WindowSizeChangedEventArgs^ args) {
-		ResizeContent();
+	void WindowSizeChanged(CoreWindow^ window, WindowSizeChangedEventArgs^) {
+		ResizeContent(window);
 	}
 
-	void ResizeContent() {
+	void ResizeContent(CoreWindow^ window) {
 		auto oldWidth = mWindowWidth;
 		auto oldHeight = mWindowHeight;
 		auto oldCellSize = mCellSize;
 
 		// get and calculate some general dimensions for the game.
-		auto window = CoreWindow::GetForCurrentThread();
 		mWindowWidth = window->Bounds.Width;
 		mWindowHeight = window->Bounds.Height;
 
