@@ -21,9 +21,9 @@ public:
 	}
 
 	virtual void SetWindow(CoreWindow^ window) {
-		window->Closed += ref new WindowClosedHandler(this, &View::WindowClosed);
-		window->VisibilityChanged += ref new WindowVisibilityChangedHandler(this, &View::WindowVisibilityChanged);
-		window->SizeChanged += ref new WindowSizeChangedHandler(this, &View::WindowSizeChanged);
+		window->Closed += ref new WindowClosedHandler(this, &View::Closed);
+		window->VisibilityChanged += ref new WindowVisibilityChangedHandler(this, &View::VisibilityChanged);
+		window->SizeChanged += ref new WindowSizeChangedHandler(this, &View::SizeChanged);
 	}
 
 	virtual void Load(String^) {
@@ -42,15 +42,15 @@ public:
 		CoreWindow::GetForCurrentThread()->Activate();
 	}
 
-	void WindowClosed(CoreWindow^, CoreWindowEventArgs^) {
+	void Closed(CoreWindow^, CoreWindowEventArgs^) {
 		// TODO stop game
 	}
 
-	void WindowVisibilityChanged(CoreWindow^, VisibilityChangedEventArgs^ args) {
+	void VisibilityChanged(CoreWindow^, VisibilityChangedEventArgs^ args) {
 		// TODO pause/unpause game
 	}
 
-	void WindowSizeChanged(CoreWindow^ window, WindowSizeChangedEventArgs^) {
+	void SizeChanged(CoreWindow^ window, WindowSizeChangedEventArgs^) {
 		// TODO resize game objects and stuff
 	}
 };
