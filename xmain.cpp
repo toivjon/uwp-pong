@@ -1,3 +1,6 @@
+#include "game.h"
+
+using namespace Pong;
 using namespace Windows::ApplicationModel::Activation;
 using namespace Windows::ApplicationModel::Core;
 using namespace Windows::Foundation;
@@ -31,7 +34,7 @@ public:
 	}
 
 	virtual void Run() {
-
+		game.Run();
 	}
 
 	virtual void Uninitialize() {
@@ -43,16 +46,22 @@ public:
 	}
 
 	void Closed(CoreWindow^, CoreWindowEventArgs^) {
-		// TODO stop game
+		game.Stop();
 	}
 
 	void VisibilityChanged(CoreWindow^, VisibilityChangedEventArgs^ args) {
-		// TODO pause/unpause game
+		if (args->Visible) {
+			game.Resume();
+		} else {
+			game.Pause();
+		}
 	}
 
 	void SizeChanged(CoreWindow^ window, WindowSizeChangedEventArgs^) {
 		// TODO resize game objects and stuff
 	}
+private:
+	Game game;
 };
 
 [MTAThread]
