@@ -4,6 +4,11 @@ using namespace Windows::Foundation;
 using namespace Windows::UI::Core;
 using namespace Platform;
 
+typedef TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^> ActivatedHandler;
+typedef TypedEventHandler<CoreWindow^, CoreWindowEventArgs^> WindowClosedHandler;
+typedef TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^> WindowVisibilityChangedHandler;
+typedef TypedEventHandler<CoreWindow^, WindowSizeChangedEventArgs^> WindowSizeChangedHandler;
+
 ref class View : public IFrameworkView, IFrameworkViewSource
 {
 public:
@@ -12,13 +17,13 @@ public:
 	}
 
 	virtual void Initialize(CoreApplicationView^ view) {
-		view->Activated += ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &View::Activated);
+		view->Activated += ref new ActivatedHandler(this, &View::Activated);
 	}
 
 	virtual void SetWindow(CoreWindow^ window) {
-		window->Closed += ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(this, &View::WindowClosed);
-		window->VisibilityChanged += ref new TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^>(this, &View::WindowVisibilityChanged);
-		window->SizeChanged += ref new TypedEventHandler<CoreWindow^, WindowSizeChangedEventArgs^>(this, &View::WindowSizeChanged);
+		window->Closed += ref new WindowClosedHandler(this, &View::WindowClosed);
+		window->VisibilityChanged += ref new WindowVisibilityChangedHandler(this, &View::WindowVisibilityChanged);
+		window->SizeChanged += ref new WindowSizeChangedHandler(this, &View::WindowSizeChanged);
 	}
 
 	virtual void Load(String^) {
