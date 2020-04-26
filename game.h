@@ -10,5 +10,9 @@ namespace Pong
 		void Pause();
 		void Resume();
 		void SetResolution(float width, float height);
+	private:
+		enum class State { RUNNING, PAUSED, STOPPED };
+
+		State state;
 	};
 }
