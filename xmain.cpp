@@ -31,8 +31,7 @@ public:
 };
 
 [MTAThread]
-int main(Array<String^>^)
-{
+int main(Array<String^>^) {
 	CoreApplication::Run(ref new View());
 	return 0;
 }
