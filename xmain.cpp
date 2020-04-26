@@ -1,9 +1,12 @@
 #include "game.h"
+#include "util.h"
 
 using namespace Pong;
+using namespace pong::util;
 using namespace Windows::ApplicationModel::Activation;
 using namespace Windows::ApplicationModel::Core;
 using namespace Windows::Foundation;
+using namespace Windows::Graphics::Display;
 using namespace Windows::UI::Core;
 using namespace Platform;
 
@@ -27,6 +30,7 @@ public:
 		window->Closed += ref new ClosedHandler(this, &View::Closed);
 		window->VisibilityChanged += ref new VisibilityChangedHandler(this, &View::VisibilityChanged);
 		window->SizeChanged += ref new SizeChangedHandler(this, &View::SizeChanged);
+		SizeChanged(window, nullptr);
 	}
 
 	virtual void Load(String^) {
@@ -58,7 +62,10 @@ public:
 	}
 
 	void SizeChanged(CoreWindow^ window, WindowSizeChangedEventArgs^) {
-		// TODO resize game objects and stuff
+		auto dpi = DisplayInformation::GetForCurrentView()->LogicalDpi;
+		auto width = ConvertDipsToPixels(window->Bounds.Width, dpi);
+		auto height = ConvertDipsToPixels(window->Bounds.Height, dpi);
+		game.SetResolution(width, height);
 	}
 private:
 	Game game;

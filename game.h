@@ -9,5 +9,6 @@ namespace Pong
 		void Stop();
 		void Pause();
 		void Resume();
+		void SetResolution(float width, float height);
 	};
 }

@@ -17,3 +17,7 @@ void Game::Pause() {
 void Game::Resume() {
 
 }
+
+void Game::SetResolution(float width, float height) {
+
+}
