@@ -8,6 +8,7 @@
 
 #include "geometry.h"
 #include "graphics.h"
+#include "player.h"
 #include "util.h"
 
 // DirectXTK
@@ -41,10 +42,6 @@ constexpr auto UPDATES_PER_SECOND = 25;
 constexpr auto UPDATE_MILLIS = 1000 / 25;
 // The amount of dots in the center line.
 constexpr auto CENTERLINE_DOTS = 15;
-// The placeholder for the left player name.
-constexpr auto LEFT_PLAYER_NAME_PLACEHOLDER = L"player-1";
-// The placeholder name for the right player name.
-constexpr auto RIGHT_PLAYER_NAME_PLACEHOLDER = L"player-2";
 // The constant aspect ratio for the game content.
 constexpr auto ASPECT_RATIO = (800.f / 600.f);
 // The epsilon constant for floating point arithmetic.
@@ -195,6 +192,9 @@ public:
 		mGraphics = std::make_unique<graphics::Graphics>();
 		RandomizeBallDirection();
 		mKeyboard = std::make_unique<Keyboard>();
+
+		mLeftPlayer = std::make_unique<Player>();
+		mRightPlayer = std::make_unique<Player>();
 	}
 
 	virtual void SetWindow(CoreWindow^ window) {
@@ -442,11 +442,11 @@ public:
 		if (mLeftPlayerController == nullptr) {
 			mLeftPlayerController = gamepad;
 			auto user = gamepad->User;
-			mLeftPlayerName = ((Platform::String^)create_task(user->GetPropertyAsync(KnownUserProperties::AccountName)).get())->Data();
+			mLeftPlayer->SetName(((Platform::String^)create_task(user->GetPropertyAsync(KnownUserProperties::AccountName)).get())->Data());
 		} else if (mRightPlayerController == nullptr) {
 			mRightPlayerController = gamepad;
 			auto user = gamepad->User;
-			mRightPlayerName = ((Platform::String^)create_task(user->GetPropertyAsync(KnownUserProperties::AccountName)).get())->Data();
+			mRightPlayer->SetName(((Platform::String^)create_task(user->GetPropertyAsync(KnownUserProperties::AccountName)).get())->Data());
 		}
 	}
 
@@ -454,12 +454,12 @@ public:
 		critical_section::scoped_lock lock{ mControllersLock };
 		if (mLeftPlayerController == gamepad) {
 			mLeftPlayerController = nullptr;
-			mLeftPlayerName = LEFT_PLAYER_NAME_PLACEHOLDER;
+			mLeftPlayer->ResetName();
 			mLeftPaddleVelocity.y = 0.f;
 			Pause();
 		} else if (mRightPlayerController == gamepad) {
 			mRightPlayerController = nullptr;
-			mRightPlayerName = RIGHT_PLAYER_NAME_PLACEHOLDER;
+			mRightPlayer->ResetName();
 			mRightPaddleVelocity.y = 0.f;
 			Pause();
 		}
@@ -535,8 +535,8 @@ public:
 	}
 
 	void ClearPoints() {
-		mLeftPoints = 0;
-		mRightPoints = 0;
+		mLeftPlayer->SetScore(0);
+		mRightPlayer->SetScore(0);
 	}
 
 	void StartCountdown() {
@@ -551,7 +551,7 @@ public:
 	}
 
 	bool IsGameOver() {
-		return mLeftPoints >= POINT_TARGET || mRightPoints >= POINT_TARGET;
+		return mLeftPlayer->GetScore() >= POINT_TARGET || mRightPlayer->GetScore() >= POINT_TARGET;
 	}
 
 	void Update(int dt) {
@@ -744,9 +744,9 @@ public:
 
 	void handleGoal(uint8_t player) {
 		if (player == PLAYER_LEFT) {
-			mLeftPoints++;
+			mLeftPlayer->IncrementScore();
 		} else {
-			mRightPoints++;
+			mRightPlayer->IncrementScore();
 		}
 		mCountdown = COUNTDOWN_MS;
 		ResetMovingObjects();
@@ -759,10 +759,10 @@ public:
 		mGraphics->DrawWhiteRects(mCenterlineRects);
 		mGraphics->DrawWhiteRect(mTopWallRect);
 		mGraphics->DrawWhiteRect(mBottomWallRect);
-		mGraphics->DrawWhiteBigText(std::to_wstring(mLeftPoints), mLeftPointsRect);
-		mGraphics->DrawWhiteBigText(std::to_wstring(mRightPoints), mRightPointsRect);
-		mGraphics->DrawBlackSmallText(mLeftPlayerName, mLeftPlayerNameRect);
-		mGraphics->DrawBlackSmallText(mRightPlayerName, mRightPlayerNameRect);
+		mGraphics->DrawWhiteBigText(std::to_wstring(mLeftPlayer->GetScore()), mLeftPointsRect);
+		mGraphics->DrawWhiteBigText(std::to_wstring(mRightPlayer->GetScore()), mRightPointsRect);
+		mGraphics->DrawBlackSmallText(mLeftPlayer->GetName(), mLeftPlayerNameRect);
+		mGraphics->DrawBlackSmallText(mRightPlayer->GetName(), mRightPlayerNameRect);
 		mGraphics->DrawWhiteRect(mRightGoalRect);
 
 		// dynamic objects
@@ -791,6 +791,9 @@ public:
 		mGraphics->EndDrawAndPresent();
 	}
 private:
+	std::unique_ptr<Player> mLeftPlayer;
+	std::unique_ptr<Player> mRightPlayer;
+
 	// The flag used to stop execution of the application's main loop when the main window is closed.
 	bool mWindowClosed;
 	// The flag used to indicate whether the main window is visible and game should be rendered.
@@ -811,12 +814,6 @@ private:
 
 	float mPaddleVelocity = 0.f;
 	float mBallVelocity = 0.f;
-
-	uint8_t mLeftPoints;
-	uint8_t mRightPoints;
-
-	std::wstring mLeftPlayerName = LEFT_PLAYER_NAME_PLACEHOLDER;
-	std::wstring mRightPlayerName = RIGHT_PLAYER_NAME_PLACEHOLDER;
 
 	Gamepad^ mLeftPlayerController;
 	Gamepad^ mRightPlayerController;
