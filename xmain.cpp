@@ -5,9 +5,9 @@ using namespace Windows::UI::Core;
 using namespace Platform;
 
 typedef TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^> ActivatedHandler;
-typedef TypedEventHandler<CoreWindow^, CoreWindowEventArgs^> WindowClosedHandler;
-typedef TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^> WindowVisibilityChangedHandler;
-typedef TypedEventHandler<CoreWindow^, WindowSizeChangedEventArgs^> WindowSizeChangedHandler;
+typedef TypedEventHandler<CoreWindow^, CoreWindowEventArgs^> ClosedHandler;
+typedef TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^> VisibilityChangedHandler;
+typedef TypedEventHandler<CoreWindow^, WindowSizeChangedEventArgs^> SizeChangedHandler;
 
 ref class View : public IFrameworkView, IFrameworkViewSource
 {
@@ -21,9 +21,9 @@ public:
 	}
 
 	virtual void SetWindow(CoreWindow^ window) {
-		window->Closed += ref new WindowClosedHandler(this, &View::Closed);
-		window->VisibilityChanged += ref new WindowVisibilityChangedHandler(this, &View::VisibilityChanged);
-		window->SizeChanged += ref new WindowSizeChangedHandler(this, &View::SizeChanged);
+		window->Closed += ref new ClosedHandler(this, &View::Closed);
+		window->VisibilityChanged += ref new VisibilityChangedHandler(this, &View::VisibilityChanged);
+		window->SizeChanged += ref new SizeChangedHandler(this, &View::SizeChanged);
 	}
 
 	virtual void Load(String^) {
