@@ -6,6 +6,7 @@
 #include <ppltasks.h>
 #include <string>
 
+#include "entity.h"
 #include "geometry.h"
 #include "graphics.h"
 #include "player.h"
@@ -311,15 +312,11 @@ public:
 		auto horizontalCenter = mWindowWidth / 2;
 		auto verticalCenter = mWindowHeight / 2;
 
-		mTopWallRect.top = mWindowHeightSpacing / 2;
-		mTopWallRect.bottom = mTopWallRect.top + mCellSize;
-		mTopWallRect.left = mWindowWidthSpacing / 2;
-		mTopWallRect.right = mWindowWidth - mWindowWidthSpacing / 2;
+		mTopWall.SetPosition(mWindowWidthSpacing / 2, mWindowHeightSpacing / 2);
+		mTopWall.SetSize(mWindowWidth - mWindowWidthSpacing, mCellSize);
 
-		mBottomWallRect.top = mWindowHeight - mWindowHeightSpacing / 2 - mCellSize;
-		mBottomWallRect.bottom = mBottomWallRect.top + mCellSize;
-		mBottomWallRect.left = mWindowWidthSpacing / 2;
-		mBottomWallRect.right = mWindowWidth - mWindowWidthSpacing / 2;
+		mBottomWall.SetPosition(mWindowWidthSpacing / 2, mWindowHeight - mWindowHeightSpacing / 2 - mCellSize);
+		mBottomWall.SetSize(mWindowWidth - mWindowWidthSpacing, mCellSize);
 
 		mLeftPointsRect.top = mWindowHeightSpacing / 2 + mCellSize * 2;
 		mLeftPointsRect.bottom = mLeftPointsRect.top + mCellSize * 6;
@@ -578,25 +575,25 @@ public:
 		mRightPaddle[mBufferIdx] = rightPaddlePosition;
 
 		// check that the left paddle stays between the top and bottom wall.
-		if (mLeftPaddle[mBufferIdx].Collides(mBottomWallRect)) {
+		if (mLeftPaddle[mBufferIdx].Collides(mBottomWall.GetRect())) {
 			auto paddleHeight = mLeftPaddle[mBufferIdx].bottom - mLeftPaddle[mBufferIdx].top;
-			mLeftPaddle[mBufferIdx].bottom = mBottomWallRect.top;
-			mLeftPaddle[mBufferIdx].top = mBottomWallRect.top - paddleHeight;
-		} else if (mLeftPaddle[mBufferIdx].Collides(mTopWallRect)) {
+			mLeftPaddle[mBufferIdx].bottom = mBottomWall.GetY();
+			mLeftPaddle[mBufferIdx].top = mBottomWall.GetY() - paddleHeight;
+		} else if (mLeftPaddle[mBufferIdx].Collides(mTopWall.GetRect())) {
 			auto paddleHeight = mLeftPaddle[mBufferIdx].bottom - mLeftPaddle[mBufferIdx].top;
-			mLeftPaddle[mBufferIdx].bottom = mTopWallRect.bottom + paddleHeight;
-			mLeftPaddle[mBufferIdx].top = mTopWallRect.bottom;
+			mLeftPaddle[mBufferIdx].bottom = mTopWall.GetY() + mTopWall.GetHeight() + paddleHeight;
+			mLeftPaddle[mBufferIdx].top = mTopWall.GetY() + mTopWall.GetHeight();
 		}
 
 		// check that the right paddle stays between the top and bottom wall.
-		if (mRightPaddle[mBufferIdx].Collides(mBottomWallRect)) {
+		if (mRightPaddle[mBufferIdx].Collides(mBottomWall.GetRect())) {
 			auto paddleHeight = mRightPaddle[mBufferIdx].bottom - mRightPaddle[mBufferIdx].top;
-			mRightPaddle[mBufferIdx].bottom = mBottomWallRect.top;
-			mRightPaddle[mBufferIdx].top = mBottomWallRect.top - paddleHeight;
-		} else if (mRightPaddle[mBufferIdx].Collides(mTopWallRect)) {
+			mRightPaddle[mBufferIdx].bottom = mBottomWall.GetY();
+			mRightPaddle[mBufferIdx].top = mBottomWall.GetY() - paddleHeight;
+		} else if (mRightPaddle[mBufferIdx].Collides(mTopWall.GetRect())) {
 			auto paddleHeight = mRightPaddle[mBufferIdx].bottom - mRightPaddle[mBufferIdx].top;
-			mRightPaddle[mBufferIdx].bottom = mTopWallRect.bottom + paddleHeight;
-			mRightPaddle[mBufferIdx].top = mTopWallRect.bottom;
+			mRightPaddle[mBufferIdx].bottom = mTopWall.GetY() + mTopWall.GetHeight() + paddleHeight;
+			mRightPaddle[mBufferIdx].top = mTopWall.GetY() + mTopWall.GetHeight();
 		}
 
 		/*
@@ -624,7 +621,7 @@ public:
 
 			auto hitTime = 0.f;
 			auto hitNormal = XMVectorSet(0.f, 0.f, 0.f, 0.f);
-			if (mBallDirection.y < 0.f && Intersect(ballPosition, mTopWallRect, movement, XMVECTOR(), hitTime, hitNormal)) {
+			if (mBallDirection.y < 0.f && Intersect(ballPosition, mTopWall.GetRect(), movement, XMVECTOR(), hitTime, hitNormal)) {
 				// move the ball straight to the hit point.
 				// TODO old... movement = XMVectorScale(movement, hitTime);
 				// movement = XMVectorScale(mBallDirection, mBallVelocity * tBall * hitTime);
@@ -648,7 +645,7 @@ public:
 				tBall -= hitTime;
 				mBeepSound.Play();
 				*/
-			} else if (mBallDirection.y > 0.f && Intersect(ballPosition, mBottomWallRect, movement, XMVECTOR(), hitTime, hitNormal)) {
+			} else if (mBallDirection.y > 0.f && Intersect(ballPosition, mBottomWall.GetRect(), movement, XMVECTOR(), hitTime, hitNormal)) {
 				// move the ball straight to the hit point.
 				movement = XMVectorScale(movement, hitTime);
 				ballPosition.Move(movement.m128_f32[0], movement.m128_f32[1]);
@@ -757,8 +754,8 @@ public:
 		mGraphics->BeginDrawAndClear();
 
 		mGraphics->DrawWhiteRects(mCenterlineRects);
-		mGraphics->DrawWhiteRect(mTopWallRect);
-		mGraphics->DrawWhiteRect(mBottomWallRect);
+		mGraphics->DrawWhiteRect(mTopWall.GetRect());
+		mGraphics->DrawWhiteRect(mBottomWall.GetRect());
 		mGraphics->DrawWhiteBigText(std::to_wstring(mLeftPlayer->GetScore()), mLeftPointsRect);
 		mGraphics->DrawWhiteBigText(std::to_wstring(mRightPlayer->GetScore()), mRightPointsRect);
 		mGraphics->DrawBlackSmallText(mLeftPlayer->GetName(), mLeftPlayerNameRect);
@@ -827,8 +824,10 @@ private:
 	std::unique_ptr<graphics::Graphics> mGraphics;
 
 	std::vector<geometry::Rectangle> mCenterlineRects;
-	geometry::Rectangle mTopWallRect;
-	geometry::Rectangle mBottomWallRect;
+
+	Entity mTopWall;
+	Entity mBottomWall;
+
 	geometry::Rectangle mLeftPointsRect;
 	geometry::Rectangle mRightPointsRect;
 	geometry::Rectangle mLeftPlayerNameRect;

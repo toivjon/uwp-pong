@@ -17,6 +17,10 @@ bool Rectangle::Collides(const Rectangle& rect) const {
 	return !(right < rect.left || bottom < rect.top || left > rect.right || top > rect.bottom);
 }
 
+bool Rectangle::Collides(const D2D_RECT_F& rect) const {
+	return !(right < rect.left || bottom < rect.top || left > rect.right || top > rect.bottom);
+}
+
 void Rectangle::Set(float left, float top, float right, float bottom) {
 	this->left = left;
 	this->top = top;
