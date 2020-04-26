@@ -318,15 +318,11 @@ public:
 		mBottomWall.SetPosition(mWindowWidthSpacing / 2, mWindowHeight - mWindowHeightSpacing / 2 - mCellSize);
 		mBottomWall.SetSize(mWindowWidth - mWindowWidthSpacing, mCellSize);
 
-		mLeftPointsRect.top = mWindowHeightSpacing / 2 + mCellSize * 2;
-		mLeftPointsRect.bottom = mLeftPointsRect.top + mCellSize * 6;
-		mLeftPointsRect.left = horizontalCenter - mCellSize * 5;
-		mLeftPointsRect.right = mLeftPointsRect.left + mCellSize;
+		mLeftScore.SetPosition(horizontalCenter - mCellSize * 5, mWindowHeightSpacing / 2 + mCellSize * 2);
+		mLeftScore.SetSize(mCellSize, mCellSize * 6);
 
-		mRightPointsRect.top = mWindowHeightSpacing / 2 + mCellSize * 2;
-		mRightPointsRect.bottom = mRightPointsRect.top + mCellSize * 6;
-		mRightPointsRect.left = horizontalCenter + mCellSize * 4;
-		mRightPointsRect.right = mRightPointsRect.left + mCellSize;
+		mRightScore.SetPosition(horizontalCenter + mCellSize * 4, mWindowHeightSpacing / 2 + mCellSize * 2);
+		mRightScore.SetSize(mCellSize, mCellSize * 6);
 
 		mLeftPlayerNameRect.top = mWindowHeightSpacing / 2;
 		mLeftPlayerNameRect.bottom = mLeftPlayerNameRect.top + mCellSize;
@@ -752,8 +748,8 @@ public:
 		mGraphics->DrawWhiteRects(mCenterlineRects);
 		mGraphics->DrawWhiteRect(mTopWall.GetRect());
 		mGraphics->DrawWhiteRect(mBottomWall.GetRect());
-		mGraphics->DrawWhiteBigText(std::to_wstring(mLeftPlayer->GetScore()), mLeftPointsRect);
-		mGraphics->DrawWhiteBigText(std::to_wstring(mRightPlayer->GetScore()), mRightPointsRect);
+		mGraphics->DrawWhiteBigText(std::to_wstring(mLeftPlayer->GetScore()), mLeftScore.GetRect());
+		mGraphics->DrawWhiteBigText(std::to_wstring(mRightPlayer->GetScore()), mRightScore.GetRect());
 		mGraphics->DrawBlackSmallText(mLeftPlayer->GetName(), mLeftPlayerNameRect);
 		mGraphics->DrawBlackSmallText(mRightPlayer->GetName(), mRightPlayerNameRect);
 
@@ -824,9 +820,9 @@ private:
 	Entity mBottomWall;
 	Entity mLeftGoal;
 	Entity mRightGoal;
+	Entity mLeftScore;
+	Entity mRightScore;
 
-	geometry::Rectangle mLeftPointsRect;
-	geometry::Rectangle mRightPointsRect;
 	geometry::Rectangle mLeftPlayerNameRect;
 	geometry::Rectangle mRightPlayerNameRect;
 	geometry::Rectangle mLeftPaddle[2];
