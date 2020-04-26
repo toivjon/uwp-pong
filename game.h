@@ -5,6 +5,8 @@ namespace Pong
 	class Game final
 	{
 	public:
+		Game();
+
 		void Run();
 		void Stop();
 		void Pause();
