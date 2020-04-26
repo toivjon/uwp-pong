@@ -368,24 +368,15 @@ public:
 			mBall[i].left = horizontalCenter - (.5f * mCellSize) + mCellSize * ballRelMovementX;
 			mBall[i].right = mBall[i].left + mCellSize;
 		}
-		mGameOverRect = {
-			horizontalCenter - 9 * mCellSize,
-			verticalCenter - 3 * mCellSize,
-			horizontalCenter + 9 * mCellSize,
-			verticalCenter + 3 * mCellSize
-		};
-		mGameOverBigTextRect = {
-			horizontalCenter - 9 * mCellSize,
-			verticalCenter - 3 * mCellSize,
-			horizontalCenter + 9 * mCellSize,
-			verticalCenter + 3 * mCellSize
-		};
-		mGameOverSmallTextRect = {
-			horizontalCenter - 10 * mCellSize,
-			verticalCenter + mCellSize,
-			horizontalCenter + 10 * mCellSize,
-			verticalCenter + 2 * mCellSize
-		};
+
+		mGameOverBox.SetPosition(horizontalCenter - 9 * mCellSize, verticalCenter - 3 * mCellSize);
+		mGameOverBox.SetSize(9 * mCellSize, 3 * mCellSize);
+
+		mGameOverTopic.SetPosition(horizontalCenter - 9 * mCellSize, verticalCenter - 3 * mCellSize);
+		mGameOverTopic.SetSize(9 * mCellSize, 3 * mCellSize);
+
+		mGameOverDescription.SetPosition(horizontalCenter - 10 * mCellSize, verticalCenter + mCellSize);
+		mGameOverDescription.SetSize(10 * mCellSize, 2 * mCellSize);
 	}
 
 	void ResetMovingObjects() {
@@ -768,9 +759,9 @@ public:
 
 		// draw the game over box if the game is over
 		if (IsGameOver()) {
-			mGraphics->DrawWhiteRect(mGameOverRect);
-			mGraphics->DrawBlackMediumText(GAME_OVER_TITLE, mGameOverBigTextRect);
-			mGraphics->DrawBlackSmallText(GAME_OVER_DESCRIPTON, mGameOverSmallTextRect);
+			mGraphics->DrawWhiteRect(mGameOverBox.GetRect());
+			mGraphics->DrawBlackMediumText(GAME_OVER_TITLE, mGameOverTopic.GetRect());
+			mGraphics->DrawBlackSmallText(GAME_OVER_DESCRIPTON, mGameOverDescription.GetRect());
 		}
 		mGraphics->EndDrawAndPresent();
 	}
@@ -825,9 +816,9 @@ private:
 	geometry::Rectangle mRightPaddle[2];
 	geometry::Rectangle mBall[2];
 
-	geometry::Rectangle mGameOverRect;
-	geometry::Rectangle mGameOverBigTextRect;
-	geometry::Rectangle mGameOverSmallTextRect;
+	Entity mGameOverBox;
+	Entity mGameOverTopic;
+	Entity mGameOverDescription;
 
 	int mBufferIdx = 0;
 
