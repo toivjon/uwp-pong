@@ -324,15 +324,11 @@ public:
 		mRightScore.SetPosition(horizontalCenter + mCellSize * 4, mWindowHeightSpacing / 2 + mCellSize * 2);
 		mRightScore.SetSize(mCellSize, mCellSize * 6);
 
-		mLeftPlayerNameRect.top = mWindowHeightSpacing / 2;
-		mLeftPlayerNameRect.bottom = mLeftPlayerNameRect.top + mCellSize;
-		mLeftPlayerNameRect.left = mWindowWidthSpacing / 2 + mCellSize * .5f;
-		mLeftPlayerNameRect.right = horizontalCenter - mCellSize * 3;
+		mLeftName.SetPosition(mWindowWidthSpacing / 2 + mCellSize * .5f, mWindowHeightSpacing / 2);
+		mLeftName.SetSize((mWindowWidth - mWindowWidthSpacing) * .5f, mCellSize);
 
-		mRightPlayerNameRect.top = mWindowHeightSpacing / 2;
-		mRightPlayerNameRect.bottom = mRightPlayerNameRect.top + mCellSize;
-		mRightPlayerNameRect.left = horizontalCenter + mCellSize * 3;
-		mRightPlayerNameRect.right = mWindowWidth - mWindowWidthSpacing / 2 - mCellSize * .5f;
+		mRightName.SetPosition(horizontalCenter, mWindowHeightSpacing / 2);
+		mRightName.SetSize((mWindowWidth - mWindowWidthSpacing) * .5f, mCellSize);
 
 		mCenterlineRects.resize(CENTERLINE_DOTS);
 		for (auto i = 0; i < CENTERLINE_DOTS; i++) {
@@ -750,8 +746,8 @@ public:
 		mGraphics->DrawWhiteRect(mBottomWall.GetRect());
 		mGraphics->DrawWhiteBigText(std::to_wstring(mLeftPlayer->GetScore()), mLeftScore.GetRect());
 		mGraphics->DrawWhiteBigText(std::to_wstring(mRightPlayer->GetScore()), mRightScore.GetRect());
-		mGraphics->DrawBlackSmallText(mLeftPlayer->GetName(), mLeftPlayerNameRect);
-		mGraphics->DrawBlackSmallText(mRightPlayer->GetName(), mRightPlayerNameRect);
+		mGraphics->DrawBlackSmallText(mLeftPlayer->GetName(), mLeftName.GetRect());
+		mGraphics->DrawBlackSmallText(mRightPlayer->GetName(), mRightName.GetRect());
 
 		// dynamic objects
 
@@ -822,9 +818,9 @@ private:
 	Entity mRightGoal;
 	Entity mLeftScore;
 	Entity mRightScore;
+	Entity mLeftName;
+	Entity mRightName;
 
-	geometry::Rectangle mLeftPlayerNameRect;
-	geometry::Rectangle mRightPlayerNameRect;
 	geometry::Rectangle mLeftPaddle[2];
 	geometry::Rectangle mRightPaddle[2];
 	geometry::Rectangle mBall[2];
