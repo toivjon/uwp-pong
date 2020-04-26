@@ -346,15 +346,11 @@ public:
 			mCenterlineRects[i].right = mCenterlineRects[i].left + mCellSize;
 		}
 
-		mLeftGoalRect.top = 0;
-		mLeftGoalRect.bottom = mWindowHeight;
-		mLeftGoalRect.left = -D3D10_FLOAT32_MAX;
-		mLeftGoalRect.right = mWindowWidthSpacing / 2;
+		mLeftGoal.SetPosition(-1000.f, -1000.f);
+		mLeftGoal.SetSize(1000.f, 2000.f);
 
-		mRightGoalRect.top = 0;
-		mRightGoalRect.bottom = mWindowHeight;
-		mRightGoalRect.left = mWindowWidth - mWindowWidthSpacing / 2;
-		mRightGoalRect.right = D3D10_FLOAT32_MAX;
+		mRightGoal.SetPosition(mWindowWidth - mWindowWidthSpacing, -1000.f);
+		mRightGoal.SetSize(1000.f, 2000.f);
 
 		auto oldHalfWidth = oldWidth / 2.f;
 		auto oldHalfHeight = oldHeight / 2.f;
@@ -732,9 +728,9 @@ public:
 		mBall[mBufferIdx] = ballPosition;
 
 		// check whether the ball has reached a goal.
-		if (mLeftGoalRect.Contains(mBall[mBufferIdx])) {
+		if (mLeftGoal.Contains(mBall[mBufferIdx])) {
 			handleGoal(PLAYER_RIGHT);
-		} else if (mRightGoalRect.Contains(mBall[mBufferIdx])) {
+		} else if (mRightGoal.Contains(mBall[mBufferIdx])) {
 			handleGoal(PLAYER_LEFT);
 		}
 	}
@@ -760,7 +756,6 @@ public:
 		mGraphics->DrawWhiteBigText(std::to_wstring(mRightPlayer->GetScore()), mRightPointsRect);
 		mGraphics->DrawBlackSmallText(mLeftPlayer->GetName(), mLeftPlayerNameRect);
 		mGraphics->DrawBlackSmallText(mRightPlayer->GetName(), mRightPlayerNameRect);
-		mGraphics->DrawWhiteRect(mRightGoalRect);
 
 		// dynamic objects
 
@@ -827,6 +822,8 @@ private:
 
 	Entity mTopWall;
 	Entity mBottomWall;
+	Entity mLeftGoal;
+	Entity mRightGoal;
 
 	geometry::Rectangle mLeftPointsRect;
 	geometry::Rectangle mRightPointsRect;
@@ -835,8 +832,6 @@ private:
 	geometry::Rectangle mLeftPaddle[2];
 	geometry::Rectangle mRightPaddle[2];
 	geometry::Rectangle mBall[2];
-	geometry::Rectangle mLeftGoalRect;
-	geometry::Rectangle mRightGoalRect;
 
 	geometry::Rectangle mGameOverRect;
 	geometry::Rectangle mGameOverBigTextRect;

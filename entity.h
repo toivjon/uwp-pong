@@ -17,6 +17,10 @@ namespace pong
 		float GetHeight() const { return mRect.bottom - mRect.top; }
 
 		const D2D_RECT_F& GetRect() const { return mRect; }
+
+		bool Collides(const D2D_RECT_F& rect) const;
+		bool Contains(const D2D_RECT_F& rect) const;
+		bool Contains(float x, float y) const;
 	private:
 		D2D_RECT_F mRect;
 	};
