@@ -39,6 +39,7 @@
     <ClCompile Include="graphics.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="entity.cpp" />
+    <ClCompile Include="xmain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Media Include="Assets\beep.wav" />

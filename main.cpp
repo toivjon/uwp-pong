@@ -830,7 +830,7 @@ private:
 };
 
 [Platform::MTAThread]
-int main(Platform::Array<Platform::String^>^)
+int xmain(Platform::Array<Platform::String^>^)
 {
 	CoreApplication::Run(ref new Pong());
 	return 0;
