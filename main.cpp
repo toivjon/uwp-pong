@@ -507,9 +507,7 @@ public:
 		}
 	}
 
-	void CheckInput() {
-		CheckKeyboard();
-
+	void CheckGamepads() {
 		critical_section::scoped_lock lock{ mControllersLock };
 		if (mLeftPlayerController != nullptr) {
 			auto reading = mLeftPlayerController->GetCurrentReading();
@@ -529,6 +527,11 @@ public:
 				}
 			}
 		}
+	}
+
+	void CheckInput() {
+		CheckKeyboard();
+		CheckGamepads();
 	}
 
 	void ClearPoints() {
