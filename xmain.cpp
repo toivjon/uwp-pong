@@ -3,6 +3,7 @@
 
 using namespace Pong;
 using namespace pong::util;
+using namespace Windows::ApplicationModel;
 using namespace Windows::ApplicationModel::Activation;
 using namespace Windows::ApplicationModel::Core;
 using namespace Windows::Foundation;
@@ -14,6 +15,8 @@ typedef TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^> ActivatedH
 typedef TypedEventHandler<CoreWindow^, CoreWindowEventArgs^> ClosedHandler;
 typedef TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^> VisibilityChangedHandler;
 typedef TypedEventHandler<CoreWindow^, WindowSizeChangedEventArgs^> SizeChangedHandler;
+typedef EventHandler<SuspendingEventArgs^> SuspendingHandler;
+typedef EventHandler<Object^> ResumingHandler;
 
 ref class View : public IFrameworkView, IFrameworkViewSource
 {
@@ -24,6 +27,8 @@ public:
 
 	virtual void Initialize(CoreApplicationView^ view) {
 		view->Activated += ref new ActivatedHandler(this, &View::Activated);
+		CoreApplication::Suspending += ref new SuspendingHandler(this, &View::Suspending);
+		CoreApplication::Resuming += ref new ResumingHandler(this, &View::Resuming);
 	}
 
 	virtual void SetWindow(CoreWindow^ window) {
@@ -47,6 +52,14 @@ public:
 
 	void Activated(CoreApplicationView^, IActivatedEventArgs^) {
 		CoreWindow::GetForCurrentThread()->Activate();
+	}
+
+	void Suspending(Object^, SuspendingEventArgs^) {
+		game.Pause();
+	}
+
+	void Resuming(Object^ sender, Object^ args) {
+		game.Resume();
 	}
 
 	void Closed(CoreWindow^, CoreWindowEventArgs^) {

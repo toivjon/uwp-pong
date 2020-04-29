@@ -11,7 +11,9 @@ Game::Game() : state(State::STOPPED) {
 void Game::Run() {
 	assert(state == State::STOPPED);
 	state = State::RUNNING;
-	// ...
+	while (state != State::STOPPED) {
+		// ...
+	}
 }
 
 void Game::Stop() {

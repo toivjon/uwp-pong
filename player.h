@@ -3,7 +3,7 @@
 #include <string>
 #include <cstdint>
 
-namespace pong
+namespace Pong
 {
 	class Player final
 	{
