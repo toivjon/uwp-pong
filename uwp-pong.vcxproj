@@ -85,7 +85,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="rectangle.h" />
+    <ClInclude Include="renderable.h" />
     <ClInclude Include="renderer.h" />
+    <ClInclude Include="sphere.h" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -106,7 +109,9 @@
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="rectangle.cpp" />
     <ClCompile Include="renderer.cpp" />
+    <ClCompile Include="sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

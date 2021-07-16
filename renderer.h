@@ -27,6 +27,8 @@ public:
 	void clear();
 	void present();
 
+	winrt::com_ptr<ID2D1DeviceContext5> getD2DContext() const { return m2DDeviceCtx; }
+
 private:
 	winrt::agile_ref<ApplicationWindow> mWindow;
 	winrt::Windows::Foundation::Size	mWindowSize;
