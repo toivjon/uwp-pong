@@ -7,7 +7,11 @@ public:
 	void render(const Renderer::Ptr& renderer) const final;
 	void setBrush(winrt::com_ptr<ID2D1Brush> brush) { mBrush = brush; }
 	void setRadius(float radius) { mRadius = radius; }
+	void setX(float x) { mX = x; }
+	void setY(float y) { mY = y; }
 private:
 	winrt::com_ptr<ID2D1Brush> mBrush;
 	float					   mRadius;
+	float					   mX;
+	float					   mY;
 };
