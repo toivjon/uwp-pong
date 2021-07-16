@@ -3,5 +3,7 @@
 
 void Rectangle::render(const Renderer::Ptr& renderer) const {
 	auto ctx = renderer->getD2DContext();
-	ctx->FillRectangle({ mWidth / 2, mHeight / 2 }, mBrush.get());
+	auto halfWidth = mWidth / 2;
+	auto halfHeight = mHeight / 2;
+	ctx->FillRectangle({ -halfWidth, -halfHeight, halfWidth, halfHeight}, mBrush.get());
 }
