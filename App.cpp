@@ -77,17 +77,17 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 
 		Rectangle upperWall;
 		upperWall.setBrush(brush);
-		upperWall.setHeight(.05f);
+		upperWall.setHeight(.03f);
 		upperWall.setWidth(1.f);
 		upperWall.setX(0.5f);
-		upperWall.setY(0.025f);
+		upperWall.setY(0.015f);
 
 		Rectangle lowerWall;
 		lowerWall.setBrush(brush);
-		lowerWall.setHeight(.05f);
+		lowerWall.setHeight(.03f);
 		lowerWall.setWidth(1.f);
 		lowerWall.setX(0.5f);
-		lowerWall.setY(.975f);
+		lowerWall.setY(.985f);
 
 		Rectangle leftPaddle;
 		leftPaddle.setBrush(brush);
