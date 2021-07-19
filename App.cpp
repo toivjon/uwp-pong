@@ -100,7 +100,7 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 		rightPaddle.setBrush(brush);
 		rightPaddle.setHeight(.15f);
 		rightPaddle.setWidth(.025f);
-		rightPaddle.setX(.975f);
+		rightPaddle.setX(.95f);
 		rightPaddle.setY(0.8f);
 
 		while (true) {
