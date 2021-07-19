@@ -94,6 +94,20 @@ void Renderer::initWindowResources() {
 	OutputDebugStringA("GraphicsContext::initWindowResources\n");
 	m2DDeviceCtx->SetTarget(nullptr);
 	m3DDeviceCtx->Flush();
+
+	// TODO perhaps we could adjust this in some other way?
+	// calculate window entity offset to maintain aspect ratio.
+	mWindowOffset = { 0,0 };
+	auto aspect = mWindowSize.Width / mWindowSize.Height;
+	const auto desiredAspect = 1.3f;
+	if (abs(aspect - desiredAspect) > 0) {
+		if (aspect > desiredAspect) {
+			mWindowOffset.Width = (mWindowSize.Width - desiredAspect * mWindowSize.Height) / 2.f;
+		} else {
+			mWindowOffset.Height = (mWindowSize.Height - mWindowSize.Width / desiredAspect) / 2.f;
+		}
+	}
+
 	if (mSwapChain != nullptr) {
 		// Resize swap chain buffers.
 		CheckOK(mSwapChain->ResizeBuffers(
@@ -192,7 +206,7 @@ void Renderer::initWindowResources() {
 void Renderer::setWindow(const ApplicationWindow& window) {
 	OutputDebugStringA("GraphicsContext::setWindow\n");
 	mWindow = window;
-	mWindowSize = Size(window.Bounds().Height, window.Bounds().Height);
+	mWindowSize = Size(window.Bounds().Width, window.Bounds().Height);
 	mDpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 	m2DDeviceCtx->SetDpi(mDpi, mDpi);
 	initWindowResources();
@@ -202,16 +216,6 @@ void Renderer::setWindowSize(const Size& size) {
 	OutputDebugStringA("GraphicsContext::setWindowSize\n");
 	if (mWindowSize != size) {
 		mWindowSize = size;
-		mWindowOffset = { 0,0 };
-		auto aspect = size.Width / size.Height;
-		const auto desiredAspect = 1.3f;
-		if (abs(aspect - desiredAspect) > 0) {
-			if (aspect > desiredAspect) {
-				mWindowOffset.Width = (size.Width - desiredAspect * size.Height) / 2.f;
-			} else {
-				mWindowOffset.Height = (size.Height - size.Width / desiredAspect) / 2.f;
-			}
-		}
 		initWindowResources();
 	}
 }
