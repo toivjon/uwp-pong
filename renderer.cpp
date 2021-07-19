@@ -202,6 +202,16 @@ void Renderer::setWindowSize(const Size& size) {
 	OutputDebugStringA("GraphicsContext::setWindowSize\n");
 	if (mWindowSize != size) {
 		mWindowSize = size;
+		mWindowOffset = { 0,0 };
+		auto aspect = size.Width / size.Height;
+		const auto desiredAspect = 1.3f;
+		if (abs(aspect - desiredAspect) > 0) {
+			if (aspect > desiredAspect) {
+				mWindowOffset.Width = (size.Width - desiredAspect * size.Height) / 2.f;
+			} else {
+				mWindowOffset.Height = (size.Height - size.Width / desiredAspect) / 2.f;
+			}
+		}
 		initWindowResources();
 	}
 }

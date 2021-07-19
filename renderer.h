@@ -28,10 +28,13 @@ public:
 	void present();
 
 	winrt::com_ptr<ID2D1DeviceContext5> getD2DContext() const { return m2DDeviceCtx; }
+	winrt::Windows::Foundation::Size getWindowSize() const { return mWindowSize; }
+	winrt::Windows::Foundation::Size getWindowOffset() const { return mWindowOffset; }
 
 private:
 	winrt::agile_ref<ApplicationWindow> mWindow;
 	winrt::Windows::Foundation::Size	mWindowSize;
+	winrt::Windows::Foundation::Size	mWindowOffset = { 0,0 };
 	float								mDpi;
 
 	winrt::com_ptr<ID3D11Device>		m3DDevice;
