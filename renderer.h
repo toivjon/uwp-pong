@@ -30,6 +30,7 @@ public:
 	winrt::com_ptr<ID2D1DeviceContext5> getD2DContext() const { return m2DDeviceCtx; }
 	winrt::Windows::Foundation::Size getWindowSize() const { return mWindowSize; }
 	winrt::Windows::Foundation::Size getWindowOffset() const { return mWindowOffset; }
+	winrt::com_ptr<IDWriteFactory3> getDWriteFactory() const { return mDWriteFactory; }
 
 private:
 	winrt::agile_ref<ApplicationWindow> mWindow;
@@ -43,4 +44,5 @@ private:
 	winrt::com_ptr<ID2D1Device5>		m2DDevice;
 	winrt::com_ptr<ID2D1DeviceContext5> m2DDeviceCtx;
 	winrt::com_ptr<IDXGISwapChain1>		mSwapChain;
+	winrt::com_ptr<IDWriteFactory3>		mDWriteFactory;
 };

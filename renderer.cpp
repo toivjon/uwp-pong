@@ -44,6 +44,13 @@ Renderer::Renderer() {
 		m2DFactory.put()
 	));
 
+	// Construct a new DirectDraw factory to build DirectDraw resources.
+	CheckOK(DWriteCreateFactory(
+		DWRITE_FACTORY_TYPE_SHARED,
+		__uuidof(IDWriteFactory3),
+		reinterpret_cast<::IUnknown**>(mDWriteFactory.put())
+	));
+
 	initDeviceResources();
 }
 

@@ -2,6 +2,7 @@
 #include "renderer.h"
 #include "sphere.h"
 #include "rectangle.h"
+#include "text.h"
 
 using namespace winrt;
 
@@ -68,6 +69,18 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 	void Run() {
 		winrt::com_ptr<ID2D1SolidColorBrush> brush;
 		mRenderer->getD2DContext()->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), brush.put());
+		winrt::com_ptr<IDWriteTextFormat> format;
+		mRenderer->getDWriteFactory()->CreateTextFormat(
+			L"Calibri",
+			nullptr,
+			DWRITE_FONT_WEIGHT_REGULAR,
+			DWRITE_FONT_STYLE_NORMAL,
+			DWRITE_FONT_STRETCH_NORMAL,
+			164.f,
+			L"en-us",
+			format.put()
+		);
+		format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 
 		Sphere sphere;
 		sphere.setBrush(brush);
@@ -103,6 +116,20 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 		rightPaddle.setX(.95f);
 		rightPaddle.setY(0.8f);
 
+		Text leftScore;
+		leftScore.setText(L"0");
+		leftScore.setBrush(brush);
+		leftScore.setFormat(format);
+		leftScore.setX(.35f);
+		leftScore.setY(.025f);
+
+		Text rightScore;
+		rightScore.setText(L"0");
+		rightScore.setBrush(brush);
+		rightScore.setFormat(format);
+		rightScore.setX(.65f);
+		rightScore.setY(.025f);
+
 		while (true) {
 			auto window = CoreWindow::GetForCurrentThread();
 			auto dispatcher = window.Dispatcher();
@@ -113,6 +140,8 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 
 				// draw all visibile entities.
 				mRenderer->clear();
+				leftScore.render(mRenderer);
+				rightScore.render(mRenderer);
 				sphere.render(mRenderer);
 				upperWall.render(mRenderer);
 				lowerWall.render(mRenderer);
