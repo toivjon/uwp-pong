@@ -59,6 +59,10 @@ Scene::Scene(const Renderer::Ptr& renderer) {
 	mRightScore.setY(.025f);
 }
 
+void Scene::update(float dt) {
+	// ...
+}
+
 void Scene::render(const Renderer::Ptr& renderer) const {
 	mLeftScore.render(renderer);
 	mRightScore.render(renderer);

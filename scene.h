@@ -10,6 +10,7 @@ public:
 	using Ptr = std::unique_ptr<Scene>;
 
 	Scene(const Renderer::Ptr& renderer);
+	void update(float dt);
 	void render(const Renderer::Ptr& renderer) const final;
 private:
 	Sphere		mSphere;

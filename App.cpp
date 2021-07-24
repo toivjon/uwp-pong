@@ -76,6 +76,7 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 				dispatcher.ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
 
 				// TODO update logic and simulation.
+				mScene->update(10.f);
 
 				// draw all visibile entities.
 				mRenderer->clear();
