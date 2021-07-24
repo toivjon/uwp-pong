@@ -88,6 +88,7 @@
     <ClInclude Include="rectangle.h" />
     <ClInclude Include="renderable.h" />
     <ClInclude Include="renderer.h" />
+    <ClInclude Include="scene.h" />
     <ClInclude Include="sphere.h" />
     <ClInclude Include="text.h" />
   </ItemGroup>
@@ -112,6 +113,7 @@
     </ClCompile>
     <ClCompile Include="rectangle.cpp" />
     <ClCompile Include="renderer.cpp" />
+    <ClCompile Include="scene.cpp" />
     <ClCompile Include="sphere.cpp" />
     <ClCompile Include="text.cpp" />
   </ItemGroup>
