@@ -46,7 +46,10 @@ Scene::Scene(const Renderer::Ptr& renderer) {
 }
 
 void Scene::update(float /*dt*/) {
-	// ...
+	// TODO update ball
+	// TODO update left paddle
+	// TODO update right paddle
+	// TODO check collisions?
 }
 
 void Scene::render(const Renderer::Ptr& renderer) const {

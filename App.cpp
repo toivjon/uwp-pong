@@ -5,6 +5,12 @@
 #include "scene.h"
 #include "text.h"
 
+// The update interval frequency in seconds.
+const long long UpdateIntervalSeconds = 10;
+
+// The maximum allowed time for one frame update.
+const long long MaxFrameTime = 250;
+
 using namespace winrt;
 
 using namespace Windows;
@@ -15,6 +21,13 @@ using namespace Windows::Foundation;
 using namespace Windows::Graphics::Display;
 using namespace Windows::UI;
 using namespace Windows::UI::Core;
+
+long long CurrentMillis() {
+	using namespace std::chrono;
+	auto time = system_clock::now().time_since_epoch();
+	auto ms = duration_cast<milliseconds>(time);
+	return ms.count();
+}
 
 struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 
@@ -69,16 +82,27 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 	}
 
 	void Run() {
+		auto prevTime = CurrentMillis();
+		auto accumulator = 0ll;
 		while (true) {
 			auto window = CoreWindow::GetForCurrentThread();
 			auto dispatcher = window.Dispatcher();
 			if (mForeground) {
 				dispatcher.ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
 
-				// TODO update logic and simulation.
-				mScene->update(10.f);
+				// Update time definitions and delta calculations.
+				auto time = CurrentMillis();
+				auto dt = time - prevTime;
+				prevTime = time;
+				accumulator += dt;
 
-				// draw all visibile entities.
+				// Update game logic with fixed timesteps.
+				while (accumulator >= UpdateIntervalSeconds) {
+					mScene->update(UpdateIntervalSeconds);
+					accumulator -= UpdateIntervalSeconds;
+				}
+
+				// Render scene contents.
 				mRenderer->clear();
 				mScene->render(mRenderer);
 				mRenderer->present();
