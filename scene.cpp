@@ -5,10 +5,10 @@ Scene::Scene(const Renderer::Ptr& renderer) {
 	winrt::com_ptr<ID2D1SolidColorBrush> brush;
 	renderer->getD2DContext()->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), brush.put());
 
-	mSphere.setBrush(brush);
-	mSphere.setRadius(.01f);
-	mSphere.setX(.5f);
-	mSphere.setY(.5f);
+	mBall.setBrush(brush);
+	mBall.setRadius(.01f);
+	mBall.setX(.5f);
+	mBall.setY(.5f);
 
 	mUpperWall.setBrush(brush);
 	mUpperWall.setHeight(.03f);
@@ -45,7 +45,9 @@ Scene::Scene(const Renderer::Ptr& renderer) {
 	mRightScore.setY(.025f);
 }
 
-void Scene::update(float /*dt*/) {
+void Scene::update(float dt) {
+	mBall.setX(mBall.getX() + 0.0001f * dt);
+	mBall.setY(mBall.getY() + 0.0001f * dt);
 	// TODO update ball
 	// TODO update left paddle
 	// TODO update right paddle
@@ -55,7 +57,7 @@ void Scene::update(float /*dt*/) {
 void Scene::render(const Renderer::Ptr& renderer) const {
 	mLeftScore.render(renderer);
 	mRightScore.render(renderer);
-	mSphere.render(renderer);
+	mBall.render(renderer);
 	mUpperWall.render(renderer);
 	mLowerWall.render(renderer);
 	mLeftPaddle.render(renderer);

@@ -13,7 +13,7 @@ public:
 	void update(float dt);
 	void render(const Renderer::Ptr& renderer) const final;
 private:
-	Sphere		mSphere;
+	Sphere		mBall;
 	Rectangle	mUpperWall;
 	Rectangle	mLowerWall;
 	Rectangle	mLeftPaddle;
