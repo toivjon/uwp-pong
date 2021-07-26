@@ -4,18 +4,6 @@
 Scene::Scene(const Renderer::Ptr& renderer) {
 	winrt::com_ptr<ID2D1SolidColorBrush> brush;
 	renderer->getD2DContext()->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), brush.put());
-	winrt::com_ptr<IDWriteTextFormat> format;
-	renderer->getDWriteFactory()->CreateTextFormat(
-		L"Calibri",
-		nullptr,
-		DWRITE_FONT_WEIGHT_REGULAR,
-		DWRITE_FONT_STYLE_NORMAL,
-		DWRITE_FONT_STRETCH_NORMAL,
-		164.f,
-		L"en-us",
-		format.put()
-	);
-	format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 
 	mSphere.setBrush(brush);
 	mSphere.setRadius(.01f);
@@ -48,18 +36,16 @@ Scene::Scene(const Renderer::Ptr& renderer) {
 	
 	mLeftScore.setText(L"0");
 	mLeftScore.setBrush(brush);
-	mLeftScore.setFormat(format);
 	mLeftScore.setX(.35f);
 	mLeftScore.setY(.025f);
 
 	mRightScore.setText(L"0");
 	mRightScore.setBrush(brush);
-	mRightScore.setFormat(format);
 	mRightScore.setX(.65f);
 	mRightScore.setY(.025f);
 }
 
-void Scene::update(float dt) {
+void Scene::update(float /*dt*/) {
 	// ...
 }
 
