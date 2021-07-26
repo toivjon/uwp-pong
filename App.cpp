@@ -93,6 +93,9 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 				// Update time definitions and delta calculations.
 				auto time = CurrentMillis();
 				auto dt = time - prevTime;
+				if (dt > MaxFrameTime) {
+					dt = MaxFrameTime;
+				}
 				prevTime = time;
 				accumulator += dt;
 
