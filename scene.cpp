@@ -48,7 +48,7 @@ Scene::Scene(const Renderer::Ptr& renderer) {
 void Scene::update(std::chrono::milliseconds delta) {
 	// TODO a temporary helper just to keep ball moving.
 	const static auto velocity = .00025f;
-	static auto directionX = .5f;
+	static auto directionX = 1.f;
 	static auto directionY = 1.f;
 	mBall.setX(mBall.getX() + directionX * velocity * delta.count());
 	mBall.setY(mBall.getY() + directionY * velocity * delta.count());
