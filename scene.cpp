@@ -55,6 +55,9 @@ void Scene::update(std::chrono::milliseconds delta) {
 }
 
 void Scene::render(float alpha, const Renderer::Ptr& renderer) const {
+	OutputDebugStringW(std::to_wstring(alpha).c_str());
+	OutputDebugStringW(L"\n");
+
 	mLeftScore.render(alpha, renderer);
 	mRightScore.render(alpha, renderer);
 	mBall.render(alpha, renderer);

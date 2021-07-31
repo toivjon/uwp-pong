@@ -96,7 +96,8 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 				}
 
 				// Render scene contents.
-				const auto alpha = accumulator / UpdateTimestep;
+				const auto accumulatorMillis= duration_cast<milliseconds>(accumulator);
+				const auto alpha = float(accumulatorMillis.count()) / float(UpdateTimestep.count());
 				mRenderer->clear();
 				mScene->render(alpha, mRenderer);
 				mRenderer->present();
