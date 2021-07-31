@@ -95,7 +95,7 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 					accumulator -= UpdateTimestep;
 				}
 
-				// Render scene contents.
+				// Render the scene based on the interpolation coefficient to perform smooth movement.
 				const auto accumulatorMillis= duration_cast<milliseconds>(accumulator);
 				const auto alpha = float(accumulatorMillis.count()) / float(UpdateTimestep.count());
 				mRenderer->clear();
