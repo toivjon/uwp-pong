@@ -15,24 +15,28 @@ Scene::Scene(const Renderer::Ptr& renderer) {
 	mUpperWall.setWidth(1.f);
 	mUpperWall.setX(0.5f);
 	mUpperWall.setY(0.015f);
+	mUpperWall.setStatic(true);
 
 	mLowerWall.setBrush(brush);
 	mLowerWall.setHeight(.03f);
 	mLowerWall.setWidth(1.f);
 	mLowerWall.setX(0.5f);
 	mLowerWall.setY(.985f);
+	mLowerWall.setStatic(true);
 
 	mLeftPaddle.setBrush(brush);
 	mLeftPaddle.setHeight(.15f);
 	mLeftPaddle.setWidth(.025f);
 	mLeftPaddle.setX(0.05f);
 	mLeftPaddle.setY(0.2f);
+	mLeftPaddle.setStatic(false);
 
 	mRightPaddle.setBrush(brush);
 	mRightPaddle.setHeight(.15f);
 	mRightPaddle.setWidth(.025f);
 	mRightPaddle.setX(.95f);
 	mRightPaddle.setY(0.8f);
+	mRightPaddle.setStatic(false);
 	
 	mLeftScore.setText(L"0");
 	mLeftScore.setBrush(brush);
@@ -62,6 +66,14 @@ void Scene::update(std::chrono::milliseconds delta) {
 	} else if (mBall.getY() >= 1.f) {
 		directionY = -1.f;
 	}
+
+	// TODO a temporary helper just to keep paddle visible.
+	mLeftPaddle.setX(mLeftPaddle.getX());
+	mLeftPaddle.setY(mLeftPaddle.getY());
+
+	// TODO a temporary helper just to keep paddle visible.
+	mRightPaddle.setX(mRightPaddle.getX());
+	mRightPaddle.setY(mRightPaddle.getY());
 
 	// TODO update ball
 	// TODO update left paddle
