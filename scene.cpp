@@ -46,8 +46,23 @@ Scene::Scene(const Renderer::Ptr& renderer) {
 }
 
 void Scene::update(std::chrono::milliseconds delta) {
-	mBall.setX(mBall.getX() + 0.0001f * delta.count());
-	mBall.setY(mBall.getY() + 0.0001f * delta.count());
+	// TODO a temporary helper just to keep ball moving.
+	const static auto velocity = .00025f;
+	static auto directionX = .5f;
+	static auto directionY = 1.f;
+	mBall.setX(mBall.getX() + directionX * velocity * delta.count());
+	mBall.setY(mBall.getY() + directionY * velocity * delta.count());
+	if (mBall.getX() <= 0.f) {
+		directionX = 1.f;
+	} else if (mBall.getX() >= 1.f) {
+		directionX = -1.f;
+	}
+	if (mBall.getY() <= 0.f) {
+		directionY = 1.f;
+	} else if (mBall.getY() >= 1.f) {
+		directionY = -1.f;
+	}
+
 	// TODO update ball
 	// TODO update left paddle
 	// TODO update right paddle
@@ -55,9 +70,6 @@ void Scene::update(std::chrono::milliseconds delta) {
 }
 
 void Scene::render(float alpha, const Renderer::Ptr& renderer) const {
-	OutputDebugStringW(std::to_wstring(alpha).c_str());
-	OutputDebugStringW(L"\n");
-
 	mLeftScore.render(alpha, renderer);
 	mRightScore.render(alpha, renderer);
 	mBall.render(alpha, renderer);
