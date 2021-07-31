@@ -5,12 +5,7 @@
 #include "scene.h"
 #include "text.h"
 
-// The update interval frequency in seconds.
-const long long UpdateIntervalSeconds = 10;
-
-// The maximum allowed time for one frame update.
-const long long MaxFrameTime = 250;
-
+using namespace std::chrono;
 using namespace winrt;
 
 using namespace Windows;
@@ -21,13 +16,6 @@ using namespace Windows::Foundation;
 using namespace Windows::Graphics::Display;
 using namespace Windows::UI;
 using namespace Windows::UI::Core;
-
-long long CurrentMillis() {
-	using namespace std::chrono;
-	auto time = system_clock::now().time_since_epoch();
-	auto ms = duration_cast<milliseconds>(time);
-	return ms.count();
-}
 
 struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 
@@ -82,32 +70,35 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 	}
 
 	void Run() {
-		auto prevTime = CurrentMillis();
-		auto accumulator = 0ll;
+		auto previousTime = system_clock::now();
+		auto accumulator = system_clock::duration();
 		while (true) {
 			auto window = CoreWindow::GetForCurrentThread();
 			auto dispatcher = window.Dispatcher();
 			if (mForeground) {
 				dispatcher.ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
 
-				// Update time definitions and delta calculations.
-				auto time = CurrentMillis();
-				auto dt = time - prevTime;
-				if (dt > MaxFrameTime) {
-					dt = MaxFrameTime;
+				// Resolve the duration of the previous frame and ensure that we stay within reasonable limits.
+				const static auto MaxFrameTime = 250ms;
+				const auto currentTime = system_clock::now();
+				auto frameTime = currentTime - previousTime;
+				if (frameTime > MaxFrameTime) {
+					frameTime = MaxFrameTime;
 				}
-				prevTime = time;
-				accumulator += dt;
+				previousTime = currentTime;
+				accumulator += frameTime;
 
-				// Update game logic with fixed timesteps.
-				while (accumulator >= UpdateIntervalSeconds) {
-					mScene->update(UpdateIntervalSeconds);
-					accumulator -= UpdateIntervalSeconds;
+				// Consume accumulated time by updating the game logic with a fixed timestep.
+				const static auto UpdateTimestep = 10ms;
+				while (accumulator >= UpdateTimestep) {
+					mScene->update(UpdateTimestep);
+					accumulator -= UpdateTimestep;
 				}
 
 				// Render scene contents.
+				const auto alpha = accumulator / UpdateTimestep;
 				mRenderer->clear();
-				mScene->render(mRenderer);
+				mScene->render(alpha, mRenderer);
 				mRenderer->present();
 			} else {
 				dispatcher.ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);

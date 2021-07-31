@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "sphere.h"
 
-void Sphere::render(const Renderer::Ptr& renderer) const {
+void Sphere::render(float /*alpha*/, const Renderer::Ptr& renderer) const {
 	auto ctx = renderer->getD2DContext();
 	auto windowSize = renderer->getWindowSize();
 	auto windowOffset = renderer->getWindowOffset();

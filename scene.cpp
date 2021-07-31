@@ -45,21 +45,21 @@ Scene::Scene(const Renderer::Ptr& renderer) {
 	mRightScore.setY(.025f);
 }
 
-void Scene::update(float dt) {
-	mBall.setX(mBall.getX() + 0.0001f * dt);
-	mBall.setY(mBall.getY() + 0.0001f * dt);
+void Scene::update(std::chrono::milliseconds delta) {
+	mBall.setX(mBall.getX() + 0.0001f * delta.count());
+	mBall.setY(mBall.getY() + 0.0001f * delta.count());
 	// TODO update ball
 	// TODO update left paddle
 	// TODO update right paddle
 	// TODO check collisions?
 }
 
-void Scene::render(const Renderer::Ptr& renderer) const {
-	mLeftScore.render(renderer);
-	mRightScore.render(renderer);
-	mBall.render(renderer);
-	mUpperWall.render(renderer);
-	mLowerWall.render(renderer);
-	mLeftPaddle.render(renderer);
-	mRightPaddle.render(renderer);
+void Scene::render(float alpha, const Renderer::Ptr& renderer) const {
+	mLeftScore.render(alpha, renderer);
+	mRightScore.render(alpha, renderer);
+	mBall.render(alpha, renderer);
+	mUpperWall.render(alpha, renderer);
+	mLowerWall.render(alpha, renderer);
+	mLeftPaddle.render(alpha, renderer);
+	mRightPaddle.render(alpha, renderer);
 }

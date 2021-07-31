@@ -10,8 +10,8 @@ public:
 	using Ptr = std::unique_ptr<Scene>;
 
 	Scene(const Renderer::Ptr& renderer);
-	void update(float dt);
-	void render(const Renderer::Ptr& renderer) const final;
+	void update(std::chrono::milliseconds delta);
+	void render(float alpha, const Renderer::Ptr& renderer) const final;
 private:
 	Sphere		mBall;
 	Rectangle	mUpperWall;
