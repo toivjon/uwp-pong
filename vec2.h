@@ -1,0 +1,24 @@
+#pragma once
+
+#include <array>
+
+// Vec2f represents a 2D vector with floating point values.
+class Vec2f final {
+public:
+	Vec2f(float x, float y) { data = { x, y }; }
+	Vec2f(const std::array<float, 2>& data) { this->data = data; }
+
+	void setX(float x) { data[0] = x; }
+	void setY(float y) { data[1] = y; }
+
+	auto getX() const -> float { return data[0]; }
+	auto getY() const -> float { return data[1]; }
+
+	auto operator+(const Vec2f& v) const -> Vec2f { return { data[0] + v.data[0], data[1] + v.data[1] }; }
+	auto operator-(const Vec2f& v) const -> Vec2f { return { data[0] - v.data[0], data[1] - v.data[1] }; }
+
+	auto operator[](int index) -> float& { return data[index]; }
+	auto operator[](int index) const -> float { return data[index]; }
+private:
+	std::array<float, 2> data;
+};
