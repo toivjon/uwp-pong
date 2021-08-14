@@ -5,6 +5,7 @@
 // Vec2f represents a 2D vector with floating point values.
 class Vec2f final {
 public:
+	Vec2f() = default;
 	Vec2f(float x, float y) { data = { x, y }; }
 	Vec2f(const std::array<float, 2>& data) { this->data = data; }
 

@@ -84,6 +84,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="aabb.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="rectangle.h" />
     <ClInclude Include="renderable.h" />
@@ -91,7 +92,7 @@
     <ClInclude Include="scene.h" />
     <ClInclude Include="sphere.h" />
     <ClInclude Include="text.h" />
-    <ClInclude Include="vec2.h" />
+    <ClInclude Include="vec2f.h" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
