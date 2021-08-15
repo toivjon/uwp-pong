@@ -1,4 +1,5 @@
 ﻿#pragma once
+#define NOMINMAX
 #include <d2d1.h>
 #include <d2d1_3.h>
 #include <d3d11.h>
