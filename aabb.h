@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include "vec2f.h"
 
 inline auto sign(float val) -> float {
@@ -21,9 +22,6 @@ public:
 	auto getCenter() const -> const Vec2f& { return center; }
 	auto getExtent() const -> const Vec2f& { return extent; }
 
-	auto min(int axis) const -> float { return center[axis] - extent[axis]; }
-	auto max(int axis) const -> float { return center[axis] + extent[axis]; }
-
 	auto collides(const AABB& aabb) const -> bool {
 		const auto centerDiff = aabb.center - center;
 		const auto extentSum = aabb.extent + extent;
@@ -39,7 +37,7 @@ public:
 	};
 
 	struct Sweep {
-		Hit   hit;
+		AABB::Hit   hit;
 		Vec2f position;
 		float time;
 	};
@@ -80,11 +78,11 @@ public:
 		const auto scaleY = 1.f / delta.getY();
 		const auto signX = sign(scaleX);
 		const auto signY = sign(scaleY);
-		const auto nearTimeX = (center.getX() - signX * (extent.getX() + padding.getX())- origin.getX()) * scaleX;
-		const auto nearTimeY = (center.getY() - signY * (extent.getY() + padding.getY())- origin.getY()) * scaleY;
+		const auto nearTimeX = (center.getX() - signX * (extent.getX() + padding.getX()) - origin.getX()) * scaleX;
+		const auto nearTimeY = (center.getY() - signY * (extent.getY() + padding.getY()) - origin.getY()) * scaleY;
 		const auto farTimeX = (center.getX() + signX * (extent.getX() + padding.getX()) - origin.getX()) * scaleX;
 		const auto farTimeY = (center.getY() + signY * (extent.getY() + padding.getY()) - origin.getY()) * scaleY;
-		if (nearTimeX > farTimeX || nearTimeY > farTimeY) {
+		if (nearTimeX > farTimeY || nearTimeY > farTimeX) {
 			return { false };
 		}
 		const auto nearTime = std::max(nearTimeX, nearTimeY);
@@ -134,8 +132,8 @@ public:
 				aabb1.center.getY() + aabb1.extent.getY())
 			);
 		} else {
-			sweep.position.setX(aabb2.center.getX() + v.getX());
-			sweep.position.setY(aabb2.center.getY() + v.getY());
+			sweep.position.setX(aabb2.center.getX() + delta.getX());
+			sweep.position.setY(aabb2.center.getY() + delta.getY());
 			sweep.time = 1.f;
 		}
 		return sweep;
@@ -153,10 +151,57 @@ public:
 			};
 			const auto direction = position - hitResult.position;
 			const auto amt = direction * .5f;
-			hitResult.position.setX(hitResult.position.getX() + amt);
-			hitResult.position.setY(hitResult.position.getY() + amt);
+			hitResult.position.setX(hitResult.position.getX() + amt.getX());
+			hitResult.position.setY(hitResult.position.getY() + amt.getY());
 		}
 		return hitResult;
+	}
+
+	struct Intersection {
+		bool  collides;
+		float time;
+	};
+
+	auto getMin(int axis) const -> float { return center[axis] - extent[axis]; }
+	auto getMax(int axis) const -> float { return center[axis] + extent[axis]; }
+
+	// This algorithm is derived from the RTCD book.
+	static auto intersect(const AABB& a, const AABB& b, const Vec2f& va, const Vec2f& vb) -> Intersection {
+		Intersection intersection = {};
+		intersection.collides = false;
+		intersection.time = 0.f;
+
+		// Exit early whether boxes initially collide.
+		if (a.collides(b)) {	
+			intersection.collides = true;
+			intersection.time = 0.f;
+			return intersection;
+		}
+
+		// We will use relative velocity where 'a' is treated as stationary.
+		const auto v = vb - va;
+
+		// Initialize times for the first and last contact.
+		auto tmin = 0.f;
+		auto tmax = 1.f;
+
+		// Find first and last contact from each axis.
+		for (auto i = 0; i < 2; i++) {
+			if (v[i] < .0f) {
+				if (b.getMax(i) < a.getMin(i)) return intersection;
+				if (a.getMax(i) < b.getMin(i)) tmin = std::max((a.getMax(i) - b.getMin(i)) / v[i], tmin);
+				if (b.getMax(i) > a.getMin(i)) tmax = std::min((a.getMin(i) - b.getMax(i)) / v[i], tmax);
+			}
+			if (v[i] > .0f) {
+				if (b.getMin(i) > a.getMax(i)) return intersection;
+				if (b.getMax(i) < a.getMin(i)) tmin = std::max((a.getMin(i) - b.getMax(i)) / v[i], tmin);
+				if (a.getMax(i) > b.getMin(i)) tmax = std::min((a.getMax(i) - b.getMin(i)) / v[i], tmax);
+			}
+			if (tmin > tmax) return intersection;
+		}
+		intersection.collides = true;
+		intersection.time = tmin;
+		return intersection;
 	}
 private:
 	Vec2f center;
