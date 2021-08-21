@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "aabb.h"
 #include "scene.h"
 
 Scene::Scene(const Renderer::Ptr& renderer) {
@@ -37,7 +38,7 @@ Scene::Scene(const Renderer::Ptr& renderer) {
 	mRightPaddle.setX(.95f);
 	mRightPaddle.setY(0.8f);
 	mRightPaddle.setStatic(false);
-	
+
 	mLeftScore.setText(L"0");
 	mLeftScore.setBrush(brush);
 	mLeftScore.setX(.35f);
@@ -72,8 +73,58 @@ void Scene::update(std::chrono::milliseconds delta) {
 	mLeftPaddle.setY(mLeftPaddle.getY());
 
 	// TODO a temporary helper just to keep paddle visible.
+	// mRightPaddle.setX(mRightPaddle.getX());
+	// mRightPaddle.setY(mRightPaddle.getY());
+
+	const static auto paddleVelocity = .00025f;
+	static auto paddleDirectionY = -1.f;
+
+	const auto paddleMovement = paddleDirectionY * paddleVelocity * delta.count();
+
 	mRightPaddle.setX(mRightPaddle.getX());
-	mRightPaddle.setY(mRightPaddle.getY());
+	// mRightPaddle.setY(mRightPaddle.getY() + paddleDirectionY * paddleMovement);
+
+	const auto paddleAABB = AABB(
+		{ mRightPaddle.getPreviousX(), mRightPaddle.getPreviousY() },
+		{ mRightPaddle.getHalfWidth(), mRightPaddle.getHalfHeight() }
+	);
+	const auto topWallAABB = AABB(
+		{ mUpperWall.getX(), mUpperWall.getY() },
+		{ mUpperWall.getHalfWidth(), mUpperWall.getHalfHeight() }
+	);
+	const auto bottomWallAABB = AABB(
+		{ mLowerWall.getX(), mLowerWall.getY() },
+		{ mLowerWall.getHalfWidth(), mLowerWall.getHalfHeight() }
+	);
+	auto v1 = Vec2f(0.f, paddleMovement);
+	const static auto nudge = .01f;
+	auto v2 = Vec2f{ 0.f, 0.f };
+
+	auto c1 = AABB::intersect(paddleAABB, topWallAABB, v1, v2);
+	if (c1.collides) {
+		paddleDirectionY = 1.f;
+		const auto wallMaxY = topWallAABB.getMax(1);
+		const auto nudgeAmount = paddleDirectionY * nudge;
+		const auto scalar = 1.f - c1.time;
+		const auto leftoverMovement = -1.f * paddleMovement * scalar;
+		const auto newY = wallMaxY + nudgeAmount + leftoverMovement;
+		mRightPaddle.setY(newY + mRightPaddle.getHalfHeight());
+	}
+	auto c2 = AABB::intersect(paddleAABB, bottomWallAABB, v1, v2);
+	if (c2.collides) {
+		paddleDirectionY = -1.f;
+		const auto wallMinY = bottomWallAABB.getMin(1);
+		const auto nudgeAmount = paddleDirectionY * nudge;
+		const auto scalar = 1.f - c2.time;
+		const auto leftoverMovement = -1.f * paddleMovement * scalar;
+		const auto newY = wallMinY + nudgeAmount + leftoverMovement;
+		mRightPaddle.setY(newY - mRightPaddle.getHalfHeight());
+	}
+
+	// This is here just to ensure that paddle actually moves when theres no collision.
+	if (!c1.collides && !c2.collides) {
+		mRightPaddle.setY(mRightPaddle.getY() + paddleMovement);
+	}
 
 	// TODO update ball
 	// TODO update left paddle
