@@ -28,12 +28,10 @@ Scene::Scene(const Renderer::Ptr& renderer) {
 	mRightPaddle.setStatic(false);
 
 	mLeftScore.setText(L"0");
-	mLeftScore.setX(.35f);
-	mLeftScore.setY(.025f);
+	mLeftScore.setPosition({ .35f, .025f });
 
 	mRightScore.setText(L"0");
-	mRightScore.setX(.65f);
-	mRightScore.setY(.025f);
+	mRightScore.setPosition({ .65f, .025f });
 }
 
 void Scene::update(std::chrono::milliseconds delta) {

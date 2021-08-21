@@ -19,8 +19,8 @@ void Text::render(float alpha, const Renderer::Ptr& renderer) const {
 		format.put()
 	);
 	format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
-	auto x = windowOffset.Width + mX * (windowSize.Width - windowOffset.Width * 2);
-	auto y = windowOffset.Height + mY * (windowSize.Height - windowOffset.Height * 2);
+	auto x = windowOffset.Width + mPosition.getX() * (windowSize.Width - windowOffset.Width * 2);
+	auto y = windowOffset.Height + mPosition.getY() * (windowSize.Height - windowOffset.Height * 2);
 	ctx->DrawText(
 		mText.c_str(),
 		UINT32(mText.size()),

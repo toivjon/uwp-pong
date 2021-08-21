@@ -1,15 +1,14 @@
 #pragma once
 
 #include "renderable.h"
+#include "vec2f.h"
 
 class Text : public Renderable {
 public:
 	void render(float alpha, const Renderer::Ptr& renderer) const final;
-	void setX(float x) { mX = x; }
-	void setY(float y) { mY = y; }
+	void setPosition(const Vec2f& position) { mPosition = position; }
 	void setText(const std::wstring& text) { mText = text; }
 private:
-	float		 mX;
-	float		 mY;
+	Vec2f		 mPosition;
 	std::wstring mText;
 };
