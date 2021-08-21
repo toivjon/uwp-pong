@@ -3,31 +3,26 @@
 #include "scene.h"
 
 Scene::Scene(const Renderer::Ptr& renderer) {
-	mBall.setHeight(.03f);
-	mBall.setWidth(.023f);
+	mBall.setSize({ .023f, .03f });
 	mBall.setX(.5f);
 	mBall.setY(.5f);
 
-	mUpperWall.setHeight(.03f);
-	mUpperWall.setWidth(1.f);
+	mUpperWall.setSize({ 1.f, .03f });
 	mUpperWall.setX(0.5f);
 	mUpperWall.setY(0.015f);
 	mUpperWall.setStatic(true);
 
-	mLowerWall.setHeight(.03f);
-	mLowerWall.setWidth(1.f);
+	mLowerWall.setSize({ 1.f, .03f });
 	mLowerWall.setX(0.5f);
 	mLowerWall.setY(.985f);
 	mLowerWall.setStatic(true);
 
-	mLeftPaddle.setHeight(.15f);
-	mLeftPaddle.setWidth(.025f);
+	mLeftPaddle.setSize({ .025f, .15f });
 	mLeftPaddle.setX(0.05f);
 	mLeftPaddle.setY(0.2f);
 	mLeftPaddle.setStatic(false);
 
-	mRightPaddle.setHeight(.15f);
-	mRightPaddle.setWidth(.025f);
+	mRightPaddle.setSize({ .025f, .15f });
 	mRightPaddle.setX(.95f);
 	mRightPaddle.setY(0.8f);
 	mRightPaddle.setStatic(false);
