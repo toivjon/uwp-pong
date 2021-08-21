@@ -51,9 +51,6 @@ void Scene::update(std::chrono::milliseconds delta) {
 		directionY = -1.f;
 	}
 
-	// TODO a temporary helper just to keep paddle visible.
-	mLeftPaddle.setPosition({ mLeftPaddle.getPosition().getX(), mLeftPaddle.getPosition().getY() });
-
 	const static auto paddleVelocity = .00025f;
 	static auto paddleDirectionY = -1.f;
 
