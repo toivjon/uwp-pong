@@ -10,11 +10,8 @@ public:
 	void setPosition(const Vec2f& position) { mPreviousPosition = position; mPosition = position; }
 	void setStatic(bool enabled) { mStatic = enabled; }
 
-	float getX() const { return mPosition.getX(); }
-	float getY() const { return mPosition.getY(); }
-
-	float getPreviousX() const { return mPreviousPosition.getX(); }
-	float getPreviousY() const { return mPreviousPosition.getY(); }
+	const Vec2f& getPosition() const { return mPosition; }
+	const Vec2f& getPreviousPosition() const { return mPreviousPosition; }
 
 	float getHalfWidth() const { return mSize.getX() / 2.f; }
 	float getHalfHeight() const { return mSize.getY() / 2.f; }

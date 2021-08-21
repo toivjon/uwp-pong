@@ -36,23 +36,23 @@ void Scene::update(std::chrono::milliseconds delta) {
 	static auto directionY = 1.f;
 	mBall.setPosition(
 		{
-		mBall.getX() + directionX * velocity * delta.count(),
-		mBall.getY() + directionY * velocity * delta.count()
+		mBall.getPosition().getX() + directionX * velocity * delta.count(),
+		mBall.getPosition().getY() + directionY * velocity * delta.count()
 		}
 	);
-	if (mBall.getX() <= 0.f) {
+	if (mBall.getPosition().getX() <= 0.f) {
 		directionX = 1.f;
-	} else if (mBall.getX() >= 1.f) {
+	} else if (mBall.getPosition().getX() >= 1.f) {
 		directionX = -1.f;
 	}
-	if (mBall.getY() <= 0.f) {
+	if (mBall.getPosition().getY() <= 0.f) {
 		directionY = 1.f;
-	} else if (mBall.getY() >= 1.f) {
+	} else if (mBall.getPosition().getY() >= 1.f) {
 		directionY = -1.f;
 	}
 
 	// TODO a temporary helper just to keep paddle visible.
-	mLeftPaddle.setPosition({ mLeftPaddle.getX(), mLeftPaddle.getY() });
+	mLeftPaddle.setPosition({ mLeftPaddle.getPosition().getX(), mLeftPaddle.getPosition().getY() });
 
 	const static auto paddleVelocity = .00025f;
 	static auto paddleDirectionY = -1.f;
@@ -60,15 +60,15 @@ void Scene::update(std::chrono::milliseconds delta) {
 	const auto paddleMovement = paddleDirectionY * paddleVelocity * delta.count();
 
 	const auto paddleAABB = AABB(
-		{ mRightPaddle.getPreviousX(), mRightPaddle.getPreviousY() },
+		{ mRightPaddle.getPreviousPosition().getX(), mRightPaddle.getPreviousPosition().getY() },
 		{ mRightPaddle.getHalfWidth(), mRightPaddle.getHalfHeight() }
 	);
 	const auto topWallAABB = AABB(
-		{ mUpperWall.getX(), mUpperWall.getY() },
+		{ mUpperWall.getPosition().getX(), mUpperWall.getPosition().getY() },
 		{ mUpperWall.getHalfWidth(), mUpperWall.getHalfHeight() }
 	);
 	const auto bottomWallAABB = AABB(
-		{ mLowerWall.getX(), mLowerWall.getY() },
+		{ mLowerWall.getPosition().getX(), mLowerWall.getPosition().getY() },
 		{ mLowerWall.getHalfWidth(), mLowerWall.getHalfHeight() }
 	);
 	auto v1 = Vec2f(0.f, paddleMovement);
@@ -83,7 +83,7 @@ void Scene::update(std::chrono::milliseconds delta) {
 		const auto scalar = 1.f - c1.time;
 		const auto leftoverMovement = -1.f * paddleMovement * scalar;
 		const auto newY = wallMaxY + nudgeAmount + leftoverMovement;
-		mRightPaddle.setPosition({ mRightPaddle.getX(), newY + mRightPaddle.getHalfHeight() });
+		mRightPaddle.setPosition({ mRightPaddle.getPosition().getX(), newY + mRightPaddle.getHalfHeight() });
 	}
 	auto c2 = AABB::intersect(paddleAABB, bottomWallAABB, v1, v2);
 	if (c2.collides) {
@@ -93,12 +93,12 @@ void Scene::update(std::chrono::milliseconds delta) {
 		const auto scalar = 1.f - c2.time;
 		const auto leftoverMovement = -1.f * paddleMovement * scalar;
 		const auto newY = wallMinY + nudgeAmount + leftoverMovement;
-		mRightPaddle.setPosition({ mRightPaddle.getX(), newY - mRightPaddle.getHalfHeight() });
+		mRightPaddle.setPosition({ mRightPaddle.getPosition().getX(), newY - mRightPaddle.getHalfHeight() });
 	}
 
 	// This is here just to ensure that paddle actually moves when theres no collision.
 	if (!c1.collides && !c2.collides) {
-		mRightPaddle.setPosition({ mRightPaddle.getX(), mRightPaddle.getY() + paddleMovement });
+		mRightPaddle.setPosition({ mRightPaddle.getPosition().getX(), mRightPaddle.getPosition().getY() + paddleMovement });
 	}
 
 	// TODO update ball
