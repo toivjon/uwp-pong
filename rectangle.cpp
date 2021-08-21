@@ -23,5 +23,5 @@ void Rectangle::render(float alpha, const Renderer::Ptr& renderer) const {
 		windowOffset.Height + (-halfHeight + y) * (windowSize.Height - windowOffset.Height * 2),
 		windowOffset.Width + (halfWidth + x) * (windowSize.Width - windowOffset.Width * 2),
 		windowOffset.Height + (halfHeight + y) * (windowSize.Height - windowOffset.Height * 2),
-	}, mBrush.get());
+	}, renderer->getBrush().get());
 }

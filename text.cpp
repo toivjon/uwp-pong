@@ -26,6 +26,6 @@ void Text::render(float alpha, const Renderer::Ptr& renderer) const {
 		UINT32(mText.size()),
 		format.get(),
 		{ x,y,x,y },
-		mBrush.get()
+		renderer->getBrush().get()
 	);
 }

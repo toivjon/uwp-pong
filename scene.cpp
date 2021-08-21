@@ -3,37 +3,29 @@
 #include "scene.h"
 
 Scene::Scene(const Renderer::Ptr& renderer) {
-	winrt::com_ptr<ID2D1SolidColorBrush> brush;
-	renderer->getD2DContext()->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), brush.put());
-
-	mBall.setBrush(brush);
 	mBall.setHeight(.03f);
 	mBall.setWidth(.023f);
 	mBall.setX(.5f);
 	mBall.setY(.5f);
 
-	mUpperWall.setBrush(brush);
 	mUpperWall.setHeight(.03f);
 	mUpperWall.setWidth(1.f);
 	mUpperWall.setX(0.5f);
 	mUpperWall.setY(0.015f);
 	mUpperWall.setStatic(true);
 
-	mLowerWall.setBrush(brush);
 	mLowerWall.setHeight(.03f);
 	mLowerWall.setWidth(1.f);
 	mLowerWall.setX(0.5f);
 	mLowerWall.setY(.985f);
 	mLowerWall.setStatic(true);
 
-	mLeftPaddle.setBrush(brush);
 	mLeftPaddle.setHeight(.15f);
 	mLeftPaddle.setWidth(.025f);
 	mLeftPaddle.setX(0.05f);
 	mLeftPaddle.setY(0.2f);
 	mLeftPaddle.setStatic(false);
 
-	mRightPaddle.setBrush(brush);
 	mRightPaddle.setHeight(.15f);
 	mRightPaddle.setWidth(.025f);
 	mRightPaddle.setX(.95f);
@@ -41,12 +33,10 @@ Scene::Scene(const Renderer::Ptr& renderer) {
 	mRightPaddle.setStatic(false);
 
 	mLeftScore.setText(L"0");
-	mLeftScore.setBrush(brush);
 	mLeftScore.setX(.35f);
 	mLeftScore.setY(.025f);
 
 	mRightScore.setText(L"0");
-	mRightScore.setBrush(brush);
 	mRightScore.setX(.65f);
 	mRightScore.setY(.025f);
 }

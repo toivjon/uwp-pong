@@ -5,7 +5,6 @@
 class Rectangle : public Renderable {
 public:
 	void render(float alpha, const Renderer::Ptr& renderer) const final;
-	void setBrush(winrt::com_ptr<ID2D1Brush> brush) { mBrush = brush; }
 	void setWidth(float width) { mWidth = width; }
 	void setHeight(float height) { mHeight = height; }
 	void setX(float x) { mPreviousX = mX;  mX = x; }
@@ -21,7 +20,6 @@ public:
 	float getHalfWidth() const { return mWidth / 2.f; }
 	float getHalfHeight() const { return mHeight / 2.f; }
 private:
-	winrt::com_ptr<ID2D1Brush> mBrush;
 	float					   mWidth;
 	float					   mHeight;
 	float					   mPreviousX;
