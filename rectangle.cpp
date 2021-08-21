@@ -11,11 +11,11 @@ void Rectangle::render(float alpha, const Renderer::Ptr& renderer) const {
 	auto x = 0.f;
 	auto y = 0.f;
 	if (mStatic) {
-		x = mX;
-		y = mY;
+		x = mPosition.getX();
+		y = mPosition.getY();
 	} else {
-		x = mPreviousX + alpha * (mX - mPreviousX);
-		y = mPreviousY + alpha * (mY - mPreviousY);
+		x = mPreviousPosition.getX() + alpha * (mPosition.getX() - mPreviousPosition.getX());
+		y = mPreviousPosition.getY() + alpha * (mPosition.getY() - mPreviousPosition.getY());
 	}
 	
 	ctx->FillRectangle({
