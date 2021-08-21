@@ -8,15 +8,8 @@ void Rectangle::render(float alpha, const Renderer::Ptr& renderer) const {
 	auto halfWidth = mSize.getX() / 2;
 	auto halfHeight = mSize.getY() / 2;
 
-	auto x = 0.f;
-	auto y = 0.f;
-	if (mStatic) {
-		x = mPosition.getX();
-		y = mPosition.getY();
-	} else {
-		x = mPreviousPosition.getX() + alpha * (mPosition.getX() - mPreviousPosition.getX());
-		y = mPreviousPosition.getY() + alpha * (mPosition.getY() - mPreviousPosition.getY());
-	}
+	auto x = mPreviousPosition.getX() + alpha * (mPosition.getX() - mPreviousPosition.getX());
+	auto y = mPreviousPosition.getY() + alpha * (mPosition.getY() - mPreviousPosition.getY());
 	
 	ctx->FillRectangle({
 		windowOffset.Width + (-halfWidth + x) * (windowSize.Width - windowOffset.Width * 2),

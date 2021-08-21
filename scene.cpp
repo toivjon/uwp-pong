@@ -8,19 +8,15 @@ Scene::Scene(const Renderer::Ptr& renderer) {
 
 	mUpperWall.setSize({ 1.f, .03f });
 	mUpperWall.setPosition({ .5f, .015f });
-	mUpperWall.setStatic(true);
 
 	mLowerWall.setSize({ 1.f, .03f });
 	mLowerWall.setPosition({ .5f, .985f });
-	mLowerWall.setStatic(true);
 
 	mLeftPaddle.setSize({ .025f, .15f });
 	mLeftPaddle.setPosition({ .05f, .2f });
-	mLeftPaddle.setStatic(false);
 
 	mRightPaddle.setSize({ .025f, .15f });
 	mRightPaddle.setPosition({ .95f, .8f });
-	mRightPaddle.setStatic(false);
 
 	mLeftScore.setText(L"0");
 	mLeftScore.setPosition({ .35f, .025f });
