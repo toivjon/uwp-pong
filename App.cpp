@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "renderer.h"
-#include "sphere.h"
 #include "rectangle.h"
 #include "scene.h"
 #include "text.h"
