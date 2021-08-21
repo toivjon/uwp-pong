@@ -2,7 +2,6 @@
 
 #include "rectangle.h"
 #include "renderable.h"
-#include "sphere.h"
 #include "text.h"
 
 class Scene : public Renderable {
@@ -13,7 +12,7 @@ public:
 	void update(std::chrono::milliseconds delta);
 	void render(float alpha, const Renderer::Ptr& renderer) const final;
 private:
-	Sphere		mBall;
+	Rectangle	mBall;
 	Rectangle	mUpperWall;
 	Rectangle	mLowerWall;
 	Rectangle	mLeftPaddle;

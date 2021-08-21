@@ -7,7 +7,8 @@ Scene::Scene(const Renderer::Ptr& renderer) {
 	renderer->getD2DContext()->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), brush.put());
 
 	mBall.setBrush(brush);
-	mBall.setRadius(.01f);
+	mBall.setHeight(.03f);
+	mBall.setWidth(.023f);
 	mBall.setX(.5f);
 	mBall.setY(.5f);
 
