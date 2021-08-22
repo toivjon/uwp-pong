@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "text.h"
 
-void Text::render(float alpha, const Renderer::Ptr& renderer) const {
+void Text::render(const Renderer::Ptr& renderer) const {
 	auto ctx = renderer->getD2DContext();
 	auto windowSize = renderer->getWindowSize();
 	auto windowOffset = renderer->getWindowOffset();

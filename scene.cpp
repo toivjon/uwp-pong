@@ -46,7 +46,7 @@ void Scene::update(std::chrono::milliseconds delta) {
 	} else if (mBall.getPosition().getY() >= 1.f) {
 		directionY = -1.f;
 	}
-
+	/*
 	const static auto paddleVelocity = .00025f;
 	static auto paddleDirectionY = -1.f;
 
@@ -93,19 +93,19 @@ void Scene::update(std::chrono::milliseconds delta) {
 	if (!c1.collides && !c2.collides) {
 		mRightPaddle.setPosition({ mRightPaddle.getPosition().getX(), mRightPaddle.getPosition().getY() + paddleMovement });
 	}
-
+	*/
 	// TODO update ball
 	// TODO update left paddle
 	// TODO update right paddle
 	// TODO check collisions?
 }
 
-void Scene::render(float alpha, const Renderer::Ptr& renderer) const {
-	mLeftScore.render(alpha, renderer);
-	mRightScore.render(alpha, renderer);
-	mBall.render(alpha, renderer);
-	mUpperWall.render(alpha, renderer);
-	mLowerWall.render(alpha, renderer);
-	mLeftPaddle.render(alpha, renderer);
-	mRightPaddle.render(alpha, renderer);
+void Scene::render(const Renderer::Ptr& renderer) const {
+	mLeftScore.render(renderer);
+	mRightScore.render(renderer);
+	mBall.render(renderer);
+	mUpperWall.render(renderer);
+	mLowerWall.render(renderer);
+	mLeftPaddle.render(renderer);
+	mRightPaddle.render(renderer);
 }

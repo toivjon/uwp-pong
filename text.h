@@ -5,7 +5,7 @@
 
 class Text : public Renderable {
 public:
-	void render(float alpha, const Renderer::Ptr& renderer) const final;
+	void render(const Renderer::Ptr& renderer) const final;
 	void setPosition(const Vec2f& position) { mPosition = position; }
 	void setText(const std::wstring& text) { mText = text; }
 private:

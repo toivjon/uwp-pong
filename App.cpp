@@ -70,7 +70,6 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 
 	void Run() {
 		auto previousTime = system_clock::now();
-		auto accumulator = system_clock::duration();
 		while (true) {
 			auto window = CoreWindow::GetForCurrentThread();
 			auto dispatcher = window.Dispatcher();
@@ -85,20 +84,11 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 					frameTime = MaxFrameTime;
 				}
 				previousTime = currentTime;
-				accumulator += frameTime;
 
-				// Consume accumulated time by updating the game logic with a fixed timestep.
-				const static auto UpdateTimestep = 10ms;
-				while (accumulator >= UpdateTimestep) {
-					mScene->update(UpdateTimestep);
-					accumulator -= UpdateTimestep;
-				}
-
-				// Render the scene based on the interpolation coefficient to perform smooth movement.
-				const auto accumulatorMillis= duration_cast<milliseconds>(accumulator);
-				const auto alpha = float(accumulatorMillis.count()) / float(UpdateTimestep.count());
+				// Update game world by the amount of time passed and render the scene.
+				mScene->update(duration_cast<milliseconds>(frameTime));
 				mRenderer->clear();
-				mScene->render(alpha, mRenderer);
+				mScene->render(mRenderer);
 				mRenderer->present();
 			} else {
 				dispatcher.ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);

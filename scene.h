@@ -10,7 +10,7 @@ public:
 
 	Scene(const Renderer::Ptr& renderer);
 	void update(std::chrono::milliseconds delta);
-	void render(float alpha, const Renderer::Ptr& renderer) const final;
+	void render(const Renderer::Ptr& renderer) const final;
 private:
 	Rectangle	mBall;
 	Rectangle	mUpperWall;
