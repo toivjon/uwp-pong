@@ -5,6 +5,7 @@
 Scene::Scene(const Renderer::Ptr& renderer) {
 	mBall.setSize({ .023f, .03f });
 	mBall.setPosition({ .5f, .5f });
+	mBall.setVelocity(Vec2f({ 1.f, 1.f }).normalized() * .0005f);
 
 	mUpperWall.setSize({ 1.f, .03f });
 	mUpperWall.setPosition({ .5f, .015f });
@@ -26,25 +27,36 @@ Scene::Scene(const Renderer::Ptr& renderer) {
 }
 
 void Scene::update(std::chrono::milliseconds delta) {
-	// TODO a temporary helper just to keep ball moving.
-	const static auto velocity = .00025f;
-	static auto directionX = 1.f;
-	static auto directionY = 1.f;
-	mBall.setPosition(
-		{
-		mBall.getPosition().getX() + directionX * velocity * delta.count(),
-		mBall.getPosition().getY() + directionY * velocity * delta.count()
-		}
-	);
+	auto hasCollision = false;
+	do {
+		// TODO build AABBs with the delta and form an octree
+		// TODO use octree to check if there is collision candidates (broad phase)
+		// TODO if (collisionCandidates > 0)
+		// TODO    perform narrow collision detection for candidates
+		// TODO    if (collisions > 0)
+		// TODO       resolve collision with the lowest alpha
+		// TODO       apply movement to all items based on the alpha
+		// TODO       delta -= alpha
+	} while (hasCollision);
+
+	// TODO How about a bit more elegant way to determine which objects to update?
+	mBall.setPosition(mBall.getPosition() + mBall.getVelocity() * delta.count());
+	mLeftPaddle.setPosition(mLeftPaddle.getPosition() + mLeftPaddle.getVelocity() * delta.count());
+	mRightPaddle.setPosition(mRightPaddle.getPosition() + mRightPaddle.getVelocity() * delta.count());
+
 	if (mBall.getPosition().getX() <= 0.f) {
-		directionX = 1.f;
+		auto velocity = mBall.getVelocity();
+		mBall.setVelocity({ -velocity.getX(), velocity.getY() });
 	} else if (mBall.getPosition().getX() >= 1.f) {
-		directionX = -1.f;
+		auto velocity = mBall.getVelocity();
+		mBall.setVelocity({ -velocity.getX(), velocity.getY() });
 	}
 	if (mBall.getPosition().getY() <= 0.f) {
-		directionY = 1.f;
+		auto velocity = mBall.getVelocity();
+		mBall.setVelocity({ velocity.getX(), -velocity.getY() });
 	} else if (mBall.getPosition().getY() >= 1.f) {
-		directionY = -1.f;
+		auto velocity = mBall.getVelocity();
+		mBall.setVelocity({ velocity.getX(), -velocity.getY() });
 	}
 	/*
 	const static auto paddleVelocity = .00025f;
