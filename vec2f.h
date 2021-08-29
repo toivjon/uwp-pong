@@ -18,6 +18,9 @@ public:
 	auto operator+(const Vec2f& v) const -> Vec2f { return { data[0] + v.data[0], data[1] + v.data[1] }; }
 	auto operator-(const Vec2f& v) const -> Vec2f { return { data[0] - v.data[0], data[1] - v.data[1] }; }
 
+	void operator+=(const Vec2f& v) { data[0] += v.data[0]; data[1] += v.data[1]; }
+	void operator-=(const Vec2f& v) { data[0] -= v.data[0]; data[1] -= v.data[1]; }
+
 	auto operator*(float s) const -> Vec2f { return { data[0] * s, data[1] * s }; }
 	auto operator/(float s) const -> Vec2f { return { data[0] / s, data[1] / s }; }
 

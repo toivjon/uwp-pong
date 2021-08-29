@@ -27,89 +27,188 @@ Scene::Scene(const Renderer::Ptr& renderer) {
 }
 
 void Scene::update(std::chrono::milliseconds delta) {
+	// The time (in milliseconds) we consume during the simulation step.
+	auto deltaMS = delta.count();
+
+	// TODO We could have these precalculated somewhere?
+	// Pre-build AABBs for non-moving (static) entities.
+	const auto uwAABB = AABB(mUpperWall.getPosition(), mUpperWall.getSize() / 2.f);
+	const auto lwAABB = AABB(mLowerWall.getPosition(), mLowerWall.getSize() / 2.f);
+
 	auto hasCollision = false;
 	do {
-		// TODO build AABBs with the delta and form an octree
-		// TODO use octree to check if there is collision candidates (broad phase)
-		// TODO if (collisionCandidates > 0)
-		// TODO    perform narrow collision detection for candidates
-		// TODO    if (collisions > 0)
-		// TODO       resolve collision with the lowest alpha
-		// TODO       apply movement to all items based on the alpha
-		// TODO       delta -= alpha
+		// Gather the current positions of each dynamic entity.
+		auto lPosition = mLeftPaddle.getPosition();
+		auto rPosition = mRightPaddle.getPosition();
+		auto bPosition = mBall.getPosition();
+
+		// TODO We could have these precalculated in the Rectangle class?
+		// Gather the extents of the dynamic entities.s
+		const auto lExtent = mLeftPaddle.getSize() / 2.f;
+		const auto rExtent = mRightPaddle.getSize() / 2.f;
+		const auto bExtent = mBall.getSize() / 2.f;
+
+		// Build AABBs for dynamic entities based on their current positions.
+		const auto lAABB = AABB(lPosition, lExtent);
+		const auto rAABB = AABB(rPosition, rExtent);
+		const auto bAABB = AABB(bPosition, bExtent);
+
+		// Calculate the new ideal positions for dynamic entities.
+		lPosition += mLeftPaddle.getVelocity() * deltaMS;
+		rPosition += mRightPaddle.getVelocity() * deltaMS;
+		bPosition += mBall.getVelocity() * deltaMS;
+
+		// Build AABBs for dynamic entities based on their current and ideal positions.
+		auto dlAABB = lAABB + AABB(lPosition, lExtent);
+		auto drAABB = rAABB + AABB(rPosition, rExtent);
+		auto dbAABB = bAABB + AABB(bPosition, bExtent);
+
+		enum class CandidateType {LPADDLE, RPADDLE, BALL, TWALL, BWALL, LGOAL, RGOAL};
+		struct Candidate {
+			CandidateType lhs;
+			CandidateType rhs;
+		};
+
+		// Use broad phase AABBs to collect simulation collision candidates.
+		std::vector<Candidate> candidates;
+		if (dbAABB.collides(dlAABB)) {
+			candidates.push_back({ CandidateType::BALL, CandidateType::LPADDLE });
+		} else if (dbAABB.collides(drAABB)) {
+			candidates.push_back({ CandidateType::BALL, CandidateType::RPADDLE });
+		}
+		if (dbAABB.collides(uwAABB)) {
+			candidates.push_back({ CandidateType::BALL, CandidateType::TWALL });
+		} else if (dbAABB.collides(lwAABB)) {
+			candidates.push_back({ CandidateType::BALL, CandidateType::BWALL });
+		}
+		if (drAABB.collides(uwAABB)) {
+			candidates.push_back({ CandidateType::RPADDLE, CandidateType::TWALL });
+		} else if (drAABB.collides(lwAABB)) {
+			candidates.push_back({ CandidateType::RPADDLE, CandidateType::BWALL });
+		}
+		if (dlAABB.collides(uwAABB)) {
+			candidates.push_back({ CandidateType::LPADDLE, CandidateType::TWALL });
+		} else if (dlAABB.collides(lwAABB)) {
+			candidates.push_back({ CandidateType::LPADDLE, CandidateType::BWALL });
+		}
+		// TODO Goals should be added here as well...
+
+		// User narrow phase AABB sweeping to check real collisions and to detect soonest collision.
+		if (!candidates.empty()) {
+			auto hasHit = false;
+			auto minTime = FLT_MAX;
+			auto pair = Candidate{};
+			for (auto& candidate : candidates) {
+				AABB::Intersection hit = {};
+				Rectangle lhs;
+				switch (candidate.lhs) {
+				case CandidateType::BALL:
+					switch (candidate.rhs) {
+					case CandidateType::LPADDLE:
+						hit = AABB::intersect(bAABB, lAABB, mBall.getVelocity(), mLeftPaddle.getVelocity());
+						break;
+					case CandidateType::RPADDLE:
+						hit = AABB::intersect(bAABB, rAABB, mBall.getVelocity(), mRightPaddle.getVelocity());
+						break;
+					case CandidateType::TWALL:
+						hit = AABB::intersect(bAABB, uwAABB, mBall.getVelocity(), { 0.f,0.f });
+						break;
+					case CandidateType::BWALL:
+						hit = AABB::intersect(bAABB, lwAABB, mBall.getVelocity(), { 0.f,0.f });
+						break;
+					case CandidateType::LGOAL:
+						// TODO ... add when ready
+						break;
+					case CandidateType::RGOAL:
+						// TODO ... add when ready
+						break;
+					}
+					break;
+				case CandidateType::LPADDLE:
+					switch (candidate.rhs) {
+					case CandidateType::TWALL:
+						hit = AABB::intersect(lAABB, uwAABB, mLeftPaddle.getVelocity(), { 0.f, 0.f });
+						break;
+					case CandidateType::BWALL:
+						hit = AABB::intersect(lAABB, lwAABB, mLeftPaddle.getVelocity(), { 0.f, 0.f });
+						break;
+					}
+					break;
+				case CandidateType::RPADDLE:
+					switch (candidate.rhs) {
+					case CandidateType::TWALL:
+						hit = AABB::intersect(rAABB, uwAABB, mRightPaddle.getVelocity(), { 0.f, 0.f });
+						break;
+					case CandidateType::BWALL:
+						hit = AABB::intersect(rAABB, lwAABB, mRightPaddle.getVelocity(), { 0.f, 0.f });
+						break;
+					}
+					break;
+				}
+				if (hit.collides && hit.time < minTime) {
+					minTime = hit.time;
+					pair = candidate;
+					hasHit = true;
+				}
+			}
+
+			// React to collision that was detected as the soonest collision.
+			if (hasHit) {
+				const auto lVelocity = mLeftPaddle.getVelocity();
+				const auto rVelocity = mRightPaddle.getVelocity();
+				const auto bVelocity = mBall.getVelocity();
+
+				if (pair.lhs == CandidateType::BALL) {
+					const auto oldPosition = mBall.getPosition();
+					auto velocity = mBall.getVelocity();
+					switch (pair.rhs) {
+					case CandidateType::TWALL:
+						velocity.setY(-velocity.getY());
+						mBall.setVelocity(velocity);
+						break;
+					case CandidateType::BWALL:
+						velocity.setY(-velocity.getY());
+						mBall.setVelocity(velocity);
+						break;
+					case CandidateType::LPADDLE:
+						velocity.setX(-velocity.getX());
+						mBall.setVelocity(velocity);
+						break;
+					case CandidateType::RPADDLE:
+						velocity.setX(-velocity.getX());
+						mBall.setVelocity(velocity);
+						break;
+					case CandidateType::LGOAL:
+						// TODO Implement scoring logic.
+						break;
+					case CandidateType::RGOAL:
+						// TODO Implement scoring logic.
+						break;
+					}
+				} else if (pair.rhs == CandidateType::LPADDLE) {
+					mLeftPaddle.setVelocity({ 0.f, 0.f });
+				} else if (pair.rhs == CandidateType::RPADDLE) {
+					mRightPaddle.setVelocity({ 0.f, 0.f });
+				}
+
+				// TODO       apply movement to all items based on the alpha
+				minTime -= 0.0001f;
+				lPosition = mLeftPaddle.getPosition();
+				rPosition = mRightPaddle.getPosition();
+				bPosition = mBall.getPosition();
+				lPosition += lVelocity * minTime;
+				rPosition += rVelocity * minTime;
+				bPosition += bVelocity * minTime;
+
+				deltaMS -= minTime;
+			}
+		}
+
+		// Apply new positions to dynamic entities.
+		mLeftPaddle.setPosition(lPosition);
+		mRightPaddle.setPosition(rPosition);
+		mBall.setPosition(bPosition);
 	} while (hasCollision);
-
-	// TODO How about a bit more elegant way to determine which objects to update?
-	mBall.setPosition(mBall.getPosition() + mBall.getVelocity() * delta.count());
-	mLeftPaddle.setPosition(mLeftPaddle.getPosition() + mLeftPaddle.getVelocity() * delta.count());
-	mRightPaddle.setPosition(mRightPaddle.getPosition() + mRightPaddle.getVelocity() * delta.count());
-
-	if (mBall.getPosition().getX() <= 0.f) {
-		auto velocity = mBall.getVelocity();
-		mBall.setVelocity({ -velocity.getX(), velocity.getY() });
-	} else if (mBall.getPosition().getX() >= 1.f) {
-		auto velocity = mBall.getVelocity();
-		mBall.setVelocity({ -velocity.getX(), velocity.getY() });
-	}
-	if (mBall.getPosition().getY() <= 0.f) {
-		auto velocity = mBall.getVelocity();
-		mBall.setVelocity({ velocity.getX(), -velocity.getY() });
-	} else if (mBall.getPosition().getY() >= 1.f) {
-		auto velocity = mBall.getVelocity();
-		mBall.setVelocity({ velocity.getX(), -velocity.getY() });
-	}
-	/*
-	const static auto paddleVelocity = .00025f;
-	static auto paddleDirectionY = -1.f;
-
-	const auto paddleMovement = paddleDirectionY * paddleVelocity * delta.count();
-
-	const auto paddleAABB = AABB(
-		{ mRightPaddle.getPreviousPosition().getX(), mRightPaddle.getPreviousPosition().getY() },
-		{ mRightPaddle.getSize().getX() / 2.f, mRightPaddle.getSize().getY() / 2.f }
-	);
-	const auto topWallAABB = AABB(
-		{ mUpperWall.getPosition().getX(), mUpperWall.getPosition().getY() },
-		{ mUpperWall.getSize().getX() / 2.f, mUpperWall.getSize().getY() / 2.f }
-	);
-	const auto bottomWallAABB = AABB(
-		{ mLowerWall.getPosition().getX(), mLowerWall.getPosition().getY() },
-		{ mLowerWall.getSize().getX() / 2.f, mLowerWall.getSize().getY() / 2.f }
-	);
-	auto v1 = Vec2f(0.f, paddleMovement);
-	const static auto nudge = .01f;
-	auto v2 = Vec2f{ 0.f, 0.f };
-
-	auto c1 = AABB::intersect(paddleAABB, topWallAABB, v1, v2);
-	if (c1.collides) {
-		paddleDirectionY = 1.f;
-		const auto wallMaxY = topWallAABB.getMax(1);
-		const auto nudgeAmount = paddleDirectionY * nudge;
-		const auto scalar = 1.f - c1.time;
-		const auto leftoverMovement = -1.f * paddleMovement * scalar;
-		const auto newY = wallMaxY + nudgeAmount + leftoverMovement;
-		mRightPaddle.setPosition({ mRightPaddle.getPosition().getX(), newY + mRightPaddle.getSize().getY() / 2.f });
-	}
-	auto c2 = AABB::intersect(paddleAABB, bottomWallAABB, v1, v2);
-	if (c2.collides) {
-		paddleDirectionY = -1.f;
-		const auto wallMinY = bottomWallAABB.getMin(1);
-		const auto nudgeAmount = paddleDirectionY * nudge;
-		const auto scalar = 1.f - c2.time;
-		const auto leftoverMovement = -1.f * paddleMovement * scalar;
-		const auto newY = wallMinY + nudgeAmount + leftoverMovement;
-		mRightPaddle.setPosition({ mRightPaddle.getPosition().getX(), newY - mRightPaddle.getSize().getY() / 2.f });
-	}
-
-	// This is here just to ensure that paddle actually moves when theres no collision.
-	if (!c1.collides && !c2.collides) {
-		mRightPaddle.setPosition({ mRightPaddle.getPosition().getX(), mRightPaddle.getPosition().getY() + paddleMovement });
-	}
-	*/
-	// TODO update ball
-	// TODO update left paddle
-	// TODO update right paddle
-	// TODO check collisions?
 }
 
 void Scene::render(const Renderer::Ptr& renderer) const {

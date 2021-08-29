@@ -16,11 +16,28 @@ class AABB {
 public:
 	AABB(const Vec2f& center, const Vec2f& extent) { this->center = center;  this->extent = extent; }
 
+	// TODO Perhaps we should use a bit more simpler solution for this?
+	auto operator+(const AABB& aabb) const -> AABB {
+		const auto xmin = std::min(getMinX(), aabb.getMinX());
+		const auto ymin = std::min(getMinY(), aabb.getMinY());
+		const auto xmax = std::max(getMaxX(), aabb.getMaxX());
+		const auto ymax = std::max(getMaxY(), aabb.getMaxY());
+		const auto extent = Vec2f((xmax - xmin) / 2.f, (ymax - ymin) / 2.f);
+		const auto center = Vec2f(xmin + extent.getX(), ymin + extent.getY());
+		return AABB(center, extent);
+	}
+
 	void setCenter(const Vec2f& center) { this->center = center; }
 	void setExtent(const Vec2f& extent) { this->extent = extent; }
 
 	auto getCenter() const -> const Vec2f& { return center; }
 	auto getExtent() const -> const Vec2f& { return extent; }
+
+	auto getMinX() const -> float { return center.getX() - extent.getX(); }
+	auto getMinY() const -> float { return center.getY() - extent.getY(); }
+
+	auto getMaxX() const -> float { return center.getX() + extent.getX(); }
+	auto getMaxY() const -> float { return center.getY() + extent.getY(); }
 
 	auto collides(const AABB& aabb) const -> bool {
 		const auto centerDiff = aabb.center - center;
@@ -172,18 +189,20 @@ public:
 		intersection.time = 0.f;
 
 		// Exit early whether boxes initially collide.
-		if (a.collides(b)) {	
+		/*
+		if (a.collides(b)) {
 			intersection.collides = true;
 			intersection.time = 0.f;
 			return intersection;
 		}
+		*/
 
 		// We will use relative velocity where 'a' is treated as stationary.
 		const auto v = vb - va;
 
 		// Initialize times for the first and last contact.
-		auto tmin = 0.f;
-		auto tmax = 1.f;
+		auto tmin = -FLT_MAX;
+		auto tmax = FLT_MAX;
 
 		// Find first and last contact from each axis.
 		for (auto i = 0; i < 2; i++) {
