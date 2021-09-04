@@ -29,6 +29,8 @@ private:
 	Rectangle	mLowerWall;
 	Rectangle	mLeftPaddle;
 	Rectangle	mRightPaddle;
+	Rectangle   mLeftGoal;
+	Rectangle   mRightGoal;
 	Text		mLeftScore;
 	Text		mRightScore;
 };

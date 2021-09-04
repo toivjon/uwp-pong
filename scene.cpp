@@ -24,6 +24,12 @@ Scene::Scene(const Renderer::Ptr& renderer) {
 
 	mRightScore.setText(L"0");
 	mRightScore.setPosition({ .65f, .025f });
+
+	mLeftGoal.setSize({1.f, 1.f});
+	mLeftGoal.setPosition({-1.5f, .5f});
+
+	mRightGoal.setSize({1.f, 1.f});
+	mRightGoal.setPosition({1.5f, .5f});
 }
 
 void Scene::update(std::chrono::milliseconds delta) {
@@ -34,6 +40,11 @@ void Scene::update(std::chrono::milliseconds delta) {
 	// Pre-build AABBs for non-moving (static) entities.
 	const auto uwAABB = AABB(mUpperWall.getPosition(), mUpperWall.getSize() / 2.f);
 	const auto lwAABB = AABB(mLowerWall.getPosition(), mLowerWall.getSize() / 2.f);
+	const auto lgAABB = AABB(mLeftGoal.getPosition(), mLeftGoal.getSize() / 2.f);
+	const auto rgAABB = AABB(mRightGoal.getPosition(), mRightGoal.getSize() / 2.f);
+
+	// TODO A temporary solution which should be handled in a more elegant way.
+	auto resetGame = false;
 
 	auto hasCollision = false;
 	do {
@@ -81,6 +92,11 @@ void Scene::update(std::chrono::milliseconds delta) {
 		} else if (dbAABB.collides(lwAABB)) {
 			candidates.push_back({ CandidateType::BALL, CandidateType::BWALL });
 		}
+		if (dbAABB.collides(lgAABB)) {
+			candidates.push_back({ CandidateType::BALL, CandidateType::LGOAL });
+		} else if (dbAABB.collides(rgAABB)) {
+			candidates.push_back({ CandidateType::BALL, CandidateType::RGOAL });
+		}
 		if (drAABB.collides(uwAABB)) {
 			candidates.push_back({ CandidateType::RPADDLE, CandidateType::TWALL });
 		} else if (drAABB.collides(lwAABB)) {
@@ -91,7 +107,6 @@ void Scene::update(std::chrono::milliseconds delta) {
 		} else if (dlAABB.collides(lwAABB)) {
 			candidates.push_back({ CandidateType::LPADDLE, CandidateType::BWALL });
 		}
-		// TODO Goals should be added here as well...
 
 		// User narrow phase AABB sweeping to check real collisions and to detect soonest collision.
 		if (!candidates.empty()) {
@@ -117,10 +132,10 @@ void Scene::update(std::chrono::milliseconds delta) {
 						hit = AABB::intersect(bAABB, lwAABB, mBall.getVelocity(), { 0.f,0.f });
 						break;
 					case CandidateType::LGOAL:
-						// TODO ... add when ready
+						hit = AABB::intersect(bAABB, lgAABB, mBall.getVelocity(), { 0.f, 0.f });
 						break;
 					case CandidateType::RGOAL:
-						// TODO ... add when ready
+						hit = AABB::intersect(bAABB, rgAABB, mBall.getVelocity(), { 0.f, 0.f });
 						break;
 					}
 					break;
@@ -180,9 +195,11 @@ void Scene::update(std::chrono::milliseconds delta) {
 						break;
 					case CandidateType::LGOAL:
 						// TODO Implement scoring logic.
+						resetGame = true;
 						break;
 					case CandidateType::RGOAL:
 						// TODO Implement scoring logic.
+						resetGame = true;
 						break;
 					}
 				} else if (pair.rhs == CandidateType::LPADDLE) {
@@ -209,6 +226,10 @@ void Scene::update(std::chrono::milliseconds delta) {
 		mRightPaddle.setPosition(rPosition);
 		mBall.setPosition(bPosition);
 	} while (hasCollision);
+
+	if (resetGame) {
+		mBall.setPosition({ .5f, .5f });
+	}
 }
 
 void Scene::render(const Renderer::Ptr& renderer) const {
