@@ -11,6 +11,18 @@ public:
 	Scene(const Renderer::Ptr& renderer);
 	void update(std::chrono::milliseconds delta);
 	void render(const Renderer::Ptr& renderer) const final;
+	
+	void setLeftPaddleYVelocity(float yVelocity) { 
+		auto velocity = mLeftPaddle.getVelocity();
+		velocity.setY(yVelocity);
+		mLeftPaddle.setVelocity(velocity);
+	}
+
+	void setRightPaddleYVelocity(float yVelocity) {
+		auto velocity = mRightPaddle.getVelocity();
+		velocity.setY(yVelocity);
+		mRightPaddle.setVelocity(velocity);
+	}
 private:
 	Rectangle	mBall;
 	Rectangle	mUpperWall;

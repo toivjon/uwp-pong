@@ -13,6 +13,7 @@ using namespace Windows::ApplicationModel::Activation;
 using namespace Windows::ApplicationModel::Core;
 using namespace Windows::Foundation;
 using namespace Windows::Graphics::Display;
+using namespace Windows::System;
 using namespace Windows::UI;
 using namespace Windows::UI::Core;
 
@@ -99,6 +100,8 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 	void SetWindow(const CoreWindow& window) {
 		OutputDebugStringA("App::SetWindow\n");
 		window.SizeChanged({ this, &App::OnWindowSizeChanged });
+		window.KeyDown({ this, &App::OnKeyDown });
+		window.KeyUp({ this, &App::OnKeyUp });
 		DisplayInformation::DisplayContentsInvalidated({ this, &App::OnDisplayContentsInvalidated });
 		auto displayInfo = DisplayInformation::GetForCurrentView();
 		displayInfo.DpiChanged({ this, &App::OnDPIChanged });
@@ -119,6 +122,43 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 	void OnDPIChanged(const DisplayInformation& info, const IInspectable&) {
 		OutputDebugStringA("App::OnDPIChanged\n");
 		mRenderer->setDpi(info.LogicalDpi());
+	}
+
+	void OnKeyDown(const CoreWindow& window, const KeyEventArgs& args) {
+		OutputDebugStringA("App::OnKeyDown\n");
+		constexpr auto PaddleVelocity = 0.001f;
+		switch (args.VirtualKey()) {
+		case VirtualKey::Up:
+			mScene->setRightPaddleYVelocity(-PaddleVelocity);
+			break;
+		case VirtualKey::Down:
+			mScene->setRightPaddleYVelocity(PaddleVelocity);
+			break;
+		case VirtualKey::W:
+			mScene->setLeftPaddleYVelocity(-PaddleVelocity);
+			break;
+		case VirtualKey::S:
+			mScene->setLeftPaddleYVelocity(PaddleVelocity);
+			break;
+		}
+	}
+
+	void OnKeyUp(const CoreWindow& window, const KeyEventArgs& args) {
+		OutputDebugStringA("App::OnKeyUp\n");
+		switch (args.VirtualKey()) {
+		case VirtualKey::Up:
+			mScene->setRightPaddleYVelocity(.0f);
+			break;
+		case VirtualKey::Down:
+			mScene->setRightPaddleYVelocity(.0f);
+			break;
+		case VirtualKey::W:
+			mScene->setLeftPaddleYVelocity(.0f);
+			break;
+		case VirtualKey::S:
+			mScene->setLeftPaddleYVelocity(.0f);
+			break;
+		}
 	}
 
 private:
