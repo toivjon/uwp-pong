@@ -26,7 +26,7 @@ Scene::Scene(const Renderer::Ptr& renderer) {
 	mRightScore.setPosition({ .65f, .025f });
 
 	mLeftGoal.setSize({1.f, 1.f});
-	mLeftGoal.setPosition({-1.5f - mBall.getSize().getX()*2.f, .5f});
+	mLeftGoal.setPosition({-.5f - mBall.getSize().getX()*2.f, .5f});
 
 	mRightGoal.setSize({1.f, 1.f});
 	mRightGoal.setPosition({1.5f + mBall.getSize().getX()*2.f, .5f});
