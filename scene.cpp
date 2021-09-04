@@ -229,6 +229,7 @@ void Scene::update(std::chrono::milliseconds delta) {
 
 	if (resetGame) {
 		mBall.setPosition({ .5f, .5f });
+		mBall.setVelocity({ -mBall.getVelocity().getX(), -mBall.getVelocity().getY() });
 	}
 }
 
