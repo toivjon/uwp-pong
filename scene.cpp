@@ -43,6 +43,11 @@ void Scene::update(std::chrono::milliseconds delta) {
 	const auto lgAABB = AABB(mLeftGoal.getPosition(), mLeftGoal.getSize() / 2.f);
 	const auto rgAABB = AABB(mRightGoal.getPosition(), mRightGoal.getSize() / 2.f);
 
+	// Gather velocities and prevent input to change paddle velocities on-the-fly.
+	auto lVelocity = mLeftPaddle.getVelocity();
+	auto rVelocity = mRightPaddle.getVelocity();
+	auto bVelocity = mBall.getVelocity();
+
 	// TODO A temporary solution which should be handled in a more elegant way.
 	auto resetGame = false;
 
@@ -65,9 +70,9 @@ void Scene::update(std::chrono::milliseconds delta) {
 		const auto bAABB = AABB(bPosition, bExtent);
 
 		// Calculate the new ideal positions for dynamic entities.
-		lPosition += mLeftPaddle.getVelocity() * deltaMS;
-		rPosition += mRightPaddle.getVelocity() * deltaMS;
-		bPosition += mBall.getVelocity() * deltaMS;
+		lPosition += lVelocity * deltaMS;
+		rPosition += rVelocity * deltaMS;
+		bPosition += bVelocity * deltaMS;
 
 		// Build AABBs for dynamic entities based on their current and ideal positions.
 		auto dlAABB = lAABB + AABB(lPosition, lExtent);
@@ -120,42 +125,42 @@ void Scene::update(std::chrono::milliseconds delta) {
 				case CandidateType::BALL:
 					switch (candidate.rhs) {
 					case CandidateType::LPADDLE:
-						hit = AABB::intersect(bAABB, lAABB, mBall.getVelocity(), mLeftPaddle.getVelocity());
+						hit = AABB::intersect(bAABB, lAABB, bVelocity, lVelocity);
 						break;
 					case CandidateType::RPADDLE:
-						hit = AABB::intersect(bAABB, rAABB, mBall.getVelocity(), mRightPaddle.getVelocity());
+						hit = AABB::intersect(bAABB, rAABB, bVelocity, rVelocity);
 						break;
 					case CandidateType::TWALL:
-						hit = AABB::intersect(bAABB, uwAABB, mBall.getVelocity(), { 0.f,0.f });
+						hit = AABB::intersect(bAABB, uwAABB, bVelocity, { 0.f,0.f });
 						break;
 					case CandidateType::BWALL:
-						hit = AABB::intersect(bAABB, lwAABB, mBall.getVelocity(), { 0.f,0.f });
+						hit = AABB::intersect(bAABB, lwAABB, bVelocity, { 0.f,0.f });
 						break;
 					case CandidateType::LGOAL:
-						hit = AABB::intersect(bAABB, lgAABB, mBall.getVelocity(), { 0.f, 0.f });
+						hit = AABB::intersect(bAABB, lgAABB, bVelocity, { 0.f, 0.f });
 						break;
 					case CandidateType::RGOAL:
-						hit = AABB::intersect(bAABB, rgAABB, mBall.getVelocity(), { 0.f, 0.f });
+						hit = AABB::intersect(bAABB, rgAABB, bVelocity, { 0.f, 0.f });
 						break;
 					}
 					break;
 				case CandidateType::LPADDLE:
 					switch (candidate.rhs) {
 					case CandidateType::TWALL:
-						hit = AABB::intersect(lAABB, uwAABB, mLeftPaddle.getVelocity(), { 0.f, 0.f });
+						hit = AABB::intersect(lAABB, uwAABB, lVelocity, { 0.f, 0.f });
 						break;
 					case CandidateType::BWALL:
-						hit = AABB::intersect(lAABB, lwAABB, mLeftPaddle.getVelocity(), { 0.f, 0.f });
+						hit = AABB::intersect(lAABB, lwAABB, lVelocity, { 0.f, 0.f });
 						break;
 					}
 					break;
 				case CandidateType::RPADDLE:
 					switch (candidate.rhs) {
 					case CandidateType::TWALL:
-						hit = AABB::intersect(rAABB, uwAABB, mRightPaddle.getVelocity(), { 0.f, 0.f });
+						hit = AABB::intersect(rAABB, uwAABB, rVelocity, { 0.f, 0.f });
 						break;
 					case CandidateType::BWALL:
-						hit = AABB::intersect(rAABB, lwAABB, mRightPaddle.getVelocity(), { 0.f, 0.f });
+						hit = AABB::intersect(rAABB, lwAABB, rVelocity, { 0.f, 0.f });
 						break;
 					}
 					break;
@@ -169,29 +174,20 @@ void Scene::update(std::chrono::milliseconds delta) {
 
 			// React to collision that was detected as the soonest collision.
 			if (hasHit) {
-				const auto lVelocity = mLeftPaddle.getVelocity();
-				const auto rVelocity = mRightPaddle.getVelocity();
-				const auto bVelocity = mBall.getVelocity();
-
 				if (pair.lhs == CandidateType::BALL) {
 					const auto oldPosition = mBall.getPosition();
-					auto velocity = mBall.getVelocity();
 					switch (pair.rhs) {
 					case CandidateType::TWALL:
-						velocity.setY(-velocity.getY());
-						mBall.setVelocity(velocity);
+						bVelocity.setY(-bVelocity.getY());
 						break;
 					case CandidateType::BWALL:
-						velocity.setY(-velocity.getY());
-						mBall.setVelocity(velocity);
+						bVelocity.setY(-bVelocity.getY());
 						break;
 					case CandidateType::LPADDLE:
-						velocity.setX(-velocity.getX());
-						mBall.setVelocity(velocity);
+						bVelocity.setX(-bVelocity.getX());
 						break;
 					case CandidateType::RPADDLE:
-						velocity.setX(-velocity.getX());
-						mBall.setVelocity(velocity);
+						bVelocity.setX(-bVelocity.getX());
 						break;
 					case CandidateType::LGOAL:
 						// TODO Implement scoring logic.
@@ -220,6 +216,11 @@ void Scene::update(std::chrono::milliseconds delta) {
 				deltaMS -= minTime;
 			}
 		}
+
+		// Apply new velocity directions to entities.
+		mLeftPaddle.setVelocity(lVelocity);
+		mRightPaddle.setVelocity(rVelocity);
+		mBall.setVelocity(bVelocity);
 
 		// Apply new positions to dynamic entities.
 		mLeftPaddle.setPosition(lPosition);
