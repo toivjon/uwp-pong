@@ -23,6 +23,9 @@ public:
 		velocity.setY(yVelocity);
 		mRightPaddle.setVelocity(velocity);
 	}
+
+	auto getRightPaddleVelocity() -> const Vec2f&{ return mRightPaddle.getVelocity(); }
+	auto getLeftPaddleVelocity() -> const Vec2f& { return mLeftPaddle.getVelocity(); }
 private:
 	void resetGame();
 

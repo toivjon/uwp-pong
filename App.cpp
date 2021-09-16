@@ -147,16 +147,24 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 		OutputDebugStringA("App::OnKeyUp\n");
 		switch (args.VirtualKey()) {
 		case VirtualKey::Up:
-			mScene->setRightPaddleYVelocity(.0f);
+			if (mScene->getRightPaddleVelocity().getY() < 0.f) {
+				mScene->setRightPaddleYVelocity(.0f);
+			}
 			break;
 		case VirtualKey::Down:
-			mScene->setRightPaddleYVelocity(.0f);
+			if (mScene->getRightPaddleVelocity().getY() > 0.f) {
+				mScene->setRightPaddleYVelocity(.0f);
+			}
 			break;
 		case VirtualKey::W:
-			mScene->setLeftPaddleYVelocity(.0f);
+			if (mScene->getLeftPaddleVelocity().getY() < 0.f) {
+				mScene->setLeftPaddleYVelocity(.0f);
+			}
 			break;
 		case VirtualKey::S:
-			mScene->setLeftPaddleYVelocity(.0f);
+			if (mScene->getLeftPaddleVelocity().getY() > 0.f) {
+				mScene->setLeftPaddleYVelocity(.0f);
+			}
 			break;
 		}
 	}
