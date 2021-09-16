@@ -25,11 +25,11 @@ Scene::Scene(const Renderer::Ptr& renderer) {
 	mRightScore.setText(L"0");
 	mRightScore.setPosition({ .65f, .025f });
 
-	mLeftGoal.setSize({1.f, 1.f});
-	mLeftGoal.setPosition({-.5f - mBall.getSize().getX()*2.f, .5f});
+	mLeftGoal.setSize({ 1.f, 1.f });
+	mLeftGoal.setPosition({ -.5f - mBall.getSize().getX() * 2.f, .5f });
 
-	mRightGoal.setSize({1.f, 1.f});
-	mRightGoal.setPosition({1.5f + mBall.getSize().getX()*2.f, .5f});
+	mRightGoal.setSize({ 1.f, 1.f });
+	mRightGoal.setPosition({ 1.5f + mBall.getSize().getX() * 2.f, .5f });
 }
 
 void Scene::update(std::chrono::milliseconds delta) {
@@ -79,7 +79,7 @@ void Scene::update(std::chrono::milliseconds delta) {
 		auto drAABB = rAABB + AABB(rPosition, rExtent);
 		auto dbAABB = bAABB + AABB(bPosition, bExtent);
 
-		enum class CandidateType {LPADDLE, RPADDLE, BALL, TWALL, BWALL, LGOAL, RGOAL};
+		enum class CandidateType { LPADDLE, RPADDLE, BALL, TWALL, BWALL, LGOAL, RGOAL };
 		struct Candidate {
 			CandidateType lhs;
 			CandidateType rhs;
