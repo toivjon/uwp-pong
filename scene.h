@@ -24,6 +24,8 @@ public:
 		mRightPaddle.setVelocity(velocity);
 	}
 private:
+	void resetGame();
+
 	Rectangle	mBall;
 	Rectangle	mUpperWall;
 	Rectangle	mLowerWall;

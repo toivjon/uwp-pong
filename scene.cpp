@@ -49,7 +49,7 @@ void Scene::update(std::chrono::milliseconds delta) {
 	auto bVelocity = mBall.getVelocity();
 
 	// TODO A temporary solution which should be handled in a more elegant way.
-	auto resetGame = false;
+	auto mustResetGame = false;
 
 	auto hasCollision = false;
 	do {
@@ -201,11 +201,11 @@ void Scene::update(std::chrono::milliseconds delta) {
 						break;
 					case CandidateType::LGOAL:
 						// TODO Implement scoring logic.
-						resetGame = true;
+						mustResetGame = true;
 						break;
 					case CandidateType::RGOAL:
 						// TODO Implement scoring logic.
-						resetGame = true;
+						mustResetGame = true;
 						break;
 					}
 				} else if (pair.lhs == CandidateType::LPADDLE) {
@@ -227,9 +227,8 @@ void Scene::update(std::chrono::milliseconds delta) {
 		mBall.setPosition(bPosition);
 	} while (hasCollision);
 
-	if (resetGame) {
-		mBall.setPosition({ .5f, .5f });
-		mBall.setVelocity({ -mBall.getVelocity().getX(), -mBall.getVelocity().getY() });
+	if (mustResetGame) {
+		resetGame();
 	}
 }
 
@@ -241,4 +240,9 @@ void Scene::render(const Renderer::Ptr& renderer) const {
 	mLowerWall.render(renderer);
 	mLeftPaddle.render(renderer);
 	mRightPaddle.render(renderer);
+}
+
+void Scene::resetGame() {
+	mBall.setPosition({ .5f, .5f });
+	mBall.setVelocity({ -mBall.getVelocity().getX(), -mBall.getVelocity().getY() });
 }
