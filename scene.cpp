@@ -245,4 +245,11 @@ void Scene::render(const Renderer::Ptr& renderer) const {
 void Scene::resetGame() {
 	mBall.setPosition({ .5f, .5f });
 	mBall.setVelocity({ -mBall.getVelocity().getX(), -mBall.getVelocity().getY() });
+
+	auto lPosition = mLeftPaddle.getPosition();
+	auto rPosition = mRightPaddle.getPosition();
+	lPosition.setY(.5f);
+	rPosition.setY(.5f);
+	mLeftPaddle.setPosition(lPosition);
+	mRightPaddle.setPosition(rPosition);
 }
