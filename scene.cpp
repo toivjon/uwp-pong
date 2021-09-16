@@ -174,6 +174,17 @@ void Scene::update(std::chrono::milliseconds delta) {
 
 			// React to collision that was detected as the soonest collision.
 			if (hasHit) {
+				// TODO       apply movement to all items based on the alpha
+				minTime -= 0.0001f;
+				lPosition = mLeftPaddle.getPosition();
+				rPosition = mRightPaddle.getPosition();
+				bPosition = mBall.getPosition();
+				lPosition += lVelocity * minTime;
+				rPosition += rVelocity * minTime;
+				bPosition += bVelocity * minTime;
+
+				deltaMS -= minTime;
+
 				if (pair.lhs == CandidateType::BALL) {
 					const auto oldPosition = mBall.getPosition();
 					switch (pair.rhs) {
@@ -199,21 +210,10 @@ void Scene::update(std::chrono::milliseconds delta) {
 						break;
 					}
 				} else if (pair.lhs == CandidateType::LPADDLE) {
-					mLeftPaddle.setVelocity({ 0.f, 0.f });
+					lVelocity.setY(0.f);
 				} else if (pair.lhs == CandidateType::RPADDLE) {
-					mRightPaddle.setVelocity({ 0.f, 0.f });
+					rVelocity.setY(0.f);
 				}
-
-				// TODO       apply movement to all items based on the alpha
-				minTime -= 0.0001f;
-				lPosition = mLeftPaddle.getPosition();
-				rPosition = mRightPaddle.getPosition();
-				bPosition = mBall.getPosition();
-				lPosition += lVelocity * minTime;
-				rPosition += rVelocity * minTime;
-				bPosition += bVelocity * minTime;
-
-				deltaMS -= minTime;
 			}
 		}
 
