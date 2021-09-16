@@ -186,7 +186,6 @@ void Scene::update(std::chrono::milliseconds delta) {
 				deltaMS -= minTime;
 
 				if (pair.lhs == CandidateType::BALL) {
-					const auto oldPosition = mBall.getPosition();
 					switch (pair.rhs) {
 					case CandidateType::TWALL:
 						bVelocity.setY(-bVelocity.getY());
