@@ -198,9 +198,9 @@ void Scene::update(std::chrono::milliseconds delta) {
 						resetGame = true;
 						break;
 					}
-				} else if (pair.rhs == CandidateType::LPADDLE) {
+				} else if (pair.lhs == CandidateType::LPADDLE) {
 					mLeftPaddle.setVelocity({ 0.f, 0.f });
-				} else if (pair.rhs == CandidateType::RPADDLE) {
+				} else if (pair.lhs == CandidateType::RPADDLE) {
 					mRightPaddle.setVelocity({ 0.f, 0.f });
 				}
 
