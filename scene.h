@@ -13,13 +13,13 @@ public:
 	void render(const Renderer::Ptr& renderer) const final;
 	
 	void setLeftPaddleYVelocity(float yVelocity) { 
-		auto velocity = mLeftPaddle.getVelocity();
+		Vec2f velocity = mLeftPaddle.getVelocity();
 		velocity.setY(yVelocity);
 		mLeftPaddle.setVelocity(velocity);
 	}
 
 	void setRightPaddleYVelocity(float yVelocity) {
-		auto velocity = mRightPaddle.getVelocity();
+		Vec2f velocity = mRightPaddle.getVelocity();
 		velocity.setY(yVelocity);
 		mRightPaddle.setVelocity(velocity);
 	}
