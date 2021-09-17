@@ -8,7 +8,7 @@ class Scene : public Renderable {
 public:
 	using Ptr = std::unique_ptr<Scene>;
 
-	Scene(const Renderer::Ptr& renderer);
+	Scene();
 	void update(std::chrono::milliseconds delta);
 	void render(const Renderer::Ptr& renderer) const final;
 	

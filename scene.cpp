@@ -2,7 +2,7 @@
 #include "aabb.h"
 #include "scene.h"
 
-Scene::Scene(const Renderer::Ptr& renderer) {
+Scene::Scene() {
 	mBall.setSize({ .023f, .03f });
 	mBall.setPosition({ .5f, .5f });
 	mBall.setVelocity(Vec2f({ 1.f, 1.f }).normalized() * .0005f);

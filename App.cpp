@@ -31,7 +31,7 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 		CoreApplication::Suspending({ this, &App::OnSuspending });
 		CoreApplication::Resuming({ this, &App::OnResuming });
 		mRenderer = std::make_unique<Renderer>();
-		mScene = std::make_unique<Scene>(mRenderer);
+		mScene = std::make_unique<Scene>();
 	}
 
 	void OnActivated(const CoreApplicationView&, const IActivatedEventArgs&) {
