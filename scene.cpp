@@ -36,7 +36,6 @@ void Scene::update(std::chrono::milliseconds delta) {
 	// The time (in milliseconds) we consume during the simulation step.
 	auto deltaMS = delta.count();
 
-	// TODO We could have these precalculated somewhere?
 	// Pre-build AABBs for non-moving (static) entities.
 	const auto uwAABB = AABB(mUpperWall.getPosition(), mUpperWall.getSize() / 2.f);
 	const auto lwAABB = AABB(mLowerWall.getPosition(), mLowerWall.getSize() / 2.f);
@@ -48,18 +47,18 @@ void Scene::update(std::chrono::milliseconds delta) {
 	Vec2f rVelocity = mRightPaddle.getVelocity();
 	Vec2f bVelocity = mBall.getVelocity();
 
+	// Gather the current positions of each dynamic entity.
+	Vec2f lPosition = mLeftPaddle.getPosition();
+	Vec2f rPosition = mRightPaddle.getPosition();
+	Vec2f bPosition = mBall.getPosition();
+
 	// TODO A temporary solution which should be handled in a more elegant way.
 	auto mustResetGame = false;
 
 	auto hasCollision = false;
 	do {
-		// Gather the current positions of each dynamic entity.
-		Vec2f lPosition = mLeftPaddle.getPosition();
-		Vec2f rPosition = mRightPaddle.getPosition();
-		Vec2f bPosition = mBall.getPosition();
-
 		// TODO We could have these precalculated in the Rectangle class?
-		// Gather the extents of the dynamic entities.s
+		// Gather the extents of the dynamic entities.
 		const auto lExtent = mLeftPaddle.getSize() / 2.f;
 		const auto rExtent = mRightPaddle.getSize() / 2.f;
 		const auto bExtent = mBall.getSize() / 2.f;
@@ -217,8 +216,8 @@ void Scene::update(std::chrono::milliseconds delta) {
 		}
 
 		// Apply new velocity directions to entities.
-		mLeftPaddle.setVelocity(lVelocity);
-		mRightPaddle.setVelocity(rVelocity);
+		// mLeftPaddle.setVelocity(lVelocity);
+		// mRightPaddle.setVelocity(rVelocity);
 		mBall.setVelocity(bVelocity);
 
 		// Apply new positions to dynamic entities.
