@@ -114,6 +114,7 @@ void Scene::update(std::chrono::milliseconds delta) {
 
 		// User narrow phase AABB sweeping to check real collisions and to detect soonest collision.
 		if (!candidates.empty()) {
+			static const Vec2f NoVelocity = { 0.f, 0.f };
 			auto hasHit = false;
 			auto minTime = FLT_MAX;
 			auto pair = Candidate{};
@@ -130,36 +131,36 @@ void Scene::update(std::chrono::milliseconds delta) {
 						hit = AABB::intersect(bAABB, rAABB, bVelocity, rVelocity);
 						break;
 					case CandidateType::TWALL:
-						hit = AABB::intersect(bAABB, uwAABB, bVelocity, { 0.f,0.f });
+						hit = AABB::intersect(bAABB, uwAABB, bVelocity, NoVelocity);
 						break;
 					case CandidateType::BWALL:
-						hit = AABB::intersect(bAABB, lwAABB, bVelocity, { 0.f,0.f });
+						hit = AABB::intersect(bAABB, lwAABB, bVelocity, NoVelocity);
 						break;
 					case CandidateType::LGOAL:
-						hit = AABB::intersect(bAABB, lgAABB, bVelocity, { 0.f, 0.f });
+						hit = AABB::intersect(bAABB, lgAABB, bVelocity, NoVelocity);
 						break;
 					case CandidateType::RGOAL:
-						hit = AABB::intersect(bAABB, rgAABB, bVelocity, { 0.f, 0.f });
+						hit = AABB::intersect(bAABB, rgAABB, bVelocity, NoVelocity);
 						break;
 					}
 					break;
 				case CandidateType::LPADDLE:
 					switch (candidate.rhs) {
 					case CandidateType::TWALL:
-						hit = AABB::intersect(lAABB, uwAABB, lVelocity, { 0.f, 0.f });
+						hit = AABB::intersect(lAABB, uwAABB, lVelocity, NoVelocity);
 						break;
 					case CandidateType::BWALL:
-						hit = AABB::intersect(lAABB, lwAABB, lVelocity, { 0.f, 0.f });
+						hit = AABB::intersect(lAABB, lwAABB, lVelocity, NoVelocity);
 						break;
 					}
 					break;
 				case CandidateType::RPADDLE:
 					switch (candidate.rhs) {
 					case CandidateType::TWALL:
-						hit = AABB::intersect(rAABB, uwAABB, rVelocity, { 0.f, 0.f });
+						hit = AABB::intersect(rAABB, uwAABB, rVelocity, NoVelocity);
 						break;
 					case CandidateType::BWALL:
-						hit = AABB::intersect(rAABB, lwAABB, rVelocity, { 0.f, 0.f });
+						hit = AABB::intersect(rAABB, lwAABB, rVelocity, NoVelocity);
 						break;
 					}
 					break;
