@@ -124,7 +124,7 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 		mRenderer->setDpi(info.LogicalDpi());
 	}
 
-	void OnKeyDown(const CoreWindow& window, const KeyEventArgs& args) {
+	void OnKeyDown(const CoreWindow&, const KeyEventArgs& args) {
 		OutputDebugStringA("App::OnKeyDown\n");
 		constexpr auto PaddleVelocity = 0.001f;
 		switch (args.VirtualKey()) {
@@ -143,7 +143,7 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 		}
 	}
 
-	void OnKeyUp(const CoreWindow& window, const KeyEventArgs& args) {
+	void OnKeyUp(const CoreWindow&, const KeyEventArgs& args) {
 		OutputDebugStringA("App::OnKeyUp\n");
 		switch (args.VirtualKey()) {
 		case VirtualKey::Up:
