@@ -44,9 +44,9 @@ void Scene::update(std::chrono::milliseconds delta) {
 	const auto rgAABB = AABB(mRightGoal.getPosition(), mRightGoal.getSize() / 2.f);
 
 	// Gather velocities and prevent input to change paddle velocities on-the-fly.
-	auto lVelocity = mLeftPaddle.getVelocity();
-	auto rVelocity = mRightPaddle.getVelocity();
-	auto bVelocity = mBall.getVelocity();
+	Vec2f lVelocity = mLeftPaddle.getVelocity();
+	Vec2f rVelocity = mRightPaddle.getVelocity();
+	Vec2f bVelocity = mBall.getVelocity();
 
 	// TODO A temporary solution which should be handled in a more elegant way.
 	auto mustResetGame = false;
@@ -54,9 +54,9 @@ void Scene::update(std::chrono::milliseconds delta) {
 	auto hasCollision = false;
 	do {
 		// Gather the current positions of each dynamic entity.
-		auto lPosition = mLeftPaddle.getPosition();
-		auto rPosition = mRightPaddle.getPosition();
-		auto bPosition = mBall.getPosition();
+		Vec2f lPosition = mLeftPaddle.getPosition();
+		Vec2f rPosition = mRightPaddle.getPosition();
+		Vec2f bPosition = mBall.getPosition();
 
 		// TODO We could have these precalculated in the Rectangle class?
 		// Gather the extents of the dynamic entities.s
@@ -246,8 +246,8 @@ void Scene::resetGame() {
 	mBall.setPosition({ .5f, .5f });
 	mBall.setVelocity({ -mBall.getVelocity().getX(), -mBall.getVelocity().getY() });
 
-	auto lPosition = mLeftPaddle.getPosition();
-	auto rPosition = mRightPaddle.getPosition();
+	Vec2f lPosition = mLeftPaddle.getPosition();
+	Vec2f rPosition = mRightPaddle.getPosition();
 	lPosition.setY(.5f);
 	rPosition.setY(.5f);
 	mLeftPaddle.setPosition(lPosition);
