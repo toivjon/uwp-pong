@@ -70,9 +70,9 @@ void Scene::update(std::chrono::milliseconds delta) {
 		const auto bAABB = AABB(bPosition, bExtent);
 
 		// Calculate the new ideal positions for dynamic entities.
-		lPosition += lVelocity * deltaMS;
-		rPosition += rVelocity * deltaMS;
-		bPosition += bVelocity * deltaMS;
+		lPosition += lVelocity * static_cast<float>(deltaMS);
+		rPosition += rVelocity * static_cast<float>(deltaMS);
+		bPosition += bVelocity * static_cast<float>(deltaMS);
 
 		// Build AABBs for dynamic entities based on their current and ideal positions.
 		auto dlAABB = lAABB + AABB(lPosition, lExtent);
