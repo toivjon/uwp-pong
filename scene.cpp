@@ -209,8 +209,10 @@ void Scene::update(std::chrono::milliseconds delta) {
 						break;
 					}
 				} else if (pair.lhs == CandidateType::LPADDLE) {
+					lPosition.setY(lPosition.getY() + .0001f * -lVelocity.getY());
 					lVelocity.setY(0.f);
 				} else if (pair.lhs == CandidateType::RPADDLE) {
+					rPosition.setY(rPosition.getY() + .0001f * -rVelocity.getY());
 					rVelocity.setY(0.f);
 				}
 			}
