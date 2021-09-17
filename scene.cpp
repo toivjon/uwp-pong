@@ -34,7 +34,7 @@ Scene::Scene() {
 
 void Scene::update(std::chrono::milliseconds delta) {
 	// The time (in milliseconds) we consume during the simulation step.
-	auto deltaMS = delta.count();
+	auto deltaMS = static_cast<float>(delta.count());
 
 	// Pre-build AABBs for non-moving (static) entities.
 	const auto uwAABB = AABB(mUpperWall.getPosition(), mUpperWall.getSize() / 2.f);
@@ -69,9 +69,9 @@ void Scene::update(std::chrono::milliseconds delta) {
 		const auto bAABB = AABB(bPosition, bExtent);
 
 		// Calculate the new ideal positions for dynamic entities.
-		lPosition += lVelocity * static_cast<float>(deltaMS);
-		rPosition += rVelocity * static_cast<float>(deltaMS);
-		bPosition += bVelocity * static_cast<float>(deltaMS);
+		lPosition += lVelocity * deltaMS;
+		rPosition += rVelocity * deltaMS;
+		bPosition += bVelocity * deltaMS;
 
 		// Build AABBs for dynamic entities based on their current and ideal positions.
 		auto dlAABB = lAABB + AABB(lPosition, lExtent);
@@ -166,7 +166,7 @@ void Scene::update(std::chrono::milliseconds delta) {
 					break;
 				}
 				if (hit.collides && hit.time < minTime) {
-					minTime = hit.time;
+					minTime = std::max(hit.time, 0.f);
 					pair = candidate;
 					hasHit = true;
 				}
@@ -179,11 +179,11 @@ void Scene::update(std::chrono::milliseconds delta) {
 				lPosition = mLeftPaddle.getPosition();
 				rPosition = mRightPaddle.getPosition();
 				bPosition = mBall.getPosition();
-				lPosition += lVelocity * minTime * deltaMS;
-				rPosition += rVelocity * minTime * deltaMS;
-				bPosition += bVelocity * minTime * deltaMS;
+				lPosition += lVelocity * minTime;
+				rPosition += rVelocity * minTime;
+				bPosition += bVelocity * minTime;
 
-				deltaMS -= minTime * deltaMS;
+				deltaMS -= minTime;
 
 				if (pair.lhs == CandidateType::BALL) {
 					switch (pair.rhs) {
