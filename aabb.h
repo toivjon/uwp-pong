@@ -22,13 +22,13 @@ public:
 		const auto ymin = std::min(getMinY(), aabb.getMinY());
 		const auto xmax = std::max(getMaxX(), aabb.getMaxX());
 		const auto ymax = std::max(getMaxY(), aabb.getMaxY());
-		const auto extent = Vec2f((xmax - xmin) / 2.f, (ymax - ymin) / 2.f);
-		const auto center = Vec2f(xmin + extent.getX(), ymin + extent.getY());
-		return AABB(center, extent);
+		const auto e = Vec2f((xmax - xmin) / 2.f, (ymax - ymin) / 2.f);
+		const auto c = Vec2f(xmin + extent.getX(), ymin + extent.getY());
+		return AABB(c, e);
 	}
 
-	void setCenter(const Vec2f& center) { this->center = center; }
-	void setExtent(const Vec2f& extent) { this->extent = extent; }
+	void setCenter(const Vec2f& c) { this->center = c; }
+	void setExtent(const Vec2f& e) { this->extent = e; }
 
 	auto getCenter() const -> const Vec2f& { return center; }
 	auto getExtent() const -> const Vec2f& { return extent; }
