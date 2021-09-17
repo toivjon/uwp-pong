@@ -55,14 +55,14 @@ void Scene::update(std::chrono::milliseconds delta) {
 	// TODO A temporary solution which should be handled in a more elegant way.
 	auto mustResetGame = false;
 
+	// TODO We could have these precalculated in the Rectangle class?
+	// Gather the extents of the dynamic entities.
+	const auto lExtent = mLeftPaddle.getSize() / 2.f;
+	const auto rExtent = mRightPaddle.getSize() / 2.f;
+	const auto bExtent = mBall.getSize() / 2.f;
+
 	auto hasCollision = false;
 	do {
-		// TODO We could have these precalculated in the Rectangle class?
-		// Gather the extents of the dynamic entities.
-		const auto lExtent = mLeftPaddle.getSize() / 2.f;
-		const auto rExtent = mRightPaddle.getSize() / 2.f;
-		const auto bExtent = mBall.getSize() / 2.f;
-
 		// Build AABBs for dynamic entities based on their current positions.
 		const auto lAABB = AABB(lPosition, lExtent);
 		const auto rAABB = AABB(rPosition, rExtent);
@@ -179,11 +179,11 @@ void Scene::update(std::chrono::milliseconds delta) {
 				lPosition = mLeftPaddle.getPosition();
 				rPosition = mRightPaddle.getPosition();
 				bPosition = mBall.getPosition();
-				lPosition += lVelocity * minTime;
-				rPosition += rVelocity * minTime;
-				bPosition += bVelocity * minTime;
+				lPosition += lVelocity * minTime * deltaMS;
+				rPosition += rVelocity * minTime * deltaMS;
+				bPosition += bVelocity * minTime * deltaMS;
 
-				deltaMS -= minTime;
+				deltaMS -= minTime * deltaMS;
 
 				if (pair.lhs == CandidateType::BALL) {
 					switch (pair.rhs) {
