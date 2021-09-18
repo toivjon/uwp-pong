@@ -189,13 +189,11 @@ public:
 		intersection.time = 0.f;
 
 		// Exit early whether boxes initially collide.
-		/*
 		if (a.collides(b)) {
 			intersection.collides = true;
 			intersection.time = 0.f;
 			return intersection;
 		}
-		*/
 
 		// We will use relative velocity where 'a' is treated as stationary.
 		const auto v = vb - va;

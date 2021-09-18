@@ -1,5 +1,6 @@
 #pragma once
 
+#include "aabb.h"
 #include "renderable.h"
 #include "vec2f.h"
 
@@ -13,6 +14,8 @@ public:
 	const Vec2f& getSize() const { return mSize; }
 	const Vec2f& getPosition() const { return mPosition; }
 	const Vec2f& getVelocity() const { return mVelocity; }
+	const Vec2f& getExtent() const { return mSize / 2.f; }
+	const AABB& getAABB() const { return AABB(mPosition, getExtent()); }
 private:
 	Vec2f mSize;
 	Vec2f mPosition;

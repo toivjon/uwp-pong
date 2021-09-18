@@ -32,202 +32,201 @@ Scene::Scene() {
 	mRightGoal.setPosition({ 1.5f + mBall.getSize().getX() * 2.f, .5f });
 }
 
+auto Scene::broadCD(const Vec2f& pL, const Vec2f& pR, const Vec2f& pB) const -> std::vector<Candidate> {
+	// Build bounding boxes for dynamic entities based on their current and ideal new positions.
+	auto bbL = mLeftPaddle.getAABB() + AABB(pL, mLeftPaddle.getExtent());
+	auto bbR = mRightPaddle.getAABB() + AABB(pR, mRightPaddle.getExtent());
+	auto bbB = mBall.getAABB() + AABB(pB, mBall.getExtent());
+
+	// Go through and pick all possible collision candidates.
+	std::vector<Candidate> candidates;
+	if (bbB.collides(bbL)) {
+		candidates.push_back({ CandidateType::BALL, CandidateType::LPADDLE });
+	} else if (bbB.collides(bbR)) {
+		candidates.push_back({ CandidateType::BALL, CandidateType::RPADDLE });
+	}
+	if (bbB.collides(mUpperWall.getAABB())) {
+		candidates.push_back({ CandidateType::BALL, CandidateType::TWALL });
+	} else if (bbB.collides(mLowerWall.getAABB())) {
+		candidates.push_back({ CandidateType::BALL, CandidateType::BWALL });
+	}
+	if (bbB.collides(mLeftGoal.getAABB())) {
+		candidates.push_back({ CandidateType::BALL, CandidateType::LGOAL });
+	} else if (bbB.collides(mRightGoal.getAABB())) {
+		candidates.push_back({ CandidateType::BALL, CandidateType::RGOAL });
+	}
+	if (bbR.collides(mUpperWall.getAABB())) {
+		candidates.push_back({ CandidateType::RPADDLE, CandidateType::TWALL });
+	} else if (bbR.collides(mLowerWall.getAABB())) {
+		candidates.push_back({ CandidateType::RPADDLE, CandidateType::BWALL });
+	}
+	if (bbL.collides(mUpperWall.getAABB())) {
+		candidates.push_back({ CandidateType::LPADDLE, CandidateType::TWALL });
+	} else if (bbL.collides(mLowerWall.getAABB())) {
+		candidates.push_back({ CandidateType::LPADDLE, CandidateType::BWALL });
+	}
+	return candidates;
+}
+
+auto Scene::narrowCD(const std::vector<Candidate>& candidates, const Vec2f& vL, const Vec2f& vR) const -> NarrowCDResult {
+	auto result = NarrowCDResult{};
+	result.hasHit = false;
+	result.hitTime = FLT_MAX;
+	for (auto& candidate : candidates) {
+		AABB::Intersection hit = {};
+		Rectangle lhs;
+		switch (candidate.lhs) {
+		case CandidateType::BALL:
+			switch (candidate.rhs) {
+			case CandidateType::LPADDLE:
+				hit = AABB::intersect(mBall.getAABB(), mLeftPaddle.getAABB(), mBall.getVelocity(), vL);
+				break;
+			case CandidateType::RPADDLE:
+				hit = AABB::intersect(mBall.getAABB(), mRightPaddle.getAABB(), mBall.getVelocity(), vR);
+				break;
+			case CandidateType::TWALL:
+				hit = AABB::intersect(mBall.getAABB(), mUpperWall.getAABB(), mBall.getVelocity(), { 0.f, 0.f });
+				break;
+			case CandidateType::BWALL:
+				hit = AABB::intersect(mBall.getAABB(), mLowerWall.getAABB(), mBall.getVelocity(), { 0.f, 0.f });
+				break;
+			case CandidateType::LGOAL:
+				hit = AABB::intersect(mBall.getAABB(), mLeftGoal.getAABB(), mBall.getVelocity(), { 0.f, 0.f });
+				break;
+			case CandidateType::RGOAL:
+				hit = AABB::intersect(mBall.getAABB(), mRightGoal.getAABB(), mBall.getVelocity(), { 0.f, 0.f });
+				break;
+			}
+			break;
+		case CandidateType::LPADDLE:
+			switch (candidate.rhs) {
+			case CandidateType::TWALL:
+				if (vL.getY() < 0.f) {
+					hit = AABB::intersect(mLeftPaddle.getAABB(), mUpperWall.getAABB(), vL, { 0.f, 0.f });
+				}
+				break;
+			case CandidateType::BWALL:
+				if (vL.getY() > 0.f) {
+					hit = AABB::intersect(mLeftPaddle.getAABB(), mLowerWall.getAABB(), vL, { 0.f, 0.f });
+				}
+				break;
+			}
+			break;
+		case CandidateType::RPADDLE:
+			switch (candidate.rhs) {
+			case CandidateType::TWALL:
+				if (vR.getY() < 0.f) {
+					hit = AABB::intersect(mRightPaddle.getAABB(), mUpperWall.getAABB(), vR, { 0.f,0.f });
+				}
+				break;
+			case CandidateType::BWALL:
+				if (vR.getY() > 0.f) {
+					hit = AABB::intersect(mRightPaddle.getAABB(), mLowerWall.getAABB(), vR, { 0.f,0.f });
+				}
+				break;
+			}
+			break;
+		}
+		if (hit.collides && hit.time < result.hitTime) {
+			result.hitTime = hit.time;
+			result.hasHit = true;
+			result.candidate = candidate;
+		}
+	}
+	return result;
+}
+
 void Scene::update(std::chrono::milliseconds delta) {
-	// The time (in milliseconds) we consume during the simulation step.
+	// Get the time (in milliseconds) we must consume during this simulation step and also lock
+	// the current velocities of the paddles to prevent input to change velocity on-the-fly.
 	auto deltaMS = static_cast<float>(delta.count());
-
-	// Pre-build AABBs for non-moving (static) entities.
-	const auto uwAABB = AABB(mUpperWall.getPosition(), mUpperWall.getSize() / 2.f);
-	const auto lwAABB = AABB(mLowerWall.getPosition(), mLowerWall.getSize() / 2.f);
-	const auto lgAABB = AABB(mLeftGoal.getPosition(), mLeftGoal.getSize() / 2.f);
-	const auto rgAABB = AABB(mRightGoal.getPosition(), mRightGoal.getSize() / 2.f);
-
-	// Gather velocities and prevent input to change paddle velocities on-the-fly.
-	Vec2f lVelocity = mLeftPaddle.getVelocity();
-	Vec2f rVelocity = mRightPaddle.getVelocity();
-	Vec2f bVelocity = mBall.getVelocity();
-
-	// Gather the current positions of each dynamic entity.
-	Vec2f lPosition = mLeftPaddle.getPosition();
-	Vec2f rPosition = mRightPaddle.getPosition();
-	Vec2f bPosition = mBall.getPosition();
+	Vec2f vL = mLeftPaddle.getVelocity();
+	Vec2f vR = mRightPaddle.getVelocity();
 
 	// TODO A temporary solution which should be handled in a more elegant way.
 	auto mustResetGame = false;
-
-	// TODO We could have these precalculated in the Rectangle class?
-	// Gather the extents of the dynamic entities.
-	const auto lExtent = mLeftPaddle.getSize() / 2.f;
-	const auto rExtent = mRightPaddle.getSize() / 2.f;
-	const auto bExtent = mBall.getSize() / 2.f;
-
-	auto hasCollision = false;
 	do {
-		// Build AABBs for dynamic entities based on their current positions.
-		const auto lAABB = AABB(lPosition, lExtent);
-		const auto rAABB = AABB(rPosition, rExtent);
-		const auto bAABB = AABB(bPosition, bExtent);
+		// Calculate the new ideal positions for the dynamic entities.
+		const auto pL = mLeftPaddle.getPosition() + vL * deltaMS;
+		const auto pR = mRightPaddle.getPosition() + vR * deltaMS;
+		const auto pB = mBall.getPosition() + mBall.getVelocity() * deltaMS;
 
-		// Calculate the new ideal positions for dynamic entities.
-		lPosition += lVelocity * deltaMS;
-		rPosition += rVelocity * deltaMS;
-		bPosition += bVelocity * deltaMS;
-
-		// Build AABBs for dynamic entities based on their current and ideal positions.
-		auto dlAABB = lAABB + AABB(lPosition, lExtent);
-		auto drAABB = rAABB + AABB(rPosition, rExtent);
-		auto dbAABB = bAABB + AABB(bPosition, bExtent);
-
-		enum class CandidateType { LPADDLE, RPADDLE, BALL, TWALL, BWALL, LGOAL, RGOAL };
-		struct Candidate {
-			CandidateType lhs;
-			CandidateType rhs;
-		};
-
-		// Use broad phase AABBs to collect simulation collision candidates.
-		std::vector<Candidate> candidates;
-		if (dbAABB.collides(dlAABB)) {
-			candidates.push_back({ CandidateType::BALL, CandidateType::LPADDLE });
-		} else if (dbAABB.collides(drAABB)) {
-			candidates.push_back({ CandidateType::BALL, CandidateType::RPADDLE });
-		}
-		if (dbAABB.collides(uwAABB)) {
-			candidates.push_back({ CandidateType::BALL, CandidateType::TWALL });
-		} else if (dbAABB.collides(lwAABB)) {
-			candidates.push_back({ CandidateType::BALL, CandidateType::BWALL });
-		}
-		if (dbAABB.collides(lgAABB)) {
-			candidates.push_back({ CandidateType::BALL, CandidateType::LGOAL });
-		} else if (dbAABB.collides(rgAABB)) {
-			candidates.push_back({ CandidateType::BALL, CandidateType::RGOAL });
-		}
-		if (drAABB.collides(uwAABB)) {
-			candidates.push_back({ CandidateType::RPADDLE, CandidateType::TWALL });
-		} else if (drAABB.collides(lwAABB)) {
-			candidates.push_back({ CandidateType::RPADDLE, CandidateType::BWALL });
-		}
-		if (dlAABB.collides(uwAABB)) {
-			candidates.push_back({ CandidateType::LPADDLE, CandidateType::TWALL });
-		} else if (dlAABB.collides(lwAABB)) {
-			candidates.push_back({ CandidateType::LPADDLE, CandidateType::BWALL });
+		// Find collision cadidates with the broad phase of the collision detection.
+		const auto collisionCandidates = broadCD(pL, pR, pB);
+		if (collisionCandidates.empty()) {
+			mLeftPaddle.setPosition(pL);
+			mRightPaddle.setPosition(pR);
+			mBall.setPosition(pB);
+			break;
 		}
 
-		// User narrow phase AABB sweeping to check real collisions and to detect soonest collision.
-		if (!candidates.empty()) {
-			static const Vec2f NoVelocity = { 0.f, 0.f };
-			auto hasHit = false;
-			auto minTime = FLT_MAX;
-			auto pair = Candidate{};
-			for (auto& candidate : candidates) {
-				AABB::Intersection hit = {};
-				Rectangle lhs;
-				switch (candidate.lhs) {
-				case CandidateType::BALL:
-					switch (candidate.rhs) {
-					case CandidateType::LPADDLE:
-						hit = AABB::intersect(bAABB, lAABB, bVelocity, lVelocity);
-						break;
-					case CandidateType::RPADDLE:
-						hit = AABB::intersect(bAABB, rAABB, bVelocity, rVelocity);
-						break;
-					case CandidateType::TWALL:
-						hit = AABB::intersect(bAABB, uwAABB, bVelocity, NoVelocity);
-						break;
-					case CandidateType::BWALL:
-						hit = AABB::intersect(bAABB, lwAABB, bVelocity, NoVelocity);
-						break;
-					case CandidateType::LGOAL:
-						hit = AABB::intersect(bAABB, lgAABB, bVelocity, NoVelocity);
-						break;
-					case CandidateType::RGOAL:
-						hit = AABB::intersect(bAABB, rgAABB, bVelocity, NoVelocity);
-						break;
-					}
-					break;
-				case CandidateType::LPADDLE:
-					switch (candidate.rhs) {
-					case CandidateType::TWALL:
-						hit = AABB::intersect(lAABB, uwAABB, lVelocity, NoVelocity);
-						break;
-					case CandidateType::BWALL:
-						hit = AABB::intersect(lAABB, lwAABB, lVelocity, NoVelocity);
-						break;
-					}
-					break;
-				case CandidateType::RPADDLE:
-					switch (candidate.rhs) {
-					case CandidateType::TWALL:
-						hit = AABB::intersect(rAABB, uwAABB, rVelocity, NoVelocity);
-						break;
-					case CandidateType::BWALL:
-						hit = AABB::intersect(rAABB, lwAABB, rVelocity, NoVelocity);
-						break;
-					}
-					break;
-				}
-				if (hit.collides && hit.time < minTime) {
-					minTime = std::max(hit.time, 0.f);
-					pair = candidate;
-					hasHit = true;
-				}
+		// Use the narrow phase of the collision detection to find out the first collision.
+		const auto collision = narrowCD(collisionCandidates, vL, vR);
+		if (!collision.hasHit) {
+			mLeftPaddle.setPosition(pL);
+			mRightPaddle.setPosition(pR);
+			mBall.setPosition(pB);
+			break;
+		}
+
+		// Consume simulation time and resolve collisions based on the first collision.
+		const auto collisionMS = collision.hitTime * deltaMS;
+		deltaMS -= collisionMS;
+
+		switch (collision.candidate.lhs) {
+		case CandidateType::BALL:
+			mLeftPaddle.setPosition(mLeftPaddle.getPosition() + vL * collisionMS);
+			mRightPaddle.setPosition(mRightPaddle.getPosition() + vR * collisionMS);
+			switch (collision.candidate.rhs) {
+			case CandidateType::BWALL:
+			case CandidateType::TWALL:
+				mBall.setPosition(mBall.getPosition() + mBall.getVelocity() * collisionMS);
+				mBall.setVelocity({ mBall.getVelocity().getX(), -mBall.getVelocity().getY() });
+				break;
+			case CandidateType::LGOAL:
+			case CandidateType::RGOAL:
+				// TODO implement scoring logics
+				mustResetGame = true;
+				break;
+			case CandidateType::LPADDLE:
+			case CandidateType::RPADDLE:
+				mBall.setPosition(mBall.getPosition() + mBall.getVelocity() * collisionMS);
+				mBall.setVelocity({ -mBall.getVelocity().getX(), mBall.getVelocity().getY() });
+				break;
 			}
-
-			// React to collision that was detected as the soonest collision.
-			if (hasHit) {
-				// TODO       apply movement to all items based on the alpha
-				minTime -= 0.0001f;
-				lPosition = mLeftPaddle.getPosition();
-				rPosition = mRightPaddle.getPosition();
-				bPosition = mBall.getPosition();
-				lPosition += lVelocity * minTime;
-				rPosition += rVelocity * minTime;
-				bPosition += bVelocity * minTime;
-
-				deltaMS -= minTime;
-
-				if (pair.lhs == CandidateType::BALL) {
-					switch (pair.rhs) {
-					case CandidateType::TWALL:
-						bVelocity.setY(-bVelocity.getY());
-						break;
-					case CandidateType::BWALL:
-						bVelocity.setY(-bVelocity.getY());
-						break;
-					case CandidateType::LPADDLE:
-						bVelocity.setX(-bVelocity.getX());
-						break;
-					case CandidateType::RPADDLE:
-						bVelocity.setX(-bVelocity.getX());
-						break;
-					case CandidateType::LGOAL:
-						// TODO Implement scoring logic.
-						mustResetGame = true;
-						break;
-					case CandidateType::RGOAL:
-						// TODO Implement scoring logic.
-						mustResetGame = true;
-						break;
-					}
-				} else if (pair.lhs == CandidateType::LPADDLE) {
-					lPosition.setY(lPosition.getY() + .0001f * -lVelocity.getY());
-					lVelocity.setY(0.f);
-				} else if (pair.lhs == CandidateType::RPADDLE) {
-					rPosition.setY(rPosition.getY() + .0001f * -rVelocity.getY());
-					rVelocity.setY(0.f);
-				}
+			break;
+		case CandidateType::LPADDLE:
+			mRightPaddle.setPosition(mRightPaddle.getPosition() + vR * collisionMS);
+			mBall.setPosition(mBall.getPosition() + mBall.getVelocity() * collisionMS);
+			switch (collision.candidate.rhs) {
+			case CandidateType::BWALL:
+				mLeftPaddle.setPosition({ mLeftPaddle.getPosition().getX(), mLowerWall.getAABB().getMinY() - mLeftPaddle.getExtent().getY() - .001f });
+				vL.setY(0.f);
+				break;
+			case CandidateType::TWALL:
+				mLeftPaddle.setPosition({ mLeftPaddle.getPosition().getX(), mUpperWall.getAABB().getMaxY() + mLeftPaddle.getExtent().getY() + .001f });
+				vL.setY(0.f);
+				break;
+			}
+			break;
+		case CandidateType::RPADDLE:
+			mLeftPaddle.setPosition(mLeftPaddle.getPosition() + vL * collisionMS);
+			mBall.setPosition(mBall.getPosition() + mBall.getVelocity() * collisionMS);
+			switch (collision.candidate.rhs) {
+			case CandidateType::BWALL:
+				mRightPaddle.setPosition({ mRightPaddle.getPosition().getX(), mLowerWall.getAABB().getMinY() - mRightPaddle.getExtent().getY() - .001f });
+				vR.setY(0.f);
+				break;
+			case CandidateType::TWALL:
+				mRightPaddle.setPosition({ mRightPaddle.getPosition().getX(), mUpperWall.getAABB().getMaxY() + mRightPaddle.getExtent().getY() + .001f });
+				vR.setY(0.f);
+				break;
 			}
 		}
-
-		// Apply new velocity directions to entities.
-		// mLeftPaddle.setVelocity(lVelocity);
-		// mRightPaddle.setVelocity(rVelocity);
-		mBall.setVelocity(bVelocity);
-
-		// Apply new positions to dynamic entities.
-		mLeftPaddle.setPosition(lPosition);
-		mRightPaddle.setPosition(rPosition);
-		mBall.setPosition(bPosition);
-	} while (hasCollision);
+		if (mustResetGame) {
+			break;
+		}
+	} while (true);
 
 	if (mustResetGame) {
 		resetGame();
