@@ -45,6 +45,11 @@ private:
 
 	auto narrowCD(const std::vector<Candidate>& candidates, const Vec2f& vL, const Vec2f& vR)const->NarrowCDResult;
 
+	struct GameContext {
+		int P1Score = 0;
+		int P2Score = 0;
+	};
+
 	Rectangle	mBall;
 	Rectangle	mUpperWall;
 	Rectangle	mLowerWall;
@@ -54,4 +59,6 @@ private:
 	Rectangle   mRightGoal;
 	Text		mLeftScore;
 	Text		mRightScore;
+
+	GameContext ctx;
 };

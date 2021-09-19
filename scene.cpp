@@ -43,10 +43,10 @@ Scene::Scene() {
 	mRightPaddle.setSize({ .025f, .15f });
 	mRightPaddle.setPosition({ .95f, CenterY });
 
-	mLeftScore.setText(L"0");
+	mLeftScore.setText(std::to_wstring(ctx.P1Score));
 	mLeftScore.setPosition({ .35f, .025f });
 
-	mRightScore.setText(L"0");
+	mRightScore.setText(std::to_wstring(ctx.P2Score));
 	mRightScore.setPosition({ .65f, .025f });
 
 	mLeftGoal.setSize({ 1.f, 1.f });
@@ -210,8 +210,15 @@ void Scene::update(std::chrono::milliseconds delta) {
 				mBall.setVelocity({ mBall.getVelocity().getX(), -mBall.getVelocity().getY() });
 				break;
 			case CandidateType::LGOAL:
+				ctx.P2Score = (ctx.P2Score + 1) % 10;
+				mRightScore.setText(std::to_wstring(ctx.P2Score));
+				// TODO implement end of game logics?
+				mustResetGame = true;
+				break;
 			case CandidateType::RGOAL:
-				// TODO implement scoring logics
+				ctx.P1Score = (ctx.P1Score + 1) % 10;
+				mLeftScore.setText(std::to_wstring(ctx.P1Score));
+				// TODO implement end of game logics?
 				mustResetGame = true;
 				break;
 			case CandidateType::LPADDLE:
