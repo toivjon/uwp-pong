@@ -2,8 +2,14 @@
 #include "aabb.h"
 #include "scene.h"
 
+// The center of the courtyard in y-axis.
+static const auto CenterY = .5f;
+
+// The center of the courtyard in x-axis.
+static const auto CenterX = .5f;
+
 // A constant presenting the center of the courtyard.
-static const auto Center = Vec2f{ .5f, .5f };
+static const auto Center = Vec2f{CenterX, CenterY};
 
 Scene::Scene() {
 	mBall.setSize({ .023f, .03f });
@@ -11,16 +17,16 @@ Scene::Scene() {
 	mBall.setVelocity(Vec2f({ 1.f, 1.f }).normalized() * .0005f);
 
 	mUpperWall.setSize({ 1.f, .03f });
-	mUpperWall.setPosition({ .5f, .015f });
+	mUpperWall.setPosition({ CenterX, .015f });
 
 	mLowerWall.setSize({ 1.f, .03f });
-	mLowerWall.setPosition({ .5f, .985f });
+	mLowerWall.setPosition({ CenterX, .985f });
 
 	mLeftPaddle.setSize({ .025f, .15f });
-	mLeftPaddle.setPosition({ .05f, .2f });
+	mLeftPaddle.setPosition({ .05f, CenterY });
 
 	mRightPaddle.setSize({ .025f, .15f });
-	mRightPaddle.setPosition({ .95f, .8f });
+	mRightPaddle.setPosition({ .95f, CenterY });
 
 	mLeftScore.setText(L"0");
 	mLeftScore.setPosition({ .35f, .025f });
@@ -29,10 +35,10 @@ Scene::Scene() {
 	mRightScore.setPosition({ .65f, .025f });
 
 	mLeftGoal.setSize({ 1.f, 1.f });
-	mLeftGoal.setPosition({ -.5f - mBall.getSize().getX() * 2.f, .5f });
+	mLeftGoal.setPosition({ -.5f - mBall.getSize().getX() * 2.f, CenterY });
 
 	mRightGoal.setSize({ 1.f, 1.f });
-	mRightGoal.setPosition({ 1.5f + mBall.getSize().getX() * 2.f, .5f });
+	mRightGoal.setPosition({ 1.5f + mBall.getSize().getX() * 2.f, CenterY });
 }
 
 auto Scene::broadCD(const Vec2f& pL, const Vec2f& pR, const Vec2f& pB) const -> std::vector<Candidate> {
@@ -252,8 +258,8 @@ void Scene::resetGame() {
 
 	Vec2f lPosition = mLeftPaddle.getPosition();
 	Vec2f rPosition = mRightPaddle.getPosition();
-	lPosition.setY(.5f);
-	rPosition.setY(.5f);
+	lPosition.setY(CenterY);
+	rPosition.setY(CenterY);
 	mLeftPaddle.setPosition(lPosition);
 	mRightPaddle.setPosition(rPosition);
 }
