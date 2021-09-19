@@ -13,7 +13,7 @@ static const auto CenterX = .5f;
 // A constant presenting the center of the courtyard.
 static const auto Center = Vec2f{ CenterX, CenterY };
 
-// Build a randomly selected direction vector from 45, 135, 225, 315 degrees.
+// Build a randomly selected direction vector from 45, 135, 225 and 315 degrees.
 inline auto NewRandomDirection() -> Vec2f {
 	static std::default_random_engine rng;
 	static std::uniform_int_distribution<std::mt19937::result_type> dist(1, 4);
