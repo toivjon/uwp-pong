@@ -2,9 +2,12 @@
 #include "aabb.h"
 #include "scene.h"
 
+// A constant presenting the center of the courtyard.
+static const auto Center = Vec2f{ .5f, .5f };
+
 Scene::Scene() {
 	mBall.setSize({ .023f, .03f });
-	mBall.setPosition({ .5f, .5f });
+	mBall.setPosition(Center);
 	mBall.setVelocity(Vec2f({ 1.f, 1.f }).normalized() * .0005f);
 
 	mUpperWall.setSize({ 1.f, .03f });
@@ -244,7 +247,7 @@ void Scene::render(const Renderer::Ptr& renderer) const {
 }
 
 void Scene::resetGame() {
-	mBall.setPosition({ .5f, .5f });
+	mBall.setPosition(Center);
 	mBall.setVelocity({ -mBall.getVelocity().getX(), -mBall.getVelocity().getY() });
 
 	Vec2f lPosition = mLeftPaddle.getPosition();
