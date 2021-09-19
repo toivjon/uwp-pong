@@ -40,7 +40,6 @@ inline auto NewRandomDirection() -> Vec2f {
 Scene::Scene() {
 	mBall.setSize({ .023f, .03f });
 	mBall.setPosition(Center);
-	mBall.setVelocity(Vec2f({ 1.f, 1.f }).normalized() * .0005f);
 
 	mUpperWall.setSize({ 1.f, .03f });
 	mUpperWall.setPosition({ CenterX, .015f });
@@ -65,6 +64,8 @@ Scene::Scene() {
 
 	mRightGoal.setSize({ 1.f, 1.f });
 	mRightGoal.setPosition({ 1.5f + mBall.getSize().getX() * 2.f, CenterY });
+
+	resetGame();
 }
 
 auto Scene::broadCD(const Vec2f& pL, const Vec2f& pR, const Vec2f& pB) const -> std::vector<Candidate> {
