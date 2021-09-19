@@ -2,6 +2,8 @@
 #include "aabb.h"
 #include "scene.h"
 
+#include <random>
+
 // The center of the courtyard in y-axis.
 static const auto CenterY = .5f;
 
@@ -9,7 +11,31 @@ static const auto CenterY = .5f;
 static const auto CenterX = .5f;
 
 // A constant presenting the center of the courtyard.
-static const auto Center = Vec2f{CenterX, CenterY};
+static const auto Center = Vec2f{ CenterX, CenterY };
+
+// Build a randomly selected direction vector from 45, 135, 225, 315 degrees.
+inline auto NewRandomDirection() -> Vec2f {
+	static std::default_random_engine rng;
+	static std::uniform_int_distribution<std::mt19937::result_type> dist(1, 4);
+	Vec2f direction;
+	switch (dist(rng)) {
+	case 1:
+		direction.set(1.f, 1.f);
+		break;
+	case 2:
+		direction.set(1.f, -1.f);
+		break;
+	case 3:
+		direction.set(-1.f, 1.f);
+		break;
+	case 4:
+		direction.set(-1.f, -1.f);
+		break;
+	default:
+		throw "Received an unsupported random direction RNG value!";
+	}
+	return direction.normalized();
+}
 
 Scene::Scene() {
 	mBall.setSize({ .023f, .03f });
@@ -254,12 +280,7 @@ void Scene::render(const Renderer::Ptr& renderer) const {
 
 void Scene::resetGame() {
 	mBall.setPosition(Center);
-	mBall.setVelocity({ -mBall.getVelocity().getX(), -mBall.getVelocity().getY() });
-
-	Vec2f lPosition = mLeftPaddle.getPosition();
-	Vec2f rPosition = mRightPaddle.getPosition();
-	lPosition.setY(CenterY);
-	rPosition.setY(CenterY);
-	mLeftPaddle.setPosition(lPosition);
-	mRightPaddle.setPosition(rPosition);
+	mBall.setVelocity(NewRandomDirection() * .0005f);
+	mLeftPaddle.setPositionY(CenterY);
+	mRightPaddle.setPositionY(CenterY);
 }

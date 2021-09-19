@@ -11,6 +11,7 @@ public:
 
 	void setX(float x) { data[0] = x; }
 	void setY(float y) { data[1] = y; }
+	void set(float x, float y) { data[0] = x; data[1] = y; }
 
 	auto getX() const -> float { return data[0]; }
 	auto getY() const -> float { return data[1]; }
