@@ -2,6 +2,7 @@
 #include "aabb.h"
 #include "scene.h"
 
+#include <array>
 #include <random>
 
 // The center of the courtyard in y-axis.
@@ -16,25 +17,14 @@ static const auto Center = Vec2f{ CenterX, CenterY };
 // Build a randomly selected direction vector from 45, 135, 225 and 315 degrees.
 inline auto NewRandomDirection() -> Vec2f {
 	static std::default_random_engine rng;
-	static std::uniform_int_distribution<std::mt19937::result_type> dist(1, 4);
-	Vec2f direction;
-	switch (dist(rng)) {
-	case 1:
-		direction.set(1.f, 1.f);
-		break;
-	case 2:
-		direction.set(1.f, -1.f);
-		break;
-	case 3:
-		direction.set(-1.f, 1.f);
-		break;
-	case 4:
-		direction.set(-1.f, -1.f);
-		break;
-	default:
-		throw "Received an unsupported random direction RNG value!";
-	}
-	return direction.normalized();
+	static std::uniform_int_distribution<std::mt19937::result_type> dist(0, 3);
+	static const std::array<Vec2f, 4> dirs = {
+		Vec2f(1.f, 1.f).normalized(),
+		Vec2f(1.f, -1.f).normalized(),
+		Vec2f(-1.f, 1.f).normalized(),
+		Vec2f(-1.f, -1.f).normalized()
+	};
+	return dirs[dist(rng)];
 }
 
 Scene::Scene() {
