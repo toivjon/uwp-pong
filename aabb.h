@@ -177,6 +177,7 @@ public:
 	struct Intersection {
 		bool  collides;
 		float time;
+		Vec2f normal;
 	};
 
 	auto getMin(int axis) const -> float { return center[axis] - extent[axis]; }
@@ -206,12 +207,32 @@ public:
 		for (auto i = 0; i < 2; i++) {
 			if (v[i] < .0f) {
 				if (b.getMax(i) < a.getMin(i)) return intersection;
-				if (a.getMax(i) < b.getMin(i)) tmin = std::max((a.getMax(i) - b.getMin(i)) / v[i], tmin);
+				if (a.getMax(i) < b.getMin(i)) {
+					auto d = (a.getMax(i) - b.getMin(i)) / v[i];
+					if (d > tmin) {
+						tmin = d;
+						if (i == 0) {
+							intersection.normal = Vec2f(sign(v.getX()), 0.f);
+						} else {
+							intersection.normal = Vec2f(0.f, sign(v.getY()));
+						}
+					}
+				}
 				if (b.getMax(i) > a.getMin(i)) tmax = std::min((a.getMin(i) - b.getMax(i)) / v[i], tmax);
 			}
 			if (v[i] > .0f) {
 				if (b.getMin(i) > a.getMax(i)) return intersection;
-				if (b.getMax(i) < a.getMin(i)) tmin = std::max((a.getMin(i) - b.getMax(i)) / v[i], tmin);
+				if (b.getMax(i) < a.getMin(i)) {
+					auto d = (a.getMin(i) - b.getMax(i)) / v[i];
+					if (d > tmin) {
+						tmin = d;
+						if (i == 0) {
+							intersection.normal = Vec2f(sign(v.getX()), 0.f);
+						} else {
+							intersection.normal = Vec2f(0.f, sign(v.getY()));
+						}
+					}
+				}
 				if (a.getMax(i) > b.getMin(i)) tmax = std::min((a.getMax(i) - b.getMin(i)) / v[i], tmax);
 			}
 			if (tmin > tmax) return intersection;

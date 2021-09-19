@@ -27,6 +27,16 @@ inline auto NewRandomDirection() -> Vec2f {
 	return dirs[dist(rng)];
 }
 
+// Calculate the dot product between the given vectors.
+inline auto Dot(const Vec2f& v1, const Vec2f& v2) -> float {
+	return v1.getX() * v2.getX() + v1.getY() * v2.getY();
+}
+
+// Reflect the incoming vector v with the given surface normal n.
+inline auto ReflectVector(const Vec2f& v, const Vec2f& n) -> Vec2f {
+	return v - n * 2.f * Dot(v, n);
+}
+
 Scene::Scene() {
 	mBall.setSize({ .023f, .03f });
 	mBall.setPosition(Center);
@@ -66,9 +76,9 @@ auto Scene::broadCD(const Vec2f& pL, const Vec2f& pR, const Vec2f& pB) const -> 
 
 	// Go through and pick all possible collision candidates.
 	std::vector<Candidate> candidates;
-	if (bbB.collides(bbL)) {
+	if (mBall.getVelocity().getX() < 0.f && bbB.collides(bbL)) {
 		candidates.push_back({ CandidateType::BALL, CandidateType::LPADDLE });
-	} else if (bbB.collides(bbR)) {
+	} else if (mBall.getVelocity().getX() > 0.f && bbB.collides(bbR)) {
 		candidates.push_back({ CandidateType::BALL, CandidateType::RPADDLE });
 	}
 	if (bbB.collides(mUpperWall.getAABB())) {
@@ -94,33 +104,35 @@ auto Scene::broadCD(const Vec2f& pL, const Vec2f& pR, const Vec2f& pB) const -> 
 	return candidates;
 }
 
-auto Scene::narrowCD(const std::vector<Candidate>& candidates, const Vec2f& vL, const Vec2f& vR) const -> NarrowCDResult {
+auto Scene::narrowCD(const std::vector<Candidate>& candidates, const Vec2f& vL, const Vec2f& vR, float deltaMS) const -> NarrowCDResult {
+	const auto& ballAABB = mBall.getAABB();
+
 	auto result = NarrowCDResult{};
 	result.hasHit = false;
 	result.hitTime = FLT_MAX;
 	for (auto& candidate : candidates) {
-		AABB::Intersection hit = {};
+		AABB::Sweep hit = {};
 		Rectangle lhs;
 		switch (candidate.lhs) {
 		case CandidateType::BALL:
 			switch (candidate.rhs) {
 			case CandidateType::LPADDLE:
-				hit = AABB::intersect(mBall.getAABB(), mLeftPaddle.getAABB(), mBall.getVelocity(), vL);
+				hit = AABB::sweep(ballAABB, mLeftPaddle.getAABB(), mBall.getVelocity() * deltaMS, vL);
 				break;
 			case CandidateType::RPADDLE:
-				hit = AABB::intersect(mBall.getAABB(), mRightPaddle.getAABB(), mBall.getVelocity(), vR);
+				hit = AABB::sweep(ballAABB, mRightPaddle.getAABB(), mBall.getVelocity() * deltaMS, vR);
 				break;
 			case CandidateType::TWALL:
-				hit = AABB::intersect(mBall.getAABB(), mUpperWall.getAABB(), mBall.getVelocity(), { 0.f, 0.f });
+				hit = AABB::sweep(ballAABB, mUpperWall.getAABB(), mBall.getVelocity() * deltaMS, { 0.f, 0.f });
 				break;
 			case CandidateType::BWALL:
-				hit = AABB::intersect(mBall.getAABB(), mLowerWall.getAABB(), mBall.getVelocity(), { 0.f, 0.f });
+				hit = AABB::sweep(ballAABB, mLowerWall.getAABB(), mBall.getVelocity() * deltaMS, { 0.f, 0.f });
 				break;
 			case CandidateType::LGOAL:
-				hit = AABB::intersect(mBall.getAABB(), mLeftGoal.getAABB(), mBall.getVelocity(), { 0.f, 0.f });
+				hit = AABB::sweep(ballAABB, mLeftGoal.getAABB(), mBall.getVelocity() * deltaMS, { 0.f, 0.f });
 				break;
 			case CandidateType::RGOAL:
-				hit = AABB::intersect(mBall.getAABB(), mRightGoal.getAABB(), mBall.getVelocity(), { 0.f, 0.f });
+				hit = AABB::sweep(ballAABB, mRightGoal.getAABB(), mBall.getVelocity() * deltaMS, { 0.f, 0.f });
 				break;
 			}
 			break;
@@ -128,12 +140,12 @@ auto Scene::narrowCD(const std::vector<Candidate>& candidates, const Vec2f& vL, 
 			switch (candidate.rhs) {
 			case CandidateType::TWALL:
 				if (vL.getY() < 0.f) {
-					hit = AABB::intersect(mLeftPaddle.getAABB(), mUpperWall.getAABB(), vL, { 0.f, 0.f });
+					hit = AABB::sweep(mLeftPaddle.getAABB(), mUpperWall.getAABB(), vL * deltaMS, { 0.f, 0.f });
 				}
 				break;
 			case CandidateType::BWALL:
 				if (vL.getY() > 0.f) {
-					hit = AABB::intersect(mLeftPaddle.getAABB(), mLowerWall.getAABB(), vL, { 0.f, 0.f });
+					hit = AABB::sweep(mLeftPaddle.getAABB(), mLowerWall.getAABB(), vL * deltaMS, { 0.f, 0.f });
 				}
 				break;
 			}
@@ -142,21 +154,22 @@ auto Scene::narrowCD(const std::vector<Candidate>& candidates, const Vec2f& vL, 
 			switch (candidate.rhs) {
 			case CandidateType::TWALL:
 				if (vR.getY() < 0.f) {
-					hit = AABB::intersect(mRightPaddle.getAABB(), mUpperWall.getAABB(), vR, { 0.f,0.f });
+					hit = AABB::sweep(mRightPaddle.getAABB(), mUpperWall.getAABB(), vR * deltaMS, { 0.f,0.f });
 				}
 				break;
 			case CandidateType::BWALL:
 				if (vR.getY() > 0.f) {
-					hit = AABB::intersect(mRightPaddle.getAABB(), mLowerWall.getAABB(), vR, { 0.f,0.f });
+					hit = AABB::sweep(mRightPaddle.getAABB(), mLowerWall.getAABB(), vR * deltaMS, { 0.f,0.f });
 				}
 				break;
 			}
 			break;
 		}
-		if (hit.collides && hit.time < result.hitTime) {
+		if (hit.hit.collided && hit.time < result.hitTime) {
 			result.hitTime = hit.time;
 			result.hasHit = true;
 			result.candidate = candidate;
+			result.normal = hit.hit.normal;
 		}
 	}
 	return result;
@@ -187,7 +200,7 @@ void Scene::update(std::chrono::milliseconds delta) {
 		}
 
 		// Use the narrow phase of the collision detection to find out the first collision.
-		const auto collision = narrowCD(collisionCandidates, vL, vR);
+		const auto collision = narrowCD(collisionCandidates, vL, vR, deltaMS);
 		if (!collision.hasHit) {
 			mLeftPaddle.setPosition(pL);
 			mRightPaddle.setPosition(pR);
@@ -207,7 +220,7 @@ void Scene::update(std::chrono::milliseconds delta) {
 			case CandidateType::BWALL:
 			case CandidateType::TWALL:
 				mBall.setPosition(mBall.getPosition() + mBall.getVelocity() * collisionMS);
-				mBall.setVelocity({ mBall.getVelocity().getX(), -mBall.getVelocity().getY() });
+				mBall.setVelocity(ReflectVector(mBall.getVelocity(), collision.normal));
 				break;
 			case CandidateType::LGOAL:
 				ctx.P2Score = (ctx.P2Score + 1) % 10;
@@ -222,9 +235,14 @@ void Scene::update(std::chrono::milliseconds delta) {
 				mustResetGame = true;
 				break;
 			case CandidateType::LPADDLE:
+				mBall.setPosition(mBall.getPosition() + mBall.getVelocity() * collisionMS);
+				mBall.setVelocity(ReflectVector(mBall.getVelocity(), collision.normal));
+				mBall.setPosition(mBall.getPosition() + mBall.getVelocity());
+				break;
 			case CandidateType::RPADDLE:
 				mBall.setPosition(mBall.getPosition() + mBall.getVelocity() * collisionMS);
-				mBall.setVelocity({ -mBall.getVelocity().getX(), mBall.getVelocity().getY() });
+				mBall.setVelocity(ReflectVector(mBall.getVelocity(), collision.normal));
+				mBall.setPosition(mBall.getPosition() + mBall.getVelocity());
 				break;
 			}
 			break;

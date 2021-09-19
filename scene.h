@@ -37,13 +37,14 @@ private:
 	};
 
 	struct NarrowCDResult {
-		bool hasHit;
-		float hitTime;
-		Candidate candidate;
+		bool		hasHit;
+		float		hitTime;
+		Candidate	candidate;
+		Vec2f		normal;
 	};
 	auto broadCD(const Vec2f& pL, const Vec2f& pR, const Vec2f& pB)const->std::vector<Candidate>;
 
-	auto narrowCD(const std::vector<Candidate>& candidates, const Vec2f& vL, const Vec2f& vR)const->NarrowCDResult;
+	auto narrowCD(const std::vector<Candidate>& candidates, const Vec2f& vL, const Vec2f& vR, float deltaMS)const->NarrowCDResult;
 
 	struct GameContext {
 		int P1Score = 0;
