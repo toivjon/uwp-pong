@@ -233,11 +233,11 @@ void Scene::update(std::chrono::milliseconds delta) {
 			mBall.setPosition(mBall.getPosition() + mBall.getVelocity() * collisionMS);
 			switch (collision.candidate.rhs) {
 			case CandidateType::BWALL:
-				mLeftPaddle.setPosition({ mLeftPaddle.getPosition().getX(), mLowerWall.getAABB().getMinY() - mLeftPaddle.getExtent().getY() - .001f });
+				mLeftPaddle.setPositionY(mLowerWall.getAABB().getMinY() - mLeftPaddle.getExtent().getY() - .001f);
 				vL.setY(0.f);
 				break;
 			case CandidateType::TWALL:
-				mLeftPaddle.setPosition({ mLeftPaddle.getPosition().getX(), mUpperWall.getAABB().getMaxY() + mLeftPaddle.getExtent().getY() + .001f });
+				mLeftPaddle.setPositionY(mUpperWall.getAABB().getMaxY() + mLeftPaddle.getExtent().getY() + .001f);
 				vL.setY(0.f);
 				break;
 			}
@@ -247,11 +247,11 @@ void Scene::update(std::chrono::milliseconds delta) {
 			mBall.setPosition(mBall.getPosition() + mBall.getVelocity() * collisionMS);
 			switch (collision.candidate.rhs) {
 			case CandidateType::BWALL:
-				mRightPaddle.setPosition({ mRightPaddle.getPosition().getX(), mLowerWall.getAABB().getMinY() - mRightPaddle.getExtent().getY() - .001f });
+				mRightPaddle.setPositionY(mLowerWall.getAABB().getMinY() - mRightPaddle.getExtent().getY() - .001f);
 				vR.setY(0.f);
 				break;
 			case CandidateType::TWALL:
-				mRightPaddle.setPosition({ mRightPaddle.getPosition().getX(), mUpperWall.getAABB().getMaxY() + mRightPaddle.getExtent().getY() + .001f });
+				mRightPaddle.setPositionY(mUpperWall.getAABB().getMaxY() + mRightPaddle.getExtent().getY() + .001f);
 				vR.setY(0.f);
 				break;
 			}
