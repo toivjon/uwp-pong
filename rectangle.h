@@ -10,6 +10,8 @@ public:
 	void setSize(const Vec2f& size) { mSize = size; }
 	void setPosition(const Vec2f& position) { mPosition = position; }
 	void setVelocity(const Vec2f& velocity) { mVelocity = velocity; }
+	void setPositionX(float x) { mPosition.setX(x); }
+	void setPositionY(float y) { mPosition.setY(y); }
 
 	const Vec2f& getSize() const { return mSize; }
 	const Vec2f& getPosition() const { return mPosition; }
