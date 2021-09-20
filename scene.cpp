@@ -17,6 +17,9 @@ static const auto Center = Vec2f{ CenterX, CenterY };
 // The amount of update ticks to wait before ball is launched after a game reset.
 static const auto CountdownTicks = 50;
 
+// The initial velocity of the ball.
+static const auto BallInitialVelocity = .0005f;
+
 // Build a randomly selected direction vector from 45, 135, 225 and 315 degrees.
 inline auto NewRandomDirection() -> Vec2f {
 	static std::default_random_engine rng;
@@ -310,7 +313,7 @@ void Scene::render(const Renderer::Ptr& renderer) const {
 
 void Scene::resetGame() {
 	mBall.setPosition(Center);
-	mBall.setVelocity(NewRandomDirection() * .0005f);
+	mBall.setVelocity(NewRandomDirection() * BallInitialVelocity);
 	mLeftPaddle.setPositionY(CenterY);
 	mRightPaddle.setPositionY(CenterY);
 	ctx.Countdown = CountdownTicks;
