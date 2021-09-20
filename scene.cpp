@@ -14,6 +14,9 @@ static const auto CenterX = .5f;
 // A constant presenting the center of the courtyard.
 static const auto Center = Vec2f{ CenterX, CenterY };
 
+// The amount of update ticks to wait before ball is launched after a game reset.
+static const auto CountdownTicks = 50;
+
 // Build a randomly selected direction vector from 45, 135, 225 and 315 degrees.
 inline auto NewRandomDirection() -> Vec2f {
 	static std::default_random_engine rng;
@@ -176,6 +179,12 @@ auto Scene::narrowCD(const std::vector<Candidate>& candidates, const Vec2f& vL, 
 }
 
 void Scene::update(std::chrono::milliseconds delta) {
+	// Skip the update whether the countdown is still in progress.
+	if (ctx.Countdown > 0) {
+		ctx.Countdown--;
+		return;
+	}
+
 	// Get the time (in milliseconds) we must consume during this simulation step and also lock
 	// the current velocities of the paddles to prevent input to change velocity on-the-fly.
 	auto deltaMS = static_cast<float>(delta.count());
@@ -299,4 +308,5 @@ void Scene::resetGame() {
 	mBall.setVelocity(NewRandomDirection() * .0005f);
 	mLeftPaddle.setPositionY(CenterY);
 	mRightPaddle.setPositionY(CenterY);
+	ctx.Countdown = CountdownTicks;
 }

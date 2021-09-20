@@ -47,8 +47,9 @@ private:
 	auto narrowCD(const std::vector<Candidate>& candidates, const Vec2f& vL, const Vec2f& vR, float deltaMS)const->NarrowCDResult;
 
 	struct GameContext {
-		int P1Score = 0;
-		int P2Score = 0;
+		int Countdown = 0;
+		int P1Score   = 0;
+		int P2Score   = 0;
 	};
 
 	Rectangle	mBall;
