@@ -243,14 +243,19 @@ void Scene::update(std::chrono::milliseconds delta) {
 				// TODO implement end of game logics?
 				mustResetGame = true;
 				break;
-			case CandidateType::LPADDLE:
+			case CandidateType::LPADDLE: {
 				mBall.setPosition(mBall.getPosition() + mBall.getVelocity() * collisionMS);
-				mBall.setVelocity(ReflectVector(mBall.getVelocity(), collision.normal));
+				auto v = ReflectVector(mBall.getVelocity(), collision.normal);
+				v = v.normalized() * (v.length() + 0.0001f);
+				mBall.setVelocity(v);
 				mBall.setPosition(mBall.getPosition() + mBall.getVelocity());
 				break;
+			}
 			case CandidateType::RPADDLE:
 				mBall.setPosition(mBall.getPosition() + mBall.getVelocity() * collisionMS);
-				mBall.setVelocity(ReflectVector(mBall.getVelocity(), collision.normal));
+				auto v = ReflectVector(mBall.getVelocity(), collision.normal);
+				v = v.normalized() * (v.length() + 0.0001f);
+				mBall.setVelocity(v);
 				mBall.setPosition(mBall.getPosition() + mBall.getVelocity());
 				break;
 			}
