@@ -20,6 +20,9 @@ static const auto CountdownTicks = 50;
 // The initial velocity of the ball.
 static const auto BallInitialVelocity = .0005f;
 
+// The amount of velocity to increment during each ball-paddle collision.
+static const auto BallVelocityIncrement = .0001f;
+
 // Build a randomly selected direction vector from 45, 135, 225 and 315 degrees.
 inline auto NewRandomDirection() -> Vec2f {
 	static std::default_random_engine rng;
@@ -249,7 +252,7 @@ void Scene::update(std::chrono::milliseconds delta) {
 			case CandidateType::LPADDLE: {
 				mBall.setPosition(mBall.getPosition() + mBall.getVelocity() * collisionMS);
 				auto v = ReflectVector(mBall.getVelocity(), collision.normal);
-				v = v.normalized() * (v.length() + 0.0001f);
+				v = v.normalized() * (v.length() + BallVelocityIncrement);
 				mBall.setVelocity(v);
 				mBall.setPosition(mBall.getPosition() + mBall.getVelocity());
 				break;
@@ -257,7 +260,7 @@ void Scene::update(std::chrono::milliseconds delta) {
 			case CandidateType::RPADDLE:
 				mBall.setPosition(mBall.getPosition() + mBall.getVelocity() * collisionMS);
 				auto v = ReflectVector(mBall.getVelocity(), collision.normal);
-				v = v.normalized() * (v.length() + 0.0001f);
+				v = v.normalized() * (v.length() + BallVelocityIncrement);
 				mBall.setVelocity(v);
 				mBall.setPosition(mBall.getPosition() + mBall.getVelocity());
 				break;
