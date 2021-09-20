@@ -254,7 +254,6 @@ void Scene::update(std::chrono::milliseconds delta) {
 				auto v = ReflectVector(mBall.getVelocity(), collision.normal);
 				v = v.normalized() * (v.length() + BallVelocityIncrement);
 				mBall.setVelocity(v);
-				mBall.setPosition(mBall.getPosition() + mBall.getVelocity());
 				break;
 			}
 			case CandidateType::RPADDLE:
@@ -262,7 +261,6 @@ void Scene::update(std::chrono::milliseconds delta) {
 				auto v = ReflectVector(mBall.getVelocity(), collision.normal);
 				v = v.normalized() * (v.length() + BallVelocityIncrement);
 				mBall.setVelocity(v);
-				mBall.setPosition(mBall.getPosition() + mBall.getVelocity());
 				break;
 			}
 			break;
