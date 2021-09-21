@@ -124,7 +124,6 @@ auto Scene::narrowCD(const std::vector<Candidate>& candidates, const Vec2f& vL, 
 	result.hitTime = FLT_MAX;
 	for (auto& candidate : candidates) {
 		AABB::Sweep hit = {};
-		Rectangle lhs;
 		switch (candidate.lhs) {
 		case CandidateType::BALL:
 			switch (candidate.rhs) {
