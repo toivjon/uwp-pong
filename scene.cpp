@@ -26,6 +26,9 @@ static const auto BallInitialVelocity = .0005f;
 // The amount of velocity to increment during each ball-paddle collision.
 static const auto BallVelocityIncrement = .0001f;
 
+// The amount of additional nudge to add to collision response to separate collded objects.
+static const auto Nudge = .001f;
+
 // Build a randomly selected direction vector from 45, 135, 225 and 315 degrees.
 inline auto NewRandomDirection() -> Vec2f {
 	static std::default_random_engine rng;
@@ -271,11 +274,11 @@ void Scene::update(std::chrono::milliseconds delta) {
 			mBall.setPosition(mBall.getPosition() + mBall.getVelocity() * collisionMS);
 			switch (collision.candidate.rhs) {
 			case CandidateType::BWALL:
-				mLeftPaddle.setPositionY(mLowerWall.getAABB().getMinY() - mLeftPaddle.getExtent().getY() - .001f);
+				mLeftPaddle.setPositionY(mLowerWall.getAABB().getMinY() - mLeftPaddle.getExtent().getY() - Nudge);
 				vL.setY(0.f);
 				break;
 			case CandidateType::TWALL:
-				mLeftPaddle.setPositionY(mUpperWall.getAABB().getMaxY() + mLeftPaddle.getExtent().getY() + .001f);
+				mLeftPaddle.setPositionY(mUpperWall.getAABB().getMaxY() + mLeftPaddle.getExtent().getY() + Nudge);
 				vL.setY(0.f);
 				break;
 			}
@@ -285,11 +288,11 @@ void Scene::update(std::chrono::milliseconds delta) {
 			mBall.setPosition(mBall.getPosition() + mBall.getVelocity() * collisionMS);
 			switch (collision.candidate.rhs) {
 			case CandidateType::BWALL:
-				mRightPaddle.setPositionY(mLowerWall.getAABB().getMinY() - mRightPaddle.getExtent().getY() - .001f);
+				mRightPaddle.setPositionY(mLowerWall.getAABB().getMinY() - mRightPaddle.getExtent().getY() - Nudge);
 				vR.setY(0.f);
 				break;
 			case CandidateType::TWALL:
-				mRightPaddle.setPositionY(mUpperWall.getAABB().getMaxY() + mRightPaddle.getExtent().getY() + .001f);
+				mRightPaddle.setPositionY(mUpperWall.getAABB().getMaxY() + mRightPaddle.getExtent().getY() + Nudge);
 				vR.setY(0.f);
 				break;
 			}
