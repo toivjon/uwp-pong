@@ -336,22 +336,22 @@ void Scene::onKeyDown(const KeyEventArgs& args) {
 void Scene::onKeyUp(const KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
-		if (getRightPaddleVelocity().getY() < 0.f) {
+		if (mRightPaddle.getVelocity().getY() < 0.f) {
 			setRightPaddleYVelocity(.0f);
 		}
 		break;
 	case VirtualKey::Down:
-		if (getRightPaddleVelocity().getY() > 0.f) {
+		if (mRightPaddle.getVelocity().getY() > 0.f) {
 			setRightPaddleYVelocity(.0f);
 		}
 		break;
 	case VirtualKey::W:
-		if (getLeftPaddleVelocity().getY() < 0.f) {
+		if (mLeftPaddle.getVelocity().getY() < 0.f) {
 			setLeftPaddleYVelocity(.0f);
 		}
 		break;
 	case VirtualKey::S:
-		if (getLeftPaddleVelocity().getY() > 0.f) {
+		if (mLeftPaddle.getVelocity().getY() > 0.f) {
 			setLeftPaddleYVelocity(.0f);
 		}
 		break;
