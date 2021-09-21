@@ -126,47 +126,12 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 
 	void OnKeyDown(const CoreWindow&, const KeyEventArgs& args) {
 		OutputDebugStringA("App::OnKeyDown\n");
-		constexpr auto PaddleVelocity = 0.001f;
-		switch (args.VirtualKey()) {
-		case VirtualKey::Up:
-			mScene->setRightPaddleYVelocity(-PaddleVelocity);
-			break;
-		case VirtualKey::Down:
-			mScene->setRightPaddleYVelocity(PaddleVelocity);
-			break;
-		case VirtualKey::W:
-			mScene->setLeftPaddleYVelocity(-PaddleVelocity);
-			break;
-		case VirtualKey::S:
-			mScene->setLeftPaddleYVelocity(PaddleVelocity);
-			break;
-		}
+		mScene->onKeyDown(args);
 	}
 
 	void OnKeyUp(const CoreWindow&, const KeyEventArgs& args) {
 		OutputDebugStringA("App::OnKeyUp\n");
-		switch (args.VirtualKey()) {
-		case VirtualKey::Up:
-			if (mScene->getRightPaddleVelocity().getY() < 0.f) {
-				mScene->setRightPaddleYVelocity(.0f);
-			}
-			break;
-		case VirtualKey::Down:
-			if (mScene->getRightPaddleVelocity().getY() > 0.f) {
-				mScene->setRightPaddleYVelocity(.0f);
-			}
-			break;
-		case VirtualKey::W:
-			if (mScene->getLeftPaddleVelocity().getY() < 0.f) {
-				mScene->setLeftPaddleYVelocity(.0f);
-			}
-			break;
-		case VirtualKey::S:
-			if (mScene->getLeftPaddleVelocity().getY() > 0.f) {
-				mScene->setLeftPaddleYVelocity(.0f);
-			}
-			break;
-		}
+		mScene->onKeyUp(args);
 	}
 
 private:

@@ -11,6 +11,8 @@ public:
 	Scene();
 	void update(std::chrono::milliseconds delta);
 	void render(const Renderer::Ptr& renderer) const final;
+	void onKeyDown(const winrt::Windows::UI::Core::KeyEventArgs& args);
+	void onKeyUp(const winrt::Windows::UI::Core::KeyEventArgs& args);
 
 	void setLeftPaddleYVelocity(float yVelocity) {
 		Vec2f velocity = mLeftPaddle.getVelocity();
