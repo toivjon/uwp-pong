@@ -319,16 +319,16 @@ void Scene::onKeyDown(const KeyEventArgs& args) {
 	constexpr auto PaddleVelocity = 0.001f;
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
-		setRightPaddleYVelocity(-PaddleVelocity);
+		mRightPaddle.setVelocityY(-PaddleVelocity);
 		break;
 	case VirtualKey::Down:
-		setRightPaddleYVelocity(PaddleVelocity);
+		mRightPaddle.setVelocityY(PaddleVelocity);
 		break;
 	case VirtualKey::W:
-		setLeftPaddleYVelocity(-PaddleVelocity);
+		mLeftPaddle.setVelocityY(-PaddleVelocity);
 		break;
 	case VirtualKey::S:
-		setLeftPaddleYVelocity(PaddleVelocity);
+		mLeftPaddle.setVelocityY(PaddleVelocity);
 		break;
 	}
 }
@@ -337,22 +337,22 @@ void Scene::onKeyUp(const KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
 		if (mRightPaddle.getVelocity().getY() < 0.f) {
-			setRightPaddleYVelocity(.0f);
+			mRightPaddle.setVelocityY(0.f);
 		}
 		break;
 	case VirtualKey::Down:
 		if (mRightPaddle.getVelocity().getY() > 0.f) {
-			setRightPaddleYVelocity(.0f);
+			mRightPaddle.setVelocityY(0.f);
 		}
 		break;
 	case VirtualKey::W:
 		if (mLeftPaddle.getVelocity().getY() < 0.f) {
-			setLeftPaddleYVelocity(.0f);
+			mLeftPaddle.setVelocityY(0.f);
 		}
 		break;
 	case VirtualKey::S:
 		if (mLeftPaddle.getVelocity().getY() > 0.f) {
-			setLeftPaddleYVelocity(.0f);
+			mLeftPaddle.setVelocityY(0.f);
 		}
 		break;
 	}

@@ -14,17 +14,6 @@ public:
 	void onKeyDown(const winrt::Windows::UI::Core::KeyEventArgs& args);
 	void onKeyUp(const winrt::Windows::UI::Core::KeyEventArgs& args);
 
-	void setLeftPaddleYVelocity(float yVelocity) {
-		Vec2f velocity = mLeftPaddle.getVelocity();
-		velocity.setY(yVelocity);
-		mLeftPaddle.setVelocity(velocity);
-	}
-
-	void setRightPaddleYVelocity(float yVelocity) {
-		Vec2f velocity = mRightPaddle.getVelocity();
-		velocity.setY(yVelocity);
-		mRightPaddle.setVelocity(velocity);
-	}
 private:
 	void resetGame();
 
