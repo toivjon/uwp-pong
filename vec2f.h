@@ -30,10 +30,6 @@ public:
 
 	auto length() const -> float { return sqrtf(data[0] * data[0] + data[1] * data[1]); }
 	auto normalized() const -> Vec2f { auto l = length();  return { data[0] / l, data[1] / l}; }
-
-	static auto lerp(const Vec2f& v0, const Vec2f& v1, float t) -> Vec2f {
-		return v0 + (v1 - v0) * t;
-	}
 private:
 	std::array<float, 2> data;
 };
