@@ -29,6 +29,9 @@ static const auto BallVelocityIncrement = .0001f;
 // The amount of additional nudge to add to collision response to separate collded objects.
 static const auto Nudge = .001f;
 
+// The velocity of player controlled paddles.
+static const auto PaddleVelocity = .001f;
+
 // Build a randomly selected direction vector from 45, 135, 225 and 315 degrees.
 inline auto NewRandomDirection() -> Vec2f {
 	static std::default_random_engine rng;
@@ -318,7 +321,6 @@ void Scene::render(const Renderer::Ptr& renderer) const {
 }
 
 void Scene::onKeyDown(const KeyEventArgs& args) {
-	constexpr auto PaddleVelocity = 0.001f;
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
 		mRightPaddle.setVelocityY(-PaddleVelocity);
