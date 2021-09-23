@@ -87,7 +87,6 @@
     <ClInclude Include="aabb.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="rectangle.h" />
-    <ClInclude Include="renderable.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="text.h" />

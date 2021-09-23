@@ -1,16 +1,16 @@
 #pragma once
 
 #include "rectangle.h"
-#include "renderable.h"
+#include "renderer.h"
 #include "text.h"
 
-class Scene : public Renderable {
+class Scene {
 public:
 	using Ptr = std::unique_ptr<Scene>;
 
 	Scene(const Renderer::Ptr& renderer);
 	void update(std::chrono::milliseconds delta);
-	void render(const Renderer::Ptr& renderer) const final;
+	void render(const Renderer::Ptr& renderer) const;
 	void onKeyDown(const winrt::Windows::UI::Core::KeyEventArgs& args);
 	void onKeyUp(const winrt::Windows::UI::Core::KeyEventArgs& args);
 

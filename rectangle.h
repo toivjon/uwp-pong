@@ -1,12 +1,12 @@
 #pragma once
 
 #include "aabb.h"
-#include "renderable.h"
+#include "renderer.h"
 #include "vec2f.h"
 
-class Rectangle : public Renderable {
+class Rectangle {
 public:
-	void render(const Renderer::Ptr& renderer) const final;
+	void render(const Renderer::Ptr& renderer) const;
 	void setSize(const Vec2f& size) { mSize = size; }
 	void setPosition(const Vec2f& position) { mPosition = position; }
 	void setVelocity(const Vec2f& velocity) { mVelocity = velocity; }
