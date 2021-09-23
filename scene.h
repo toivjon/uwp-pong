@@ -8,7 +8,7 @@ class Scene : public Renderable {
 public:
 	using Ptr = std::unique_ptr<Scene>;
 
-	Scene();
+	Scene(const Renderer::Ptr& renderer);
 	void update(std::chrono::milliseconds delta);
 	void render(const Renderer::Ptr& renderer) const final;
 	void onKeyDown(const winrt::Windows::UI::Core::KeyEventArgs& args);
@@ -39,6 +39,13 @@ private:
 		int P1Score   = 0;
 		int P2Score   = 0;
 	};
+
+	Rectangle   mDialogBackground;
+	Rectangle   mDialogForeground;
+	Text        mDialogTopic;
+	Text        mDialogDescription;
+	bool        mShowWelcomeDialog;
+	bool        mShowEndgameDialog;
 
 	Rectangle	mBall;
 	Rectangle	mUpperWall;

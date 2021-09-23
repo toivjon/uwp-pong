@@ -53,8 +53,9 @@ Renderer::Renderer() {
 
 	initDeviceResources();
 
-	// Build the white brush, which is the only brush we need.
-	CheckOK(m2DDeviceCtx->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), mBrush.put()));
+	// Build the white and black brush, which are the only brushes we need.
+	CheckOK(m2DDeviceCtx->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), mWhiteBrush.put()));
+	CheckOK(m2DDeviceCtx->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), mBlackBrush.put()));
 }
 
 void Renderer::initDeviceResources() {

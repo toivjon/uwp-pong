@@ -6,7 +6,7 @@ void Text::render(const Renderer::Ptr& renderer) const {
 	auto windowSize = renderer->getWindowSize();
 	auto windowOffset = renderer->getWindowOffset();
 	auto writeFactory = renderer->getDWriteFactory();
-	auto size = 0.27f * (windowSize.Height - windowOffset.Height * 2.f);
+	auto size = mFontSize * (windowSize.Height - windowOffset.Height * 2.f);
 	winrt::com_ptr<IDWriteTextFormat> format;
 	writeFactory->CreateTextFormat(
 		L"Calibri",
@@ -25,7 +25,7 @@ void Text::render(const Renderer::Ptr& renderer) const {
 		mText.c_str(),
 		UINT32(mText.size()),
 		format.get(),
-		{ x,y,x,y },
-		renderer->getBrush().get()
+		{ x-mText.length() * size * .5f,y,x + mText.length() * size * .5f,y},
+		mBrush.get()
 	);
 }

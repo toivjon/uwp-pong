@@ -55,33 +55,62 @@ inline auto ReflectVector(const Vec2f& v, const Vec2f& n) -> Vec2f {
 	return v - n * 2.f * Dot(v, n);
 }
 
-Scene::Scene() {
+Scene::Scene(const Renderer::Ptr& renderer) : mShowWelcomeDialog(true) {
+	mDialogBackground.setSize({ 0.75f, 0.80f });
+	mDialogBackground.setPosition({ Center });
+	mDialogBackground.setBrush(renderer->getWhiteBrush());
+
+	mDialogForeground.setSize({ 0.70f, 0.75f });
+	mDialogForeground.setPosition({ Center });
+	mDialogForeground.setBrush(renderer->getBlackBrush());
+
+	mDialogTopic.setBrush(renderer->getWhiteBrush());
+	mDialogTopic.setText(L"UWP Pong");
+	mDialogTopic.setPosition({ CenterX, .3f });
+	mDialogTopic.setFontSize(.1f);
+
+	mDialogDescription.setBrush(renderer->getWhiteBrush());
+	mDialogDescription.setText(L"Press any key or button to start a game");
+	mDialogDescription.setPosition({ CenterX, .6f });
+	mDialogDescription.setFontSize(.05f);
+
 	mBall.setSize({ .023f, .03f });
 	mBall.setPosition(Center);
+	mBall.setBrush(renderer->getWhiteBrush());
 
 	mUpperWall.setSize({ 1.f, .03f });
 	mUpperWall.setPosition({ CenterX, .015f });
+	mUpperWall.setBrush(renderer->getWhiteBrush());
 
 	mLowerWall.setSize({ 1.f, .03f });
 	mLowerWall.setPosition({ CenterX, .985f });
+	mLowerWall.setBrush(renderer->getWhiteBrush());
 
 	mLeftPaddle.setSize({ .025f, .15f });
 	mLeftPaddle.setPosition({ .05f, CenterY });
+	mLeftPaddle.setBrush(renderer->getWhiteBrush());
 
 	mRightPaddle.setSize({ .025f, .15f });
 	mRightPaddle.setPosition({ .95f, CenterY });
+	mRightPaddle.setBrush(renderer->getWhiteBrush());
 
 	mLeftScore.setText(std::to_wstring(ctx.P1Score));
 	mLeftScore.setPosition({ .35f, .025f });
+	mLeftScore.setBrush(renderer->getWhiteBrush());
+	mLeftScore.setFontSize(.27f);
 
 	mRightScore.setText(std::to_wstring(ctx.P2Score));
 	mRightScore.setPosition({ .65f, .025f });
+	mRightScore.setBrush(renderer->getWhiteBrush());
+	mRightScore.setFontSize(.27f);
 
 	mLeftGoal.setSize({ 1.f, 1.f });
 	mLeftGoal.setPosition({ -.5f - mBall.getSize().getX() * 2.f, CenterY });
+	mLeftGoal.setBrush(renderer->getWhiteBrush());
 
 	mRightGoal.setSize({ 1.f, 1.f });
 	mRightGoal.setPosition({ 1.5f + mBall.getSize().getX() * 2.f, CenterY });
+	mRightGoal.setBrush(renderer->getWhiteBrush());
 
 	resetGame();
 }
@@ -193,6 +222,11 @@ auto Scene::narrowCD(const std::vector<Candidate>& candidates, const Vec2f& vL, 
 }
 
 void Scene::update(std::chrono::milliseconds delta) {
+	// Skip the update whether the game has been just launched or the game has ended.
+	if (mShowWelcomeDialog || mShowEndgameDialog) {
+		return;
+	}
+
 	// Skip the update whether the countdown is still in progress.
 	if (ctx.Countdown > 0) {
 		ctx.Countdown--;
@@ -246,15 +280,23 @@ void Scene::update(std::chrono::milliseconds delta) {
 				mBall.setVelocity(ReflectVector(mBall.getVelocity(), collision.normal));
 				break;
 			case CandidateType::LGOAL:
-				ctx.P2Score = (ctx.P2Score + 1) % 10;
-				mRightScore.setText(std::to_wstring(ctx.P2Score));
-				// TODO implement end of game logics?
+				ctx.P2Score++;
+				if (ctx.P2Score >= 10) {
+					mShowEndgameDialog = true;
+					mDialogTopic.setText(L"Right player wins!");
+				} else {
+					mRightScore.setText(std::to_wstring(ctx.P2Score));
+				}
 				mustResetGame = true;
 				break;
 			case CandidateType::RGOAL:
-				ctx.P1Score = (ctx.P1Score + 1) % 10;
-				mLeftScore.setText(std::to_wstring(ctx.P1Score));
-				// TODO implement end of game logics?
+				ctx.P1Score++;
+				if (ctx.P1Score >= 10) {
+					mShowEndgameDialog = true;
+					mDialogTopic.setText(L"Left player wins!");
+				} else {
+					mLeftScore.setText(std::to_wstring(ctx.P1Score));
+				}
 				mustResetGame = true;
 				break;
 			case CandidateType::LPADDLE: {
@@ -311,6 +353,7 @@ void Scene::update(std::chrono::milliseconds delta) {
 }
 
 void Scene::render(const Renderer::Ptr& renderer) const {
+	// Base game entities are always shown.
 	mLeftScore.render(renderer);
 	mRightScore.render(renderer);
 	mBall.render(renderer);
@@ -318,22 +361,39 @@ void Scene::render(const Renderer::Ptr& renderer) const {
 	mLowerWall.render(renderer);
 	mLeftPaddle.render(renderer);
 	mRightPaddle.render(renderer);
+
+	// Dialog stuff is shown only on game enter or end game.
+	if (mShowWelcomeDialog || mShowEndgameDialog) {
+		mDialogBackground.render(renderer);
+		mDialogForeground.render(renderer);
+		mDialogTopic.render(renderer);
+		mDialogDescription.render(renderer);
+	}
 }
 
 void Scene::onKeyDown(const KeyEventArgs& args) {
-	switch (args.VirtualKey()) {
-	case VirtualKey::Up:
-		mRightPaddle.setVelocityY(-PaddleVelocity);
-		break;
-	case VirtualKey::Down:
-		mRightPaddle.setVelocityY(PaddleVelocity);
-		break;
-	case VirtualKey::W:
-		mLeftPaddle.setVelocityY(-PaddleVelocity);
-		break;
-	case VirtualKey::S:
-		mLeftPaddle.setVelocityY(PaddleVelocity);
-		break;
+	if (mShowEndgameDialog || mShowWelcomeDialog) {
+		mShowEndgameDialog = false;
+		mShowWelcomeDialog = false;
+		ctx.P1Score = 0;
+		ctx.P2Score = 0;
+		mRightScore.setText(std::to_wstring(ctx.P2Score));
+		mLeftScore.setText(std::to_wstring(ctx.P1Score));
+	} else {
+		switch (args.VirtualKey()) {
+		case VirtualKey::Up:
+			mRightPaddle.setVelocityY(-PaddleVelocity);
+			break;
+		case VirtualKey::Down:
+			mRightPaddle.setVelocityY(PaddleVelocity);
+			break;
+		case VirtualKey::W:
+			mLeftPaddle.setVelocityY(-PaddleVelocity);
+			break;
+		case VirtualKey::S:
+			mLeftPaddle.setVelocityY(PaddleVelocity);
+			break;
+		}
 	}
 }
 

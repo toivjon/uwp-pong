@@ -12,5 +12,5 @@ void Rectangle::render(const Renderer::Ptr& renderer) const {
 		windowOffset.Height + (-halfHeight + mPosition.getY()) * (windowSize.Height - windowOffset.Height * 2),
 		windowOffset.Width + (halfWidth + mPosition.getX()) * (windowSize.Width - windowOffset.Width * 2),
 		windowOffset.Height + (halfHeight + mPosition.getY()) * (windowSize.Height - windowOffset.Height * 2),
-	}, renderer->getBrush().get());
+	}, mBrush.get());
 }

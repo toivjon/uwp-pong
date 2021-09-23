@@ -31,7 +31,8 @@ public:
 	winrt::Windows::Foundation::Size getWindowSize() const { return mWindowSize; }
 	winrt::Windows::Foundation::Size getWindowOffset() const { return mWindowOffset; }
 	winrt::com_ptr<IDWriteFactory3> getDWriteFactory() const { return mDWriteFactory; }
-	winrt::com_ptr<ID2D1Brush> getBrush() const { return mBrush; }
+	winrt::com_ptr<ID2D1Brush> getWhiteBrush() const { return mWhiteBrush; }
+	winrt::com_ptr<ID2D1Brush> getBlackBrush() const { return mBlackBrush; }
 
 private:
 	winrt::agile_ref<ApplicationWindow>  mWindow;
@@ -46,5 +47,6 @@ private:
 	winrt::com_ptr<ID2D1DeviceContext5>  m2DDeviceCtx;
 	winrt::com_ptr<IDXGISwapChain1>		 mSwapChain;
 	winrt::com_ptr<IDWriteFactory3>		 mDWriteFactory;
-	winrt::com_ptr<ID2D1SolidColorBrush> mBrush;
+	winrt::com_ptr<ID2D1SolidColorBrush> mWhiteBrush;
+	winrt::com_ptr<ID2D1SolidColorBrush> mBlackBrush;
 };
