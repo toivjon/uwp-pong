@@ -8,11 +8,24 @@
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.UI.Core.h>
 
-#include "rectangle.h"
-#include "text.h"
+#include "vec2f.h"
 
 // An alias for the CoreWindow to avoid using the full name monster.
 using ApplicationWindow = winrt::Windows::UI::Core::CoreWindow;
+
+struct Rectangle {
+	Vec2f					   size;
+	Vec2f					   position;
+	Vec2f					   velocity;
+	winrt::com_ptr<ID2D1Brush> brush;
+};
+
+struct Text {
+	Vec2f					   position;
+	std::wstring			   text;
+	winrt::com_ptr<ID2D1Brush> brush;
+	float					   fontSize;
+};
 
 class Renderer {
 public:

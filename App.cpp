@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "renderer.h"
-#include "rectangle.h"
 #include "scene.h"
-#include "text.h"
 
 using namespace std::chrono;
 using namespace winrt;

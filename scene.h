@@ -1,8 +1,6 @@
 #pragma once
 
-#include "rectangle.h"
 #include "renderer.h"
-#include "text.h"
 
 class Scene {
 public:

@@ -86,10 +86,8 @@
   <ItemGroup>
     <ClInclude Include="aabb.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="rectangle.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="scene.h" />
-    <ClInclude Include="text.h" />
     <ClInclude Include="vec2f.h" />
   </ItemGroup>
   <ItemGroup>
