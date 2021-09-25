@@ -361,20 +361,20 @@ void Scene::update(std::chrono::milliseconds delta) {
 
 void Scene::render(const Renderer::Ptr& renderer) const {
 	// Base game entities are always shown.
-	mLeftScore.render(renderer);
-	mRightScore.render(renderer);
-	mBall.render(renderer);
-	mUpperWall.render(renderer);
-	mLowerWall.render(renderer);
-	mLeftPaddle.render(renderer);
-	mRightPaddle.render(renderer);
+	renderer->draw(mLeftScore);
+	renderer->draw(mRightScore);
+	renderer->draw(mBall);
+	renderer->draw(mUpperWall);
+	renderer->draw(mLowerWall);
+	renderer->draw(mLeftPaddle);
+	renderer->draw(mRightPaddle);
 
 	// Dialog stuff is shown only on game enter or end game.
 	if (mShowWelcomeDialog || mShowEndgameDialog) {
-		mDialogBackground.render(renderer);
-		mDialogForeground.render(renderer);
-		mDialogTopic.render(renderer);
-		mDialogDescription.render(renderer);
+		renderer->draw(mDialogBackground);
+		renderer->draw(mDialogForeground);
+		renderer->draw(mDialogTopic);
+		renderer->draw(mDialogDescription);
 	}
 }
 

@@ -8,6 +8,9 @@
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.UI.Core.h>
 
+#include "rectangle.h"
+#include "text.h"
+
 // An alias for the CoreWindow to avoid using the full name monster.
 using ApplicationWindow = winrt::Windows::UI::Core::CoreWindow;
 
@@ -33,6 +36,9 @@ public:
 	winrt::com_ptr<IDWriteFactory3> getDWriteFactory() const { return mDWriteFactory; }
 	winrt::com_ptr<ID2D1Brush> getWhiteBrush() const { return mWhiteBrush; }
 	winrt::com_ptr<ID2D1Brush> getBlackBrush() const { return mBlackBrush; }
+
+	void draw(const Rectangle& rect);
+	void draw(const Text& text);
 
 private:
 	winrt::agile_ref<ApplicationWindow>  mWindow;

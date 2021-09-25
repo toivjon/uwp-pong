@@ -258,3 +258,39 @@ void Renderer::present() {
 		CheckOK(presentResult);
 	}
 }
+
+void Renderer::draw(const Rectangle& rect) {
+	auto halfWidth = rect.size.getX() / 2;
+	auto halfHeight = rect.size.getY() / 2;
+	m2DDeviceCtx->FillRectangle({
+		mWindowOffset.Width + (-halfWidth + rect.position.getX()) * (mWindowSize.Width - mWindowOffset.Width * 2),
+		mWindowOffset.Height + (-halfHeight + rect.position.getY()) * (mWindowSize.Height - mWindowOffset.Height * 2),
+		mWindowOffset.Width + (halfWidth + rect.position.getX()) * (mWindowSize.Width - mWindowOffset.Width * 2),
+		mWindowOffset.Height + (halfHeight + rect.position.getY()) * (mWindowSize.Height - mWindowOffset.Height * 2),
+		}, rect.brush.get());
+}
+
+void Renderer::draw(const Text& text) {
+	auto size = text.fontSize * (mWindowSize.Height - mWindowOffset.Height * 2.f);
+	winrt::com_ptr<IDWriteTextFormat> format;
+	mDWriteFactory->CreateTextFormat(
+		L"Calibri",
+		nullptr,
+		DWRITE_FONT_WEIGHT_REGULAR,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		size,
+		L"en-us",
+		format.put()
+	);
+	format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	auto x = mWindowOffset.Width + text.position.getX() * (mWindowSize.Width - mWindowOffset.Width * 2);
+	auto y = mWindowOffset.Height + text.position.getY() * (mWindowSize.Height - mWindowOffset.Height * 2);
+	m2DDeviceCtx->DrawText(
+		text.text.c_str(),
+		UINT32(text.text.size()),
+		format.get(),
+		{ x - text.text.length() * size * .5f,y,x + text.text.length() * size * .5f,y },
+		text.brush.get()
+	);
+}

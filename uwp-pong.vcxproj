@@ -111,10 +111,8 @@
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="rectangle.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="scene.cpp" />
-    <ClCompile Include="text.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
