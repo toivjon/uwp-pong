@@ -6,29 +6,21 @@
 // A simple 2D axis aligned bounding box implementation.
 class AABB {
 public:
-	AABB(const Vec2f& center, const Vec2f& extent) { this->center = center;  this->extent = extent; }
+	AABB(const Vec2f& center, const Vec2f& extent) {
+		min = center - extent;
+		max = center + extent;
+	}
 
 	// TODO Perhaps we should use a bit more simpler solution for this?
 	auto operator+(const AABB& aabb) const -> AABB {
-		const auto xmin = std::min(getMinX(), aabb.getMinX());
-		const auto ymin = std::min(getMinY(), aabb.getMinY());
-		const auto xmax = std::max(getMaxX(), aabb.getMaxX());
-		const auto ymax = std::max(getMaxY(), aabb.getMaxY());
-		const auto e = Vec2f{ (xmax - xmin) / 2.f, (ymax - ymin) / 2.f };
-		const auto c = Vec2f{ xmin + extent.x, ymin + extent.y };
-		return AABB(c, e);
-	}
-
-	auto getMinX() const -> float { return center.x - extent.x; }
-	auto getMinY() const -> float { return center.y - extent.y; }
-
-	auto getMaxX() const -> float { return center.x + extent.x; }
-	auto getMaxY() const -> float { return center.y + extent.y; }
-
-	auto collides(const AABB& aabb) const -> bool {
-		const auto centerDiff = aabb.center - center;
-		const auto extentSum = aabb.extent + extent;
-		return fabsf(centerDiff.x) <= extentSum.x && fabsf(centerDiff.y) <= (extentSum.y);
+		const auto xmin = std::min(min.x, aabb.min.x);
+		const auto ymin = std::min(min.y, aabb.min.y);
+		const auto xmax = std::max(max.x, aabb.max.x);
+		const auto ymax = std::max(max.y, aabb.max.y);
+		auto result = AABB{ {},{} };
+		result.min = { xmin, ymin };
+		result.max = { xmax, ymax };
+		return result;
 	}
 
 	struct Intersection {
@@ -36,8 +28,12 @@ public:
 		float time;
 	};
 
-	auto getMin(int axis) const -> float { return center[axis] - extent[axis]; }
-	auto getMax(int axis) const -> float { return center[axis] + extent[axis]; }
+	auto getMin(int axis) const -> float { return axis == 0 ? min.x : min.y; }
+	auto getMax(int axis) const -> float { return axis == 0 ? max.x : max.y; }
+
+	static auto intersect(const AABB& a, const AABB& b) -> bool {
+		return a.min.x <= b.max.x && a.max.x >= b.min.x && a.min.y <= b.max.y && a.max.y >= b.min.y;
+	}
 
 	// This algorithm is derived from the RTCD book.
 	static auto intersect(const AABB& a, const AABB& b, const Vec2f& va, const Vec2f& vb) -> Intersection {
@@ -46,7 +42,7 @@ public:
 		intersection.time = 0.f;
 
 		// Exit early whether boxes initially collide.
-		if (a.collides(b)) {
+		if (intersect(a, b)) {
 			intersection.collides = true;
 			intersection.time = 0.f;
 			return intersection;
@@ -77,7 +73,7 @@ public:
 		intersection.time = tmin;
 		return intersection;
 	}
-private:
-	Vec2f center;
-	Vec2f extent;
+
+	Vec2f min;
+	Vec2f max;
 };

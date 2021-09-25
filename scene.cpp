@@ -116,33 +116,34 @@ auto Scene::broadCD(const Vec2f& pL, const Vec2f& pR, const Vec2f& pB) const -> 
 	// Build bounding boxes for dynamic entities based on their current and ideal new positions.
 	auto bbL = RectangleToAABB(mLeftPaddle) + AABB(pL, mLeftPaddle.size / 2.f);
 	auto bbR = RectangleToAABB(mRightPaddle) + AABB(pR, mRightPaddle.size / 2.f);
+	auto bbBX = RectangleToAABB(mBall);
 	auto bbB = RectangleToAABB(mBall) + AABB(pB, mBall.size / 2.f);
 
 	// Go through and pick all possible collision candidates.
 	std::vector<Candidate> candidates;
-	if (mBall.velocity.x < 0.f && bbB.collides(bbL)) {
+	if (mBall.velocity.x < 0.f && AABB::intersect(bbB, bbL)) {
 		candidates.push_back({ CandidateType::BALL, CandidateType::LPADDLE });
-	} else if (mBall.velocity.x > 0.f && bbB.collides(bbR)) {
+	} else if (mBall.velocity.x > 0.f && AABB::intersect(bbB, bbR)) {
 		candidates.push_back({ CandidateType::BALL, CandidateType::RPADDLE });
 	}
-	if (bbB.collides(RectangleToAABB(mUpperWall))) {
+	if (AABB::intersect(bbB, RectangleToAABB(mUpperWall))) {
 		candidates.push_back({ CandidateType::BALL, CandidateType::TWALL });
-	} else if (bbB.collides(RectangleToAABB(mLowerWall))) {
+	} else if (AABB::intersect(bbB, RectangleToAABB(mLowerWall))) {
 		candidates.push_back({ CandidateType::BALL, CandidateType::BWALL });
 	}
-	if (bbB.collides(RectangleToAABB(mLeftGoal))) {
+	if (AABB::intersect(bbB, RectangleToAABB(mLeftGoal))) {
 		candidates.push_back({ CandidateType::BALL, CandidateType::LGOAL });
-	} else if (bbB.collides(RectangleToAABB(mRightGoal))) {
+	} else if (AABB::intersect(bbB, RectangleToAABB(mRightGoal))) {
 		candidates.push_back({ CandidateType::BALL, CandidateType::RGOAL });
 	}
-	if (bbR.collides(RectangleToAABB(mUpperWall))) {
+	if (AABB::intersect(bbR, RectangleToAABB(mUpperWall))) {
 		candidates.push_back({ CandidateType::RPADDLE, CandidateType::TWALL });
-	} else if (bbR.collides(RectangleToAABB(mLowerWall))) {
+	} else if (AABB::intersect(bbR, RectangleToAABB(mLowerWall))) {
 		candidates.push_back({ CandidateType::RPADDLE, CandidateType::BWALL });
 	}
-	if (bbL.collides(RectangleToAABB(mUpperWall))) {
+	if (AABB::intersect(bbL, RectangleToAABB(mUpperWall))) {
 		candidates.push_back({ CandidateType::LPADDLE, CandidateType::TWALL });
-	} else if (bbL.collides(RectangleToAABB(mLowerWall))) {
+	} else if (AABB::intersect(bbL, RectangleToAABB(mLowerWall))) {
 		candidates.push_back({ CandidateType::LPADDLE, CandidateType::BWALL });
 	}
 	return candidates;
@@ -272,12 +273,12 @@ void Scene::update(std::chrono::milliseconds delta) {
 			switch (collision.candidate.rhs) {
 			case CandidateType::BWALL:
 				mBall.position += mBall.velocity * collisionMS;
-				mBall.position.y = RectangleToAABB(mLowerWall).getMinY() - (mBall.size / 2.f).y - Nudge;
+				mBall.position.y = RectangleToAABB(mLowerWall).min.y - (mBall.size / 2.f).y - Nudge;
 				mBall.velocity.y = -mBall.velocity.y;
 				break;
 			case CandidateType::TWALL:
 				mBall.position += mBall.velocity * collisionMS;
-				mBall.position.y = RectangleToAABB(mUpperWall).getMaxY() + (mBall.size / 2.f).y + Nudge;
+				mBall.position.y = RectangleToAABB(mUpperWall).max.y + (mBall.size / 2.f).y + Nudge;
 				mBall.velocity.y = -mBall.velocity.y;
 				break;
 			case CandidateType::LGOAL:
@@ -318,11 +319,11 @@ void Scene::update(std::chrono::milliseconds delta) {
 			mBall.position += mBall.velocity * collisionMS;
 			switch (collision.candidate.rhs) {
 			case CandidateType::BWALL:
-				mLeftPaddle.position.y = RectangleToAABB(mLowerWall).getMinY() - (mLeftPaddle.size / 2.f).y - Nudge;
+				mLeftPaddle.position.y = RectangleToAABB(mLowerWall).min.y - (mLeftPaddle.size / 2.f).y - Nudge;
 				vL.y = 0.f;
 				break;
 			case CandidateType::TWALL:
-				mLeftPaddle.position.y = RectangleToAABB(mUpperWall).getMaxY() + (mLeftPaddle.size / 2.f).y + Nudge;
+				mLeftPaddle.position.y = RectangleToAABB(mUpperWall).max.y + (mLeftPaddle.size / 2.f).y + Nudge;
 				vL.y = 0.f;
 				break;
 			}
@@ -332,11 +333,11 @@ void Scene::update(std::chrono::milliseconds delta) {
 			mBall.position += mBall.velocity * collisionMS;
 			switch (collision.candidate.rhs) {
 			case CandidateType::BWALL:
-				mRightPaddle.position.y = RectangleToAABB(mLowerWall).getMinY() - (mRightPaddle.size / 2.f).y - Nudge;
+				mRightPaddle.position.y = RectangleToAABB(mLowerWall).min.y - (mRightPaddle.size / 2.f).y - Nudge;
 				vR.y = 0.f;
 				break;
 			case CandidateType::TWALL:
-				mRightPaddle.position.y = RectangleToAABB(mUpperWall).getMaxY() + (mRightPaddle.size / 2.f).y + Nudge;
+				mRightPaddle.position.y = RectangleToAABB(mUpperWall).max.y + (mRightPaddle.size / 2.f).y + Nudge;
 				vR.y = 0.f;
 				break;
 			}
