@@ -3,10 +3,6 @@
 #include <algorithm>
 #include "vec2f.h"
 
-inline auto sign(float val) -> float {
-	return val >= 0.f ? 1.f : -1.f;
-}
-
 // A simple 2D axis aligned bounding box implementation.
 class AABB {
 public:
