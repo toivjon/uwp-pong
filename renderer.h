@@ -14,17 +14,17 @@
 using ApplicationWindow = winrt::Windows::UI::Core::CoreWindow;
 
 struct Rectangle {
-	Vec2f					   size;
-	Vec2f					   position;
-	Vec2f					   velocity;
+	Vec2f					   size = { 0.f,0.f };
+	Vec2f					   position = { 0.f,0.f };
+	Vec2f					   velocity = { 0.f, 0.f };
 	winrt::com_ptr<ID2D1Brush> brush;
 };
 
 struct Text {
-	Vec2f					   position;
+	Vec2f					   position = { 0.f,0.f };
 	std::wstring			   text;
 	winrt::com_ptr<ID2D1Brush> brush;
-	float					   fontSize;
+	float					   fontSize = 0.f;
 };
 
 class Renderer {
