@@ -260,13 +260,13 @@ void Renderer::present() {
 }
 
 void Renderer::draw(const Rectangle& rect) {
-	auto halfWidth = rect.size.getX() / 2;
-	auto halfHeight = rect.size.getY() / 2;
+	auto halfWidth = rect.size.x / 2;
+	auto halfHeight = rect.size.y / 2;
 	m2DDeviceCtx->FillRectangle({
-		mWindowOffset.Width + (-halfWidth + rect.position.getX()) * (mWindowSize.Width - mWindowOffset.Width * 2),
-		mWindowOffset.Height + (-halfHeight + rect.position.getY()) * (mWindowSize.Height - mWindowOffset.Height * 2),
-		mWindowOffset.Width + (halfWidth + rect.position.getX()) * (mWindowSize.Width - mWindowOffset.Width * 2),
-		mWindowOffset.Height + (halfHeight + rect.position.getY()) * (mWindowSize.Height - mWindowOffset.Height * 2),
+		mWindowOffset.Width + (-halfWidth + rect.position.x) * (mWindowSize.Width - mWindowOffset.Width * 2),
+		mWindowOffset.Height + (-halfHeight + rect.position.y) * (mWindowSize.Height - mWindowOffset.Height * 2),
+		mWindowOffset.Width + (halfWidth + rect.position.x) * (mWindowSize.Width - mWindowOffset.Width * 2),
+		mWindowOffset.Height + (halfHeight + rect.position.y) * (mWindowSize.Height - mWindowOffset.Height * 2),
 		}, rect.brush.get());
 }
 
@@ -284,8 +284,8 @@ void Renderer::draw(const Text& text) {
 		format.put()
 	);
 	format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
-	auto x = mWindowOffset.Width + text.position.getX() * (mWindowSize.Width - mWindowOffset.Width * 2);
-	auto y = mWindowOffset.Height + text.position.getY() * (mWindowSize.Height - mWindowOffset.Height * 2);
+	auto x = mWindowOffset.Width + text.position.x * (mWindowSize.Width - mWindowOffset.Width * 2);
+	auto y = mWindowOffset.Height + text.position.y * (mWindowSize.Height - mWindowOffset.Height * 2);
 	m2DDeviceCtx->DrawText(
 		text.text.c_str(),
 		UINT32(text.text.size()),

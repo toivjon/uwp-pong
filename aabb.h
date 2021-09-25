@@ -22,8 +22,8 @@ public:
 		const auto ymin = std::min(getMinY(), aabb.getMinY());
 		const auto xmax = std::max(getMaxX(), aabb.getMaxX());
 		const auto ymax = std::max(getMaxY(), aabb.getMaxY());
-		const auto e = Vec2f((xmax - xmin) / 2.f, (ymax - ymin) / 2.f);
-		const auto c = Vec2f(xmin + extent.getX(), ymin + extent.getY());
+		const auto e = Vec2f{ (xmax - xmin) / 2.f, (ymax - ymin) / 2.f };
+		const auto c = Vec2f{ xmin + extent.x, ymin + extent.y };
 		return AABB(c, e);
 	}
 
@@ -33,16 +33,16 @@ public:
 	auto getCenter() const -> const Vec2f& { return center; }
 	auto getExtent() const -> const Vec2f& { return extent; }
 
-	auto getMinX() const -> float { return center.getX() - extent.getX(); }
-	auto getMinY() const -> float { return center.getY() - extent.getY(); }
+	auto getMinX() const -> float { return center.x - extent.x; }
+	auto getMinY() const -> float { return center.y - extent.y; }
 
-	auto getMaxX() const -> float { return center.getX() + extent.getX(); }
-	auto getMaxY() const -> float { return center.getY() + extent.getY(); }
+	auto getMaxX() const -> float { return center.x + extent.x; }
+	auto getMaxY() const -> float { return center.y + extent.y; }
 
 	auto collides(const AABB& aabb) const -> bool {
 		const auto centerDiff = aabb.center - center;
 		const auto extentSum = aabb.extent + extent;
-		return fabsf(centerDiff.getX()) <= extentSum.getX() && fabsf(centerDiff.getY()) <= (extentSum.getY());
+		return fabsf(centerDiff.x) <= extentSum.x && fabsf(centerDiff.y) <= (extentSum.y);
 	}
 
 	struct Intersection {
@@ -83,9 +83,9 @@ public:
 					if (d > tmin) {
 						tmin = d;
 						if (i == 0) {
-							intersection.normal = Vec2f(sign(v.getX()), 0.f);
+							intersection.normal = Vec2f{ sign(v.x), 0.f };
 						} else {
-							intersection.normal = Vec2f(0.f, sign(v.getY()));
+							intersection.normal = Vec2f{ 0.f, sign(v.y) };
 						}
 					}
 				}
@@ -98,9 +98,9 @@ public:
 					if (d > tmin) {
 						tmin = d;
 						if (i == 0) {
-							intersection.normal = Vec2f(sign(v.getX()), 0.f);
+							intersection.normal = Vec2f{ sign(v.x), 0.f };
 						} else {
-							intersection.normal = Vec2f(0.f, sign(v.getY()));
+							intersection.normal = Vec2f{ 0.f, sign(v.y) };
 						}
 					}
 				}

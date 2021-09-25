@@ -37,17 +37,17 @@ inline auto NewRandomDirection() -> Vec2f {
 	static std::default_random_engine rng;
 	static std::uniform_int_distribution<std::mt19937::result_type> dist(0, 3);
 	static const std::array<Vec2f, 4> dirs = {
-		Vec2f(1.f, 1.f).normalized(),
-		Vec2f(1.f, -1.f).normalized(),
-		Vec2f(-1.f, 1.f).normalized(),
-		Vec2f(-1.f, -1.f).normalized()
+		Vec2f{1.f, 1.f}.normalized(),
+		Vec2f{1.f, -1.f}.normalized(),
+		Vec2f{-1.f, 1.f}.normalized(),
+		Vec2f{-1.f, -1.f}.normalized()
 	};
 	return dirs[dist(rng)];
 }
 
 // Calculate the dot product between the given vectors.
 inline auto Dot(const Vec2f& v1, const Vec2f& v2) -> float {
-	return v1.getX() * v2.getX() + v1.getY() * v2.getY();
+	return v1.x * v2.x + v1.y * v2.y;
 }
 
 // Reflect the incoming vector v with the given surface normal n.
@@ -94,10 +94,12 @@ Scene::Scene(const Renderer::Ptr& renderer) : mShowWelcomeDialog(true) {
 	mLeftPaddle.size = { .025f, .15f };
 	mLeftPaddle.position = { .05f, CenterY };
 	mLeftPaddle.brush = renderer->getWhiteBrush();
+	mLeftPaddle.velocity = { 0.f, 0.f };
 
 	mRightPaddle.size = { .025f, .15f };
 	mRightPaddle.position = { .95f, CenterY };
 	mRightPaddle.brush = renderer->getWhiteBrush();
+	mRightPaddle.velocity = { 0.f, 0.f };
 
 	mLeftScore.text = std::to_wstring(ctx.P1Score);
 	mLeftScore.position = { .35f, .025f };
@@ -110,11 +112,11 @@ Scene::Scene(const Renderer::Ptr& renderer) : mShowWelcomeDialog(true) {
 	mRightScore.fontSize = .27f;
 
 	mLeftGoal.size = { 1.f, 1.f };
-	mLeftGoal.position = { -.5f - mBall.size.getX() * 2.f, CenterY };
+	mLeftGoal.position = { -.5f - mBall.size.x * 2.f, CenterY };
 	mLeftGoal.brush = renderer->getWhiteBrush();
 
 	mRightGoal.size = { 1.f, 1.f };
-	mRightGoal.position = { 1.5f + mBall.size.getX() * 2.f, CenterY };
+	mRightGoal.position = { 1.5f + mBall.size.x * 2.f, CenterY };
 	mRightGoal.brush = renderer->getWhiteBrush();
 
 	resetGame();
@@ -128,9 +130,9 @@ auto Scene::broadCD(const Vec2f& pL, const Vec2f& pR, const Vec2f& pB) const -> 
 
 	// Go through and pick all possible collision candidates.
 	std::vector<Candidate> candidates;
-	if (mBall.velocity.getX() < 0.f && bbB.collides(bbL)) {
+	if (mBall.velocity.x < 0.f && bbB.collides(bbL)) {
 		candidates.push_back({ CandidateType::BALL, CandidateType::LPADDLE });
-	} else if (mBall.velocity.getX() > 0.f && bbB.collides(bbR)) {
+	} else if (mBall.velocity.x > 0.f && bbB.collides(bbR)) {
 		candidates.push_back({ CandidateType::BALL, CandidateType::RPADDLE });
 	}
 	if (bbB.collides(RectangleToAABB(mUpperWall))) {
@@ -190,12 +192,12 @@ auto Scene::narrowCD(const std::vector<Candidate>& candidates, const Vec2f& vL, 
 		case CandidateType::LPADDLE:
 			switch (candidate.rhs) {
 			case CandidateType::TWALL:
-				if (vL.getY() < 0.f) {
+				if (vL.y < 0.f) {
 					hit = AABB::intersect(RectangleToAABB(mLeftPaddle), RectangleToAABB(mUpperWall), vL * deltaMS, { 0.f, 0.f });
 				}
 				break;
 			case CandidateType::BWALL:
-				if (vL.getY() > 0.f) {
+				if (vL.y > 0.f) {
 					hit = AABB::intersect(RectangleToAABB(mLeftPaddle), RectangleToAABB(mLowerWall), vL * deltaMS, { 0.f, 0.f });
 				}
 				break;
@@ -204,12 +206,12 @@ auto Scene::narrowCD(const std::vector<Candidate>& candidates, const Vec2f& vL, 
 		case CandidateType::RPADDLE:
 			switch (candidate.rhs) {
 			case CandidateType::TWALL:
-				if (vR.getY() < 0.f) {
+				if (vR.y < 0.f) {
 					hit = AABB::intersect(RectangleToAABB(mRightPaddle), RectangleToAABB(mUpperWall), vR * deltaMS, { 0.f,0.f });
 				}
 				break;
 			case CandidateType::BWALL:
-				if (vR.getY() > 0.f) {
+				if (vR.y > 0.f) {
 					hit = AABB::intersect(RectangleToAABB(mRightPaddle), RectangleToAABB(mLowerWall), vR * deltaMS, { 0.f,0.f });
 				}
 				break;
@@ -280,13 +282,13 @@ void Scene::update(std::chrono::milliseconds delta) {
 			switch (collision.candidate.rhs) {
 			case CandidateType::BWALL:
 				mBall.position += mBall.velocity * collisionMS;
-				mBall.position.setY(RectangleToAABB(mLowerWall).getMinY() - (mBall.size / 2.f).getY() - Nudge);
-				mBall.velocity.setY(-mBall.velocity.getY());
+				mBall.position.y = RectangleToAABB(mLowerWall).getMinY() - (mBall.size / 2.f).y - Nudge;
+				mBall.velocity.y = -mBall.velocity.y;
 				break;
 			case CandidateType::TWALL:
 				mBall.position += mBall.velocity * collisionMS;
-				mBall.position.setY(RectangleToAABB(mUpperWall).getMaxY() + (mBall.size / 2.f).getY() + Nudge);
-				mBall.velocity.setY(-mBall.velocity.getY());
+				mBall.position.y = RectangleToAABB(mUpperWall).getMaxY() + (mBall.size / 2.f).y + Nudge;
+				mBall.velocity.y = -mBall.velocity.y;
 				break;
 			case CandidateType::LGOAL:
 				ctx.P2Score++;
@@ -310,13 +312,13 @@ void Scene::update(std::chrono::milliseconds delta) {
 				break;
 			case CandidateType::LPADDLE: {
 				mBall.position += mBall.velocity * collisionMS;
-				mBall.velocity.setX(-mBall.velocity.getX());
+				mBall.velocity.x = -mBall.velocity.x;
 				mBall.velocity = mBall.velocity.normalized() * (mBall.velocity.length() + BallVelocityIncrement);
 				break;
 			}
 			case CandidateType::RPADDLE:
 				mBall.position += mBall.velocity * collisionMS;
-				mBall.velocity.setX(-mBall.velocity.getX());
+				mBall.velocity.x = -mBall.velocity.x;
 				mBall.velocity = mBall.velocity.normalized() * (mBall.velocity.length() + BallVelocityIncrement);
 				break;
 			}
@@ -326,12 +328,12 @@ void Scene::update(std::chrono::milliseconds delta) {
 			mBall.position += mBall.velocity * collisionMS;
 			switch (collision.candidate.rhs) {
 			case CandidateType::BWALL:
-				mLeftPaddle.position.setY(RectangleToAABB(mLowerWall).getMinY() - (mLeftPaddle.size / 2.f).getY() - Nudge);
-				vL.setY(0.f);
+				mLeftPaddle.position.y = RectangleToAABB(mLowerWall).getMinY() - (mLeftPaddle.size / 2.f).y - Nudge;
+				vL.y = 0.f;
 				break;
 			case CandidateType::TWALL:
-				mLeftPaddle.position.setY(RectangleToAABB(mUpperWall).getMaxY() + (mLeftPaddle.size / 2.f).getY() + Nudge);
-				vL.setY(0.f);
+				mLeftPaddle.position.y = RectangleToAABB(mUpperWall).getMaxY() + (mLeftPaddle.size / 2.f).y + Nudge;
+				vL.y = 0.f;
 				break;
 			}
 			break;
@@ -340,12 +342,12 @@ void Scene::update(std::chrono::milliseconds delta) {
 			mBall.position += mBall.velocity * collisionMS;
 			switch (collision.candidate.rhs) {
 			case CandidateType::BWALL:
-				mRightPaddle.position.setY(RectangleToAABB(mLowerWall).getMinY() - (mRightPaddle.size / 2.f).getY() - Nudge);
-				vR.setY(0.f);
+				mRightPaddle.position.y = RectangleToAABB(mLowerWall).getMinY() - (mRightPaddle.size / 2.f).y - Nudge;
+				vR.y = 0.f;
 				break;
 			case CandidateType::TWALL:
-				mRightPaddle.position.setY(RectangleToAABB(mUpperWall).getMaxY() + (mRightPaddle.size / 2.f).getY() + Nudge);
-				vR.setY(0.f);
+				mRightPaddle.position.y = RectangleToAABB(mUpperWall).getMaxY() + (mRightPaddle.size / 2.f).y + Nudge;
+				vR.y = 0.f;
 				break;
 			}
 		}
@@ -390,16 +392,16 @@ void Scene::onKeyDown(const KeyEventArgs& args) {
 	} else {
 		switch (args.VirtualKey()) {
 		case VirtualKey::Up:
-			mRightPaddle.velocity.setY(-PaddleVelocity);
+			mRightPaddle.velocity.y = -PaddleVelocity;
 			break;
 		case VirtualKey::Down:
-			mRightPaddle.velocity.setY(PaddleVelocity);
+			mRightPaddle.velocity.y = PaddleVelocity;
 			break;
 		case VirtualKey::W:
-			mLeftPaddle.velocity.setY(-PaddleVelocity);
+			mLeftPaddle.velocity.y = -PaddleVelocity;
 			break;
 		case VirtualKey::S:
-			mLeftPaddle.velocity.setY(PaddleVelocity);
+			mLeftPaddle.velocity.y = PaddleVelocity;
 			break;
 		}
 	}
@@ -409,23 +411,23 @@ void Scene::onKeyDown(const KeyEventArgs& args) {
 void Scene::onKeyUp(const KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
-		if (mRightPaddle.velocity.getY() < 0.f) {
-			mRightPaddle.velocity.setY(0.f);
+		if (mRightPaddle.velocity.y < 0.f) {
+			mRightPaddle.velocity.y = 0.f;
 		}
 		break;
 	case VirtualKey::Down:
-		if (mRightPaddle.velocity.getY() > 0.f) {
-			mRightPaddle.velocity.setY(0.f);
+		if (mRightPaddle.velocity.y > 0.f) {
+			mRightPaddle.velocity.y = 0.f;
 		}
 		break;
 	case VirtualKey::W:
-		if (mLeftPaddle.velocity.getY() < 0.f) {
-			mLeftPaddle.velocity.setY(0.f);
+		if (mLeftPaddle.velocity.y < 0.f) {
+			mLeftPaddle.velocity.y = 0.f;
 		}
 		break;
 	case VirtualKey::S:
-		if (mLeftPaddle.velocity.getY() > 0.f) {
-			mLeftPaddle.velocity.setY(0.f);
+		if (mLeftPaddle.velocity.y > 0.f) {
+			mLeftPaddle.velocity.y = 0.f;
 		}
 		break;
 	}
@@ -434,7 +436,7 @@ void Scene::onKeyUp(const KeyEventArgs& args) {
 void Scene::resetGame() {
 	mBall.position = Center;
 	mBall.velocity = NewRandomDirection() * BallInitialVelocity;
-	mLeftPaddle.position.setY(CenterY);
-	mRightPaddle.position.setY(CenterY);
+	mLeftPaddle.position.y = CenterY;
+	mRightPaddle.position.y = CenterY;
 	ctx.Countdown = CountdownTicks;
 }
