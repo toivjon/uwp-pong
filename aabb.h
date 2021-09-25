@@ -71,22 +71,12 @@ public:
 		for (auto i = 0; i < 2; i++) {
 			if (v[i] < .0f) {
 				if (b.getMax(i) < a.getMin(i)) return intersection;
-				if (a.getMax(i) < b.getMin(i)) {
-					auto d = (a.getMax(i) - b.getMin(i)) / v[i];
-					if (d > tmin) {
-						tmin = d;
-					}
-				}
+				if (a.getMax(i) < b.getMin(i)) tmin = std::max((a.getMax(i) - b.getMin(i)) / v[i], tmin);
 				if (b.getMax(i) > a.getMin(i)) tmax = std::min((a.getMin(i) - b.getMax(i)) / v[i], tmax);
 			}
 			if (v[i] > .0f) {
 				if (b.getMin(i) > a.getMax(i)) return intersection;
-				if (b.getMax(i) < a.getMin(i)) {
-					auto d = (a.getMin(i) - b.getMax(i)) / v[i];
-					if (d > tmin) {
-						tmin = d;
-					}
-				}
+				if (b.getMax(i) < a.getMin(i)) tmin = std::max((a.getMin(i) - b.getMax(i)) / v[i], tmin);
 				if (a.getMax(i) > b.getMin(i)) tmax = std::min((a.getMax(i) - b.getMin(i)) / v[i], tmax);
 			}
 			if (tmin > tmax) return intersection;
