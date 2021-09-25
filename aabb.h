@@ -7,10 +7,6 @@ inline auto sign(float val) -> float {
 	return val >= 0.f ? 1.f : -1.f;
 }
 
-inline auto clamp(float val, float min, float max) -> float {
-	return val < min ? min : val > max ? max : val;
-}
-
 // A simple 2D axis aligned bounding box implementation.
 class AABB {
 public:
