@@ -28,7 +28,6 @@ private:
 		bool		hasHit;
 		float		hitTime;
 		Candidate	candidate;
-		Vec2f		normal;
 	};
 	auto broadCD(const Vec2f& pL, const Vec2f& pR, const Vec2f& pB)const->std::vector<Candidate>;
 

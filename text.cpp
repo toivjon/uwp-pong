@@ -6,7 +6,7 @@ void Text::render(const Renderer::Ptr& renderer) const {
 	auto windowSize = renderer->getWindowSize();
 	auto windowOffset = renderer->getWindowOffset();
 	auto writeFactory = renderer->getDWriteFactory();
-	auto size = mFontSize * (windowSize.Height - windowOffset.Height * 2.f);
+	auto size = fontSize * (windowSize.Height - windowOffset.Height * 2.f);
 	winrt::com_ptr<IDWriteTextFormat> format;
 	writeFactory->CreateTextFormat(
 		L"Calibri",
@@ -19,13 +19,13 @@ void Text::render(const Renderer::Ptr& renderer) const {
 		format.put()
 	);
 	format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
-	auto x = windowOffset.Width + mPosition.getX() * (windowSize.Width - windowOffset.Width * 2);
-	auto y = windowOffset.Height + mPosition.getY() * (windowSize.Height - windowOffset.Height * 2);
+	auto x = windowOffset.Width + position.getX() * (windowSize.Width - windowOffset.Width * 2);
+	auto y = windowOffset.Height + position.getY() * (windowSize.Height - windowOffset.Height * 2);
 	ctx->DrawText(
-		mText.c_str(),
-		UINT32(mText.size()),
+		text.c_str(),
+		UINT32(text.size()),
 		format.get(),
-		{ x-mText.length() * size * .5f,y,x + mText.length() * size * .5f,y},
-		mBrush.get()
+		{ x-text.length() * size * .5f,y,x + text.length() * size * .5f,y},
+		brush.get()
 	);
 }
