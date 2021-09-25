@@ -50,11 +50,6 @@ inline auto Dot(const Vec2f& v1, const Vec2f& v2) -> float {
 	return v1.x * v2.x + v1.y * v2.y;
 }
 
-// Reflect the incoming vector v with the given surface normal n.
-inline auto ReflectVector(const Vec2f& v, const Vec2f& n) -> Vec2f {
-	return v - n * 2.f * Dot(v, n);
-}
-
 // Build a new AABB from a Rectangle instance.
 inline auto RectangleToAABB(const Rectangle& rect) -> AABB {
 	return AABB(rect.position, rect.size / 2.f);
