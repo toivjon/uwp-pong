@@ -45,11 +45,6 @@ inline auto NewRandomDirection() -> Vec2f {
 	return dirs[dist(rng)];
 }
 
-// Calculate the dot product between the given vectors.
-inline auto Dot(const Vec2f& v1, const Vec2f& v2) -> float {
-	return v1.x * v2.x + v1.y * v2.y;
-}
-
 // Build a new AABB from a Rectangle instance.
 inline auto RectangleToAABB(const Rectangle& rect) -> AABB {
 	return AABB(rect.position, rect.size / 2.f);
