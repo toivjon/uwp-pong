@@ -27,12 +27,6 @@ public:
 		return AABB(c, e);
 	}
 
-	void setCenter(const Vec2f& c) { this->center = c; }
-	void setExtent(const Vec2f& e) { this->extent = e; }
-
-	auto getCenter() const -> const Vec2f& { return center; }
-	auto getExtent() const -> const Vec2f& { return extent; }
-
 	auto getMinX() const -> float { return center.x - extent.x; }
 	auto getMinY() const -> float { return center.y - extent.y; }
 
