@@ -1,5 +1,6 @@
 ﻿#pragma once
 #define NOMINMAX
+#include <concrt.h>
 #include <d2d1.h>
 #include <d2d1_3.h>
 #include <d3d11.h>
@@ -11,3 +12,4 @@
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Graphics.Display.h>
 #include <winrt/Windows.UI.Core.h>
+#include <winrt/Windows.Gaming.Input.h>

@@ -11,6 +11,7 @@ public:
 	void render(const Renderer::Ptr& renderer) const;
 	void onKeyDown(const winrt::Windows::UI::Core::KeyEventArgs& args);
 	void onKeyUp(const winrt::Windows::UI::Core::KeyEventArgs& args);
+	void onReadGamepad(int player, const winrt::Windows::Gaming::Input::GamepadReading& reading);
 
 private:
 	void resetGame();

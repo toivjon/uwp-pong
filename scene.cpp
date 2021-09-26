@@ -5,6 +5,7 @@
 #include <array>
 #include <random>
 
+using namespace winrt::Windows::Gaming::Input;
 using namespace winrt::Windows::UI::Core;
 using namespace winrt::Windows::System;
 
@@ -430,4 +431,30 @@ void Scene::resetGame() {
 	mLeftPaddle.position.y = CenterY;
 	mRightPaddle.position.y = CenterY;
 	ctx.Countdown = CountdownTicks;
+}
+
+void Scene::onReadGamepad(int player, const GamepadReading& reading) {
+	if (mShowWelcomeDialog || mShowEndgameDialog) {
+		if (reading.Buttons != GamepadButtons::None) {
+			mShowEndgameDialog = false;
+			mShowWelcomeDialog = false;
+			ctx.P1Score = 0;
+			ctx.P2Score = 0;
+			mRightScore.text = std::to_wstring(ctx.P2Score);
+			mLeftScore.text = std::to_wstring(ctx.P1Score);
+		}
+	} else {
+		static const auto DeadZone = .25f;
+		auto velocity = 0.f;
+		if (reading.LeftThumbstickY > DeadZone) {
+			velocity = -PaddleVelocity;
+		} else if (reading.LeftThumbstickY < -DeadZone) {
+			velocity = PaddleVelocity;
+		}
+		if (player == 0) {
+			mLeftPaddle.velocity.y = velocity;
+		} else {
+			mRightPaddle.velocity.y = velocity;
+		}
+	}
 }

@@ -5,11 +5,13 @@
 using namespace std::chrono;
 using namespace winrt;
 
+using namespace concurrency;
 using namespace Windows;
 using namespace Windows::ApplicationModel;
 using namespace Windows::ApplicationModel::Activation;
 using namespace Windows::ApplicationModel::Core;
 using namespace Windows::Foundation;
+using namespace Windows::Gaming::Input;
 using namespace Windows::Graphics::Display;
 using namespace Windows::System;
 using namespace Windows::UI;
@@ -28,13 +30,17 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 		CoreApplication::LeavingBackground({ this, &App::OnLeavingBackground });
 		CoreApplication::Suspending({ this, &App::OnSuspending });
 		CoreApplication::Resuming({ this, &App::OnResuming });
+		Gamepad::GamepadAdded({ this, &App::OnGamepadAdded });
+		Gamepad::GamepadRemoved({ this, &App::OnGamepadRemoved });
 		mRenderer = std::make_unique<Renderer>();
 		mScene = std::make_unique<Scene>(mRenderer);
 	}
 
 	void OnActivated(const CoreApplicationView&, const IActivatedEventArgs&) {
 		OutputDebugStringA("App::OnActivated\n");
-		CoreWindow::GetForCurrentThread().Activate();
+		auto window = CoreWindow::GetForCurrentThread();
+		window.Activate();
+		mRenderer->setWindow(window);
 	}
 
 	void OnEnteredBackground(const IInspectable&, const EnteredBackgroundEventArgs&) {
@@ -74,6 +80,9 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 			auto dispatcher = window.Dispatcher();
 			if (mForeground) {
 				dispatcher.ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
+
+				// Read gamepad readings.
+				ReadGamepads();
 
 				// Resolve the duration of the previous frame and ensure that we stay within reasonable limits.
 				const static auto MaxFrameTime = 250ms;
@@ -132,10 +141,40 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 		mScene->onKeyUp(args);
 	}
 
+	void OnGamepadAdded(const IInspectable&, const Gamepad& gamepad) {
+		OutputDebugStringA("App::OnGamepadAdded\n");
+		critical_section::scoped_lock lock{ mGamepadLock };
+		if (mGamepads.size() < 2) {
+			auto finder = std::find(begin(mGamepads), end(mGamepads), gamepad);
+			if (finder == end(mGamepads)) {
+				mGamepads.push_back(gamepad);
+			}
+		}
+	}
+
+	void OnGamepadRemoved(const IInspectable&, const Gamepad& gamepad) {
+		OutputDebugStringA("App::OnGamepadRemoved\n");
+		critical_section::scoped_lock lock{ mGamepadLock };
+		auto finder = std::find(begin(mGamepads), end(mGamepads), gamepad);
+		if (finder != end(mGamepads)) {
+			mGamepads.erase(finder);
+		}
+	}
+
+	void ReadGamepads() {
+		critical_section::scoped_lock lock{ mGamepadLock };
+		for (auto i = 0; i < mGamepads.size(); i++) {
+			auto reading = mGamepads[i].GetCurrentReading();
+			mScene->onReadGamepad(i, reading);
+		}
+	}
+
 private:
-	Renderer::Ptr mRenderer;
-	bool		  mForeground = false;
-	Scene::Ptr	  mScene;
+	Renderer::Ptr		 mRenderer;
+	bool				 mForeground = false;
+	Scene::Ptr			 mScene;
+	critical_section     mGamepadLock;
+	std::vector<Gamepad> mGamepads;
 };
 
 int __stdcall wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
