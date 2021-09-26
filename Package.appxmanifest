@@ -20,8 +20,8 @@
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="uwp_pong.App">
       <uap:VisualElements DisplayName="UWP Pong" Description="A simple UWP implementation of the classic Pong game."
         Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" BackgroundColor="transparent">
-        <uap:SplashScreen Image="Assets\SplashScreen.png" />
-        <uap:DefaultTile/>
+        <uap:SplashScreen Image="Assets\SplashScreen.png"  BackgroundColor="black"/>
+        <uap:DefaultTile ShortName="UWP Pong"/>
       </uap:VisualElements>
     </Application>
   </Applications>
