@@ -66,7 +66,7 @@ Scene::Scene(const Renderer::Ptr& renderer) : mShowWelcomeDialog(true) {
 	mDialogTopic.fontSize = .1f;
 
 	mDialogDescription.brush = renderer->getWhiteBrush();
-	mDialogDescription.text = L"Press any key or button to start a game";
+	mDialogDescription.text = L"Press X key or button to start a game";
 	mDialogDescription.position = { CenterX, .6f };
 	mDialogDescription.fontSize = .05f;
 
@@ -374,28 +374,29 @@ void Scene::render(const Renderer::Ptr& renderer) const {
 
 // TODO Just store the paddle movement request. Apply it in the update to prevent stutter.
 void Scene::onKeyDown(const KeyEventArgs& args) {
-	if (mShowEndgameDialog || mShowWelcomeDialog) {
-		mShowEndgameDialog = false;
-		mShowWelcomeDialog = false;
-		ctx.P1Score = 0;
-		ctx.P2Score = 0;
-		mRightScore.text = std::to_wstring(ctx.P2Score);
-		mLeftScore.text = std::to_wstring(ctx.P1Score);
-	} else {
-		switch (args.VirtualKey()) {
-		case VirtualKey::Up:
-			mRightPaddle.velocity.y = -PaddleVelocity;
-			break;
-		case VirtualKey::Down:
-			mRightPaddle.velocity.y = PaddleVelocity;
-			break;
-		case VirtualKey::W:
-			mLeftPaddle.velocity.y = -PaddleVelocity;
-			break;
-		case VirtualKey::S:
-			mLeftPaddle.velocity.y = PaddleVelocity;
-			break;
+	switch (args.VirtualKey()) {
+	case VirtualKey::Up:
+		mRightPaddle.velocity.y = -PaddleVelocity;
+		break;
+	case VirtualKey::Down:
+		mRightPaddle.velocity.y = PaddleVelocity;
+		break;
+	case VirtualKey::W:
+		mLeftPaddle.velocity.y = -PaddleVelocity;
+		break;
+	case VirtualKey::S:
+		mLeftPaddle.velocity.y = PaddleVelocity;
+		break;
+	case VirtualKey::X:
+		if (mShowEndgameDialog || mShowWelcomeDialog) {
+			mShowEndgameDialog = false;
+			mShowWelcomeDialog = false;
+			ctx.P1Score = 0;
+			ctx.P2Score = 0;
+			mRightScore.text = std::to_wstring(ctx.P2Score);
+			mLeftScore.text = std::to_wstring(ctx.P1Score);
 		}
+		break;
 	}
 }
 
@@ -435,7 +436,7 @@ void Scene::resetGame() {
 
 void Scene::onReadGamepad(int player, const GamepadReading& reading) {
 	if (mShowWelcomeDialog || mShowEndgameDialog) {
-		if (reading.Buttons != GamepadButtons::None) {
+		if (GamepadButtons::X == (reading.Buttons & GamepadButtons::X)) {
 			mShowEndgameDialog = false;
 			mShowWelcomeDialog = false;
 			ctx.P1Score = 0;
