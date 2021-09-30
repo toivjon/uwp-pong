@@ -172,10 +172,10 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 	}
 
 private:
-	Renderer::Ptr		 mRenderer;
-	Audio::Ptr			 mAudio;
-	bool				 mForeground = false;
-	Scene::Ptr			 mScene;
+	Renderer::Ptr        mRenderer;
+	Audio::Ptr           mAudio;
+	bool                 mForeground = false;
+	Scene::Ptr           mScene;
 	critical_section     mGamepadLock;
 	std::vector<Gamepad> mGamepads;
 };
