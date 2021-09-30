@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "audio.hpp"
 #include "renderer.h"
 #include "scene.h"
 
@@ -33,7 +34,8 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 		Gamepad::GamepadAdded({ this, &App::OnGamepadAdded });
 		Gamepad::GamepadRemoved({ this, &App::OnGamepadRemoved });
 		mRenderer = std::make_unique<Renderer>();
-		mScene = std::make_unique<Scene>(mRenderer);
+		mAudio = std::make_unique<Audio>();
+		mScene = std::make_unique<Scene>(mRenderer, mAudio);
 	}
 
 	void OnActivated(const CoreApplicationView&, const IActivatedEventArgs&) {
@@ -171,6 +173,7 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 
 private:
 	Renderer::Ptr		 mRenderer;
+	Audio::Ptr			 mAudio;
 	bool				 mForeground = false;
 	Scene::Ptr			 mScene;
 	critical_section     mGamepadLock;

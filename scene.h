@@ -1,12 +1,13 @@
 #pragma once
 
+#include "audio.hpp"
 #include "renderer.h"
 
 class Scene {
 public:
 	using Ptr = std::unique_ptr<Scene>;
 
-	Scene(const Renderer::Ptr& renderer);
+	Scene(const Renderer::Ptr& renderer, Audio::Ptr& audio);
 	void update(std::chrono::milliseconds delta);
 	void render(const Renderer::Ptr& renderer) const;
 	void onKeyDown(const winrt::Windows::UI::Core::KeyEventArgs& args);
@@ -56,4 +57,7 @@ private:
 	Text		mRightScore;
 
 	GameContext ctx;
+
+	Audio::Ptr&  mAudio;
+	Audio::Sound mBeepSound;
 };

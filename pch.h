@@ -7,9 +7,13 @@
 #include <dwrite_3.h>
 #include <dxgi1_3.h>
 #include <memory>
+#include <mfapi.h>
+#include <mfidl.h>
+#include <mfreadwrite.h>
 #include <windows.h>
 #include <winrt/Windows.ApplicationModel.Core.h>
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Graphics.Display.h>
 #include <winrt/Windows.UI.Core.h>
 #include <winrt/Windows.Gaming.Input.h>
+#include <xaudio2.h>

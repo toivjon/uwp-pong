@@ -51,7 +51,7 @@ inline auto RectangleToAABB(const Rectangle& rect) -> AABB {
 	return AABB(rect.position, rect.size / 2.f);
 }
 
-Scene::Scene(const Renderer::Ptr& renderer) : mShowWelcomeDialog(true) {
+Scene::Scene(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mShowWelcomeDialog(true), mAudio(audio) {
 	mDialogBackground.size = { 0.75f, 0.80f };
 	mDialogBackground.position = { Center };
 	mDialogBackground.brush = renderer->getWhiteBrush();
@@ -109,6 +109,8 @@ Scene::Scene(const Renderer::Ptr& renderer) : mShowWelcomeDialog(true) {
 	mRightGoal.size = { 1.f, 1.f };
 	mRightGoal.position = { 1.5f + mBall.size.x * 2.f, CenterY };
 	mRightGoal.brush = renderer->getWhiteBrush();
+
+	mBeepSound = mAudio->createSound(L"Assets/beep.wav");
 
 	resetGame();
 }
@@ -276,11 +278,13 @@ void Scene::update(std::chrono::milliseconds delta) {
 				mBall.position += mBall.velocity * collisionMS;
 				mBall.position.y = RectangleToAABB(mLowerWall).min.y - (mBall.size / 2.f).y - Nudge;
 				mBall.velocity.y = -mBall.velocity.y;
+				mAudio->playSound(mBeepSound);
 				break;
 			case CandidateType::TWALL:
 				mBall.position += mBall.velocity * collisionMS;
 				mBall.position.y = RectangleToAABB(mUpperWall).max.y + (mBall.size / 2.f).y + Nudge;
 				mBall.velocity.y = -mBall.velocity.y;
+				mAudio->playSound(mBeepSound);
 				break;
 			case CandidateType::LGOAL:
 				ctx.P2Score++;
@@ -306,12 +310,14 @@ void Scene::update(std::chrono::milliseconds delta) {
 				mBall.position += mBall.velocity * collisionMS;
 				mBall.velocity.x = -mBall.velocity.x;
 				mBall.velocity = mBall.velocity.normalized() * (mBall.velocity.length() + BallVelocityIncrement);
+				mAudio->playSound(mBeepSound);
 				break;
 			}
 			case CandidateType::RPADDLE:
 				mBall.position += mBall.velocity * collisionMS;
 				mBall.velocity.x = -mBall.velocity.x;
 				mBall.velocity = mBall.velocity.normalized() * (mBall.velocity.length() + BallVelocityIncrement);
+				mAudio->playSound(mBeepSound);
 				break;
 			}
 			break;
