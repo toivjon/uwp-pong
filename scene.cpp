@@ -394,11 +394,8 @@ void Scene::onKeyDown(const KeyEventArgs& args) {
 		break;
 	case VirtualKey::X:
 		if (mDialogVisible) {
+			clearScores();
 			mDialogVisible = false;
-			ctx.P1Score = 0;
-			ctx.P2Score = 0;
-			mRightScore.text = std::to_wstring(ctx.P2Score);
-			mLeftScore.text = std::to_wstring(ctx.P1Score);
 		}
 		break;
 	}
@@ -429,14 +426,19 @@ void Scene::resetGame() {
 	ctx.Countdown = CountdownTicks;
 }
 
+void Scene::clearScores() {
+	ctx.P1Score = 0;
+	ctx.P2Score = 0;
+	mRightScore.text = std::to_wstring(ctx.P2Score);
+	mLeftScore.text = std::to_wstring(ctx.P1Score);
+}
+
 void Scene::onReadGamepad(int player, const GamepadReading& reading) {
 	if (mDialogVisible) {
 		if (GamepadButtons::X == (reading.Buttons & GamepadButtons::X)) {
+			clearScores();
 			mDialogVisible = false;
-			ctx.P1Score = 0;
-			ctx.P2Score = 0;
-			mRightScore.text = std::to_wstring(ctx.P2Score);
-			mLeftScore.text = std::to_wstring(ctx.P1Score);
+			
 		}
 	} else {
 		static const auto DeadZone = .25f;

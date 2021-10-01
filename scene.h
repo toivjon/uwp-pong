@@ -16,6 +16,7 @@ public:
 
 private:
 	void resetGame();
+	void clearScores();
 
 	enum class CandidateType { LPADDLE, RPADDLE, BALL, TWALL, BWALL, LGOAL, RGOAL };
 
