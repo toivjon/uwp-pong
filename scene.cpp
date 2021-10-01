@@ -164,10 +164,14 @@ auto Scene::narrowCD(const std::vector<Candidate>& candidates, const Vec2f& vL, 
 		case CandidateType::BALL:
 			switch (candidate.rhs) {
 			case CandidateType::LPADDLE:
-				hit = AABB::intersect(ballAABB, RectangleToAABB(mLeftPaddle), mBall.velocity * deltaMS, vL);
+				if (mBall.velocity.x < 0.f) {
+					hit = AABB::intersect(ballAABB, RectangleToAABB(mLeftPaddle), mBall.velocity * deltaMS, vL);
+				}
 				break;
 			case CandidateType::RPADDLE:
-				hit = AABB::intersect(ballAABB, RectangleToAABB(mRightPaddle), mBall.velocity * deltaMS, vR);
+				if (mBall.velocity.x > 0.f) {
+					hit = AABB::intersect(ballAABB, RectangleToAABB(mRightPaddle), mBall.velocity * deltaMS, vR);
+				}
 				break;
 			case CandidateType::TWALL:
 				hit = AABB::intersect(ballAABB, RectangleToAABB(mUpperWall), mBall.velocity * deltaMS, { 0.f, 0.f });
