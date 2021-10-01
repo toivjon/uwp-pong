@@ -112,7 +112,7 @@ Scene::Scene(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(
 
 	mBeepSound = mAudio->createSound(L"Assets/beep.wav");
 
-	resetGame();
+	newGame();
 }
 
 auto Scene::broadCD(const Vec2f& pL, const Vec2f& pR, const Vec2f& pB) const -> std::vector<Candidate> {
@@ -240,7 +240,7 @@ void Scene::update(std::chrono::milliseconds delta) {
 	Vec2f vR = mRightPaddle.velocity;
 
 	// TODO A temporary solution which should be handled in a more elegant way.
-	auto mustResetGame = false;
+	auto mustStartGame = false;
 	do {
 		// Calculate the new ideal positions for the dynamic entities.
 		const auto pL = mLeftPaddle.position + vL * deltaMS;
@@ -294,7 +294,7 @@ void Scene::update(std::chrono::milliseconds delta) {
 				} else {
 					mRightScore.text = std::to_wstring(ctx.P2Score);
 				}
-				mustResetGame = true;
+				mustStartGame = true;
 				break;
 			case CandidateType::RGOAL:
 				ctx.P1Score++;
@@ -304,7 +304,7 @@ void Scene::update(std::chrono::milliseconds delta) {
 				} else {
 					mLeftScore.text = std::to_wstring(ctx.P1Score);
 				}
-				mustResetGame = true;
+				mustStartGame = true;
 				break;
 			case CandidateType::LPADDLE: {
 				mBall.position += mBall.velocity * collisionMS;
@@ -349,13 +349,13 @@ void Scene::update(std::chrono::milliseconds delta) {
 				break;
 			}
 		}
-		if (mustResetGame) {
+		if (mustStartGame) {
 			break;
 		}
 	} while (true);
 
-	if (mustResetGame) {
-		resetGame();
+	if (mustStartGame) {
+		newRound();
 	}
 }
 
@@ -394,7 +394,7 @@ void Scene::onKeyDown(const KeyEventArgs& args) {
 		break;
 	case VirtualKey::X:
 		if (mDialogVisible) {
-			clearScores();
+			newGame();
 			mDialogVisible = false;
 		}
 		break;
@@ -418,7 +418,7 @@ void Scene::onKeyUp(const KeyEventArgs& args) {
 	}
 }
 
-void Scene::resetGame() {
+void Scene::newRound() {
 	mBall.position = Center;
 	mBall.velocity = NewRandomDirection() * BallInitialVelocity;
 	mLeftPaddle.position.y = CenterY;
@@ -426,19 +426,19 @@ void Scene::resetGame() {
 	ctx.Countdown = CountdownTicks;
 }
 
-void Scene::clearScores() {
+void Scene::newGame() {
 	ctx.P1Score = 0;
 	ctx.P2Score = 0;
 	mRightScore.text = std::to_wstring(ctx.P2Score);
 	mLeftScore.text = std::to_wstring(ctx.P1Score);
+	newRound();
 }
 
 void Scene::onReadGamepad(int player, const GamepadReading& reading) {
 	if (mDialogVisible) {
 		if (GamepadButtons::X == (reading.Buttons & GamepadButtons::X)) {
-			clearScores();
+			newGame();
 			mDialogVisible = false;
-			
 		}
 	} else {
 		static const auto DeadZone = .25f;

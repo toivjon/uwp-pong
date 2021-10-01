@@ -15,7 +15,8 @@ public:
 	void onReadGamepad(int player, const winrt::Windows::Gaming::Input::GamepadReading& reading);
 
 private:
-	void resetGame();
+	void newRound();
+	void newGame();
 	void clearScores();
 
 	enum class CandidateType { LPADDLE, RPADDLE, BALL, TWALL, BWALL, LGOAL, RGOAL };
