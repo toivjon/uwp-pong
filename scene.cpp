@@ -410,24 +410,16 @@ void Scene::onKeyDown(const KeyEventArgs& args) {
 void Scene::onKeyUp(const KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
-		if (mRightPaddle.velocity.y < 0.f) {
-			mRightPaddle.velocity.y = 0.f;
-		}
+		mRightPaddle.velocity.y = std::max(0.f, mRightPaddle.velocity.y);
 		break;
 	case VirtualKey::Down:
-		if (mRightPaddle.velocity.y > 0.f) {
-			mRightPaddle.velocity.y = 0.f;
-		}
+		mRightPaddle.velocity.y = std::min(0.f, mRightPaddle.velocity.y);
 		break;
 	case VirtualKey::W:
-		if (mLeftPaddle.velocity.y < 0.f) {
-			mLeftPaddle.velocity.y = 0.f;
-		}
+		mLeftPaddle.velocity.y = std::max(0.f, mLeftPaddle.velocity.y);
 		break;
 	case VirtualKey::S:
-		if (mLeftPaddle.velocity.y > 0.f) {
-			mLeftPaddle.velocity.y = 0.f;
-		}
+		mLeftPaddle.velocity.y = std::min(0.f, mLeftPaddle.velocity.y);
 		break;
 	}
 }
