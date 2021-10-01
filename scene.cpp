@@ -124,9 +124,9 @@ auto Scene::broadCD(const Vec2f& pL, const Vec2f& pR, const Vec2f& pB) const -> 
 
 	// Go through and pick all possible collision candidates.
 	std::vector<Candidate> candidates;
-	if (mBall.velocity.x < 0.f && AABB::intersect(bbB, bbL)) {
+	if (AABB::intersect(bbB, bbL)) {
 		candidates.push_back({ CandidateType::BALL, CandidateType::LPADDLE });
-	} else if (mBall.velocity.x > 0.f && AABB::intersect(bbB, bbR)) {
+	} else if (AABB::intersect(bbB, bbR)) {
 		candidates.push_back({ CandidateType::BALL, CandidateType::RPADDLE });
 	}
 	if (AABB::intersect(bbB, RectangleToAABB(mUpperWall))) {
