@@ -43,8 +43,7 @@ private:
 	Rectangle   mDialogForeground;
 	Text        mDialogTopic;
 	Text        mDialogDescription;
-	bool        mShowWelcomeDialog;
-	bool        mShowEndgameDialog;
+	bool        mDialogVisible;
 
 	Rectangle	mBall;
 	Rectangle	mUpperWall;

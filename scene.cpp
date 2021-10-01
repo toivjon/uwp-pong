@@ -51,7 +51,7 @@ inline auto RectangleToAABB(const Rectangle& rect) -> AABB {
 	return AABB(rect.position, rect.size / 2.f);
 }
 
-Scene::Scene(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mShowWelcomeDialog(true), mAudio(audio) {
+Scene::Scene(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(true), mAudio(audio) {
 	mDialogBackground.size = { 0.75f, 0.80f };
 	mDialogBackground.position = { Center };
 	mDialogBackground.brush = renderer->getWhiteBrush();
@@ -223,7 +223,7 @@ auto Scene::narrowCD(const std::vector<Candidate>& candidates, const Vec2f& vL, 
 
 void Scene::update(std::chrono::milliseconds delta) {
 	// Skip the update whether the game has been just launched or the game has ended.
-	if (mShowWelcomeDialog || mShowEndgameDialog) {
+	if (mDialogVisible) {
 		return;
 	}
 
@@ -289,7 +289,7 @@ void Scene::update(std::chrono::milliseconds delta) {
 			case CandidateType::LGOAL:
 				ctx.P2Score++;
 				if (ctx.P2Score >= 10) {
-					mShowEndgameDialog = true;
+					mDialogVisible = true;
 					mDialogTopic.text = L"Right player wins!";
 				} else {
 					mRightScore.text = std::to_wstring(ctx.P2Score);
@@ -299,7 +299,7 @@ void Scene::update(std::chrono::milliseconds delta) {
 			case CandidateType::RGOAL:
 				ctx.P1Score++;
 				if (ctx.P1Score >= 10) {
-					mShowEndgameDialog = true;
+					mDialogVisible = true;
 					mDialogTopic.text = L"Left player wins!";
 				} else {
 					mLeftScore.text = std::to_wstring(ctx.P1Score);
@@ -370,7 +370,7 @@ void Scene::render(const Renderer::Ptr& renderer) const {
 	renderer->draw(mRightPaddle);
 
 	// Dialog stuff is shown only on game enter or end game.
-	if (mShowWelcomeDialog || mShowEndgameDialog) {
+	if (mDialogVisible) {
 		renderer->draw(mDialogBackground);
 		renderer->draw(mDialogForeground);
 		renderer->draw(mDialogTopic);
@@ -393,9 +393,8 @@ void Scene::onKeyDown(const KeyEventArgs& args) {
 		mLeftPaddle.velocity.y = PaddleVelocity;
 		break;
 	case VirtualKey::X:
-		if (mShowEndgameDialog || mShowWelcomeDialog) {
-			mShowEndgameDialog = false;
-			mShowWelcomeDialog = false;
+		if (mDialogVisible) {
+			mDialogVisible = false;
 			ctx.P1Score = 0;
 			ctx.P2Score = 0;
 			mRightScore.text = std::to_wstring(ctx.P2Score);
@@ -431,10 +430,9 @@ void Scene::resetGame() {
 }
 
 void Scene::onReadGamepad(int player, const GamepadReading& reading) {
-	if (mShowWelcomeDialog || mShowEndgameDialog) {
+	if (mDialogVisible) {
 		if (GamepadButtons::X == (reading.Buttons & GamepadButtons::X)) {
-			mShowEndgameDialog = false;
-			mShowWelcomeDialog = false;
+			mDialogVisible = false;
 			ctx.P1Score = 0;
 			ctx.P2Score = 0;
 			mRightScore.text = std::to_wstring(ctx.P2Score);
