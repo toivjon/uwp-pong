@@ -378,7 +378,6 @@ void Scene::render(const Renderer::Ptr& renderer) const {
 	}
 }
 
-// TODO Just store the paddle movement request. Apply it in the update to prevent stutter.
 void Scene::onKeyDown(const KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
@@ -406,7 +405,6 @@ void Scene::onKeyDown(const KeyEventArgs& args) {
 	}
 }
 
-// TODO Just store the paddle movement request. Apply it in the update to prevent stutter.
 void Scene::onKeyUp(const KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
