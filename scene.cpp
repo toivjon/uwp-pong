@@ -115,7 +115,7 @@ Scene::Scene(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(
 	newGame();
 }
 
-auto Scene::narrowCD(const Vec2f& vL, const Vec2f& vR, float deltaMS) const -> CollisionResult {
+auto Scene::detectCollision(const Vec2f& vL, const Vec2f& vR, float deltaMS) const -> CollisionResult {
 	const auto& ballAABB = RectangleToAABB(mBall);
 	auto result = CollisionResult{};
 	result.hasHit = false;
@@ -231,7 +231,7 @@ void Scene::update(std::chrono::milliseconds delta) {
 		const auto pB = mBall.position + mBall.velocity * deltaMS;
 
 		// Perform collision detection to find out the first collision.
-		const auto collision = narrowCD(vL, vR, deltaMS);
+		const auto collision = detectCollision(vL, vR, deltaMS);
 		if (!collision.hasHit) {
 			mLeftPaddle.position = pL;
 			mRightPaddle.position = pR;

@@ -31,7 +31,7 @@ private:
 		Candidate	candidate;
 	};
 
-	auto narrowCD(const Vec2f& vL, const Vec2f& vR, float deltaMS)const->CollisionResult;
+	auto detectCollision(const Vec2f& vL, const Vec2f& vR, float deltaMS)const->CollisionResult;
 
 	struct GameContext {
 		int Countdown = 0;
