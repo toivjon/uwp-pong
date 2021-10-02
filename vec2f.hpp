@@ -10,8 +10,6 @@ struct Vec2f final {
 
 	auto operator*(float s) const -> Vec2f { return { x * s, y * s }; }
 
-	auto operator[](int index) const -> float { return index == 0 ? x : y; }
-
 	float x;
 	float y;
 };

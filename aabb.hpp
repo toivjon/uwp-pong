@@ -15,9 +15,6 @@ public:
 		float time;
 	};
 
-	auto getMin(int axis) const -> float { return axis == 0 ? min.x : min.y; }
-	auto getMax(int axis) const -> float { return axis == 0 ? max.x : max.y; }
-
 	static auto intersect(const AABB& a, const AABB& b) -> bool {
 		return a.min.x <= b.max.x && a.max.x >= b.min.x && a.min.y <= b.max.y && a.max.y >= b.min.y;
 	}
@@ -42,20 +39,32 @@ public:
 		auto tmin = -FLT_MAX;
 		auto tmax = FLT_MAX;
 
-		// Find first and last contact from each axis.
-		for (auto i = 0; i < 2; i++) {
-			if (v[i] < .0f) {
-				if (b.getMax(i) < a.getMin(i)) return intersection;
-				if (a.getMax(i) < b.getMin(i)) tmin = std::max((a.getMax(i) - b.getMin(i)) / v[i], tmin);
-				if (b.getMax(i) > a.getMin(i)) tmax = std::min((a.getMin(i) - b.getMax(i)) / v[i], tmax);
-			}
-			if (v[i] > .0f) {
-				if (b.getMin(i) > a.getMax(i)) return intersection;
-				if (b.getMax(i) < a.getMin(i)) tmin = std::max((a.getMin(i) - b.getMax(i)) / v[i], tmin);
-				if (a.getMax(i) > b.getMin(i)) tmax = std::min((a.getMax(i) - b.getMin(i)) / v[i], tmax);
-			}
-			if (tmin > tmax) return intersection;
+		// Find the first and last contact from x-axis.
+		if (v.x < .0f) {
+			if (b.max.x < a.min.x) return intersection;
+			if (a.max.x < b.min.x) tmin = std::max((a.max.x - b.min.x) / v.x, tmin);
+			if (b.max.x > a.min.x) tmax = std::min((a.min.x - b.max.x) / v.x, tmax);
 		}
+		if (v.x > .0f) {
+			if (b.min.x > a.max.x) return intersection;
+			if (b.max.x < a.min.x) tmin = std::max((a.min.x - b.max.x) / v.x, tmin);
+			if (a.max.x > b.min.x) tmax = std::min((a.max.x - b.min.x) / v.x, tmax);
+		}
+		if (tmin > tmax) return intersection;
+
+		// Find the first and last contact from y-axis.
+		if (v.y < .0f) {
+			if (b.max.y < a.min.y) return intersection;
+			if (a.max.y < b.min.y) tmin = std::max((a.max.y - b.min.y) / v.y, tmin);
+			if (b.max.y > a.min.y) tmax = std::min((a.min.y - b.max.y) / v.y, tmax);
+		}
+		if (v.y > .0f) {
+			if (b.min.y > a.max.y) return intersection;
+			if (b.max.y < a.min.y) tmin = std::max((a.min.y - b.max.y) / v.y, tmin);
+			if (a.max.y > b.min.y) tmax = std::min((a.max.y - b.min.y) / v.y, tmax);
+		}
+		if (tmin > tmax) return intersection;
+
 		intersection.collides = (tmin >= 0.f && tmin <= 1.f);
 		intersection.time = tmin;
 		return intersection;
