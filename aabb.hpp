@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algorithm>
 #include "vec2f.hpp"
 
 // A simple 2D axis aligned bounding box implementation.
