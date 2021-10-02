@@ -165,41 +165,33 @@ auto Scene::detectCollision(const Vec2f& vL, const Vec2f& vR, float deltaMS) con
 		result.candidate.lhs = CandidateType::BALL;
 		result.candidate.rhs = CandidateType::RGOAL;
 	}
-	if (vL.y < 0.f) {
-		hit = AABB::intersect(RectangleToAABB(mLeftPaddle), RectangleToAABB(mUpperWall), vL * deltaMS, { 0.f, 0.f });
-		if (hit.collides && hit.time < result.hitTime) {
-			result.hitTime = hit.time;
-			result.hasHit = true;
-			result.candidate.lhs = CandidateType::LPADDLE;
-			result.candidate.rhs = CandidateType::TWALL;
-		}
+	hit = AABB::intersect(RectangleToAABB(mLeftPaddle), RectangleToAABB(mUpperWall), vL * deltaMS, { 0.f, 0.f });
+	if (hit.collides && hit.time < result.hitTime) {
+		result.hitTime = hit.time;
+		result.hasHit = true;
+		result.candidate.lhs = CandidateType::LPADDLE;
+		result.candidate.rhs = CandidateType::TWALL;
 	}
-	if (vL.y > 0.f) {
-		hit = AABB::intersect(RectangleToAABB(mLeftPaddle), RectangleToAABB(mLowerWall), vL * deltaMS, { 0.f, 0.f });
-		if (hit.collides && hit.time < result.hitTime) {
-			result.hitTime = hit.time;
-			result.hasHit = true;
-			result.candidate.lhs = CandidateType::LPADDLE;
-			result.candidate.rhs = CandidateType::BWALL;
-		}
+	hit = AABB::intersect(RectangleToAABB(mLeftPaddle), RectangleToAABB(mLowerWall), vL * deltaMS, { 0.f, 0.f });
+	if (hit.collides && hit.time < result.hitTime) {
+		result.hitTime = hit.time;
+		result.hasHit = true;
+		result.candidate.lhs = CandidateType::LPADDLE;
+		result.candidate.rhs = CandidateType::BWALL;
 	}
-	if (vR.y < 0.f) {
-		hit = AABB::intersect(RectangleToAABB(mRightPaddle), RectangleToAABB(mUpperWall), vR * deltaMS, { 0.f,0.f });
-		if (hit.collides && hit.time < result.hitTime) {
-			result.hitTime = hit.time;
-			result.hasHit = true;
-			result.candidate.lhs = CandidateType::RPADDLE;
-			result.candidate.rhs = CandidateType::TWALL;
-		}
+	hit = AABB::intersect(RectangleToAABB(mRightPaddle), RectangleToAABB(mUpperWall), vR * deltaMS, { 0.f,0.f });
+	if (hit.collides && hit.time < result.hitTime) {
+		result.hitTime = hit.time;
+		result.hasHit = true;
+		result.candidate.lhs = CandidateType::RPADDLE;
+		result.candidate.rhs = CandidateType::TWALL;
 	}
-	if (vR.y > 0.f) {
-		hit = AABB::intersect(RectangleToAABB(mRightPaddle), RectangleToAABB(mLowerWall), vR * deltaMS, { 0.f,0.f });
-		if (hit.collides && hit.time < result.hitTime) {
-			result.hitTime = hit.time;
-			result.hasHit = true;
-			result.candidate.lhs = CandidateType::RPADDLE;
-			result.candidate.rhs = CandidateType::BWALL;
-		}
+	hit = AABB::intersect(RectangleToAABB(mRightPaddle), RectangleToAABB(mLowerWall), vR * deltaMS, { 0.f,0.f });
+	if (hit.collides && hit.time < result.hitTime) {
+		result.hitTime = hit.time;
+		result.hasHit = true;
+		result.candidate.lhs = CandidateType::RPADDLE;
+		result.candidate.rhs = CandidateType::BWALL;
 	}
 	return result;
 }
