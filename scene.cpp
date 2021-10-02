@@ -24,8 +24,8 @@ static const auto CountdownTicks = 50;
 // The initial velocity of the ball.
 static const auto BallInitialVelocity = .0005f;
 
-// The amount of velocity to increment during each ball-paddle collision.
-static const auto BallVelocityIncrement = .0001f;
+// The amount of velocity to multiply during each ball-paddle collision.
+static const auto BallVelocityMultiplier = 1.1f;
 
 // The amount of additional nudge to add to collision response to separate collded objects.
 static const auto Nudge = .001f;
@@ -267,14 +267,14 @@ void Scene::update(std::chrono::milliseconds delta) {
 			case CandidateType::LPADDLE: {
 				mBall.position.x = mLeftPaddle.position.x + mLeftPaddle.extent.x + mBall.extent.x + Nudge;
 				mBall.velocity.x = -mBall.velocity.x;
-				mBall.velocity = mBall.velocity.normalized() * (mBall.velocity.length() + BallVelocityIncrement);
+				mBall.velocity = mBall.velocity * BallVelocityMultiplier;
 				mAudio->playSound(mBeepSound);
 				break;
 			}
 			case CandidateType::RPADDLE:
 				mBall.position.x = mRightPaddle.position.x - mRightPaddle.extent.x - mBall.extent.x - Nudge;
 				mBall.velocity.x = -mBall.velocity.x;
-				mBall.velocity = mBall.velocity.normalized() * (mBall.velocity.length() + BallVelocityIncrement);
+				mBall.velocity = mBall.velocity * BallVelocityMultiplier;
 				mAudio->playSound(mBeepSound);
 				break;
 			}
