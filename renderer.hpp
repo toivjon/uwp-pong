@@ -8,7 +8,7 @@
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.UI.Core.h>
 
-#include "vec2f.h"
+#include "vec2f.hpp"
 
 // An alias for the CoreWindow to avoid using the full name monster.
 using ApplicationWindow = winrt::Windows::UI::Core::CoreWindow;

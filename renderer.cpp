@@ -1,5 +1,5 @@
-#include "pch.h"
-#include "renderer.h"
+#include "pch.hpp"
+#include "renderer.hpp"
 
 using namespace winrt;
 using namespace winrt::Windows::Foundation;

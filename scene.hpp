@@ -1,7 +1,7 @@
 #pragma once
 
 #include "audio.hpp"
-#include "renderer.h"
+#include "renderer.hpp"
 
 class Scene {
 public:

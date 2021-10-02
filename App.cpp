@@ -1,7 +1,7 @@
-#include "pch.h"
+#include "pch.hpp"
 #include "audio.hpp"
-#include "renderer.h"
-#include "scene.h"
+#include "renderer.hpp"
+#include "scene.hpp"
 
 using namespace std::chrono;
 using namespace winrt;

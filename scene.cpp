@@ -1,6 +1,6 @@
-#include "pch.h"
-#include "aabb.h"
-#include "scene.h"
+#include "pch.hpp"
+#include "aabb.hpp"
+#include "scene.hpp"
 
 #include <array>
 #include <random>
