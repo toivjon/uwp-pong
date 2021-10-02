@@ -260,13 +260,11 @@ void Renderer::present() {
 }
 
 void Renderer::draw(const Rectangle& rect) {
-	auto halfWidth = rect.size.x / 2;
-	auto halfHeight = rect.size.y / 2;
 	m2DDeviceCtx->FillRectangle({
-		mWindowOffset.Width + (-halfWidth + rect.position.x) * (mWindowSize.Width - mWindowOffset.Width * 2),
-		mWindowOffset.Height + (-halfHeight + rect.position.y) * (mWindowSize.Height - mWindowOffset.Height * 2),
-		mWindowOffset.Width + (halfWidth + rect.position.x) * (mWindowSize.Width - mWindowOffset.Width * 2),
-		mWindowOffset.Height + (halfHeight + rect.position.y) * (mWindowSize.Height - mWindowOffset.Height * 2),
+		mWindowOffset.Width + (-rect.extent.x + rect.position.x) * (mWindowSize.Width - mWindowOffset.Width * 2),
+		mWindowOffset.Height + (-rect.extent.y + rect.position.y) * (mWindowSize.Height - mWindowOffset.Height * 2),
+		mWindowOffset.Width + (rect.extent.x + rect.position.x) * (mWindowSize.Width - mWindowOffset.Width * 2),
+		mWindowOffset.Height + (rect.extent.y + rect.position.y) * (mWindowSize.Height - mWindowOffset.Height * 2),
 		}, rect.brush.get());
 }
 

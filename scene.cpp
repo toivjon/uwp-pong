@@ -48,15 +48,15 @@ inline auto NewRandomDirection() -> Vec2f {
 
 // Build a new AABB from a Rectangle instance.
 inline auto RectangleToAABB(const Rectangle& rect) -> AABB {
-	return AABB(rect.position, rect.size / 2.f);
+	return AABB(rect.position, rect.extent);
 }
 
 Scene::Scene(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(true), mAudio(audio) {
-	mDialogBackground.size = { 0.75f, 0.80f };
+	mDialogBackground.extent = { 0.375f, 0.40f };
 	mDialogBackground.position = { Center };
 	mDialogBackground.brush = renderer->getWhiteBrush();
 
-	mDialogForeground.size = { 0.70f, 0.75f };
+	mDialogForeground.extent = { 0.35f, 0.375f };
 	mDialogForeground.position = { Center };
 	mDialogForeground.brush = renderer->getBlackBrush();
 
@@ -70,24 +70,24 @@ Scene::Scene(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(
 	mDialogDescription.position = { CenterX, .6f };
 	mDialogDescription.fontSize = .05f;
 
-	mBall.size = { .023f, .03f };
+	mBall.extent = { .0115f, .015f };
 	mBall.position = Center;
 	mBall.brush = renderer->getWhiteBrush();
 
-	mUpperWall.size = { 1.f, .03f };
+	mUpperWall.extent = { .5f, .015f };
 	mUpperWall.position = { CenterX, .015f };
 	mUpperWall.brush = renderer->getWhiteBrush();
 
-	mLowerWall.size = { 1.f, .03f };
+	mLowerWall.extent = mUpperWall.extent;
 	mLowerWall.position = { CenterX, .985f };
 	mLowerWall.brush = renderer->getWhiteBrush();
 
-	mLeftPaddle.size = { .025f, .15f };
+	mLeftPaddle.extent = { .0125f, .075f };
 	mLeftPaddle.position = { .05f, CenterY };
 	mLeftPaddle.brush = renderer->getWhiteBrush();
 	mLeftPaddle.velocity = { 0.f, 0.f };
 
-	mRightPaddle.size = { .025f, .15f };
+	mRightPaddle.extent = mLeftPaddle.extent;
 	mRightPaddle.position = { .95f, CenterY };
 	mRightPaddle.brush = renderer->getWhiteBrush();
 	mRightPaddle.velocity = { 0.f, 0.f };
@@ -102,12 +102,12 @@ Scene::Scene(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(
 	mRightScore.brush = renderer->getWhiteBrush();
 	mRightScore.fontSize = .27f;
 
-	mLeftGoal.size = { 1.f, 1.f };
-	mLeftGoal.position = { -.5f - mBall.size.x * 2.f, CenterY };
+	mLeftGoal.extent = { .5f, .5f };
+	mLeftGoal.position = { -.5f - mBall.extent.x * 4.f, CenterY };
 	mLeftGoal.brush = renderer->getWhiteBrush();
 
-	mRightGoal.size = { 1.f, 1.f };
-	mRightGoal.position = { 1.5f + mBall.size.x * 2.f, CenterY };
+	mRightGoal.extent = mLeftGoal.extent;
+	mRightGoal.position = { 1.5f + mBall.extent.x * 4.f, CenterY };
 	mRightGoal.brush = renderer->getWhiteBrush();
 
 	mBeepSound = mAudio->createSound(L"Assets/beep.wav");
@@ -235,12 +235,12 @@ void Scene::update(std::chrono::milliseconds delta) {
 		case CandidateType::BALL:
 			switch (collision.candidate.rhs) {
 			case CandidateType::BWALL:
-				mBall.position.y = RectangleToAABB(mLowerWall).min.y - mBall.size.y / 2.f - Nudge;
+				mBall.position.y = RectangleToAABB(mLowerWall).min.y - mBall.extent.y - Nudge;
 				mBall.velocity.y = -mBall.velocity.y;
 				mAudio->playSound(mBeepSound);
 				break;
 			case CandidateType::TWALL:
-				mBall.position.y = RectangleToAABB(mUpperWall).max.y + mBall.size.y / 2.f + Nudge;
+				mBall.position.y = RectangleToAABB(mUpperWall).max.y + mBall.extent.y + Nudge;
 				mBall.velocity.y = -mBall.velocity.y;
 				mAudio->playSound(mBeepSound);
 				break;
@@ -265,14 +265,14 @@ void Scene::update(std::chrono::milliseconds delta) {
 				mustStartGame = true;
 				break;
 			case CandidateType::LPADDLE: {
-				mBall.position.x = RectangleToAABB(mLeftPaddle).max.x + mBall.size.x / 2.f + Nudge;
+				mBall.position.x = RectangleToAABB(mLeftPaddle).max.x + mBall.extent.x + Nudge;
 				mBall.velocity.x = -mBall.velocity.x;
 				mBall.velocity = mBall.velocity.normalized() * (mBall.velocity.length() + BallVelocityIncrement);
 				mAudio->playSound(mBeepSound);
 				break;
 			}
 			case CandidateType::RPADDLE:
-				mBall.position.x = RectangleToAABB(mRightPaddle).min.x - mBall.size.x / 2.f - Nudge;
+				mBall.position.x = RectangleToAABB(mRightPaddle).min.x - mBall.extent.x - Nudge;
 				mBall.velocity.x = -mBall.velocity.x;
 				mBall.velocity = mBall.velocity.normalized() * (mBall.velocity.length() + BallVelocityIncrement);
 				mAudio->playSound(mBeepSound);
@@ -282,11 +282,11 @@ void Scene::update(std::chrono::milliseconds delta) {
 		case CandidateType::LPADDLE:
 			switch (collision.candidate.rhs) {
 			case CandidateType::BWALL:
-				mLeftPaddle.position.y = RectangleToAABB(mLowerWall).min.y - mLeftPaddle.size.y / 2.f - Nudge;
+				mLeftPaddle.position.y = RectangleToAABB(mLowerWall).min.y - mLeftPaddle.extent.y - Nudge;
 				vL.y = 0.f;
 				break;
 			case CandidateType::TWALL:
-				mLeftPaddle.position.y = RectangleToAABB(mUpperWall).max.y + mLeftPaddle.size.y / 2.f + Nudge;
+				mLeftPaddle.position.y = RectangleToAABB(mUpperWall).max.y + mLeftPaddle.extent.y + Nudge;
 				vL.y = 0.f;
 				break;
 			}
@@ -294,11 +294,11 @@ void Scene::update(std::chrono::milliseconds delta) {
 		case CandidateType::RPADDLE:
 			switch (collision.candidate.rhs) {
 			case CandidateType::BWALL:
-				mRightPaddle.position.y = RectangleToAABB(mLowerWall).min.y - mRightPaddle.size.y / 2.f - Nudge;
+				mRightPaddle.position.y = RectangleToAABB(mLowerWall).min.y - mRightPaddle.extent.y - Nudge;
 				vR.y = 0.f;
 				break;
 			case CandidateType::TWALL:
-				mRightPaddle.position.y = RectangleToAABB(mUpperWall).max.y + mRightPaddle.size.y / 2.f + Nudge;
+				mRightPaddle.position.y = RectangleToAABB(mUpperWall).max.y + mRightPaddle.extent.y + Nudge;
 				vR.y = 0.f;
 				break;
 			}
