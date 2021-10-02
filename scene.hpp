@@ -33,12 +33,6 @@ private:
 
 	auto detectCollision(const Vec2f& vL, const Vec2f& vR, float deltaMS)const->CollisionResult;
 
-	struct GameContext {
-		int Countdown = 0;
-		int P1Score   = 0;
-		int P2Score   = 0;
-	};
-
 	Rectangle   mDialogBackground;
 	Rectangle   mDialogForeground;
 	Text        mDialogTopic;
@@ -55,7 +49,9 @@ private:
 	Text		mLeftScore;
 	Text		mRightScore;
 
-	GameContext ctx;
+	int mCountdown = 0;
+	int mP1Score = 0;
+	int mP2Score = 0;
 
 	Audio::Ptr&  mAudio;
 	Audio::Sound mBeepSound;

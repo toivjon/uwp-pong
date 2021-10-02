@@ -92,12 +92,12 @@ Scene::Scene(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(
 	mRightPaddle.brush = renderer->getWhiteBrush();
 	mRightPaddle.velocity = { 0.f, 0.f };
 
-	mLeftScore.text = std::to_wstring(ctx.P1Score);
+	mLeftScore.text = std::to_wstring(mP1Score);
 	mLeftScore.position = { .35f, .025f };
 	mLeftScore.brush = renderer->getWhiteBrush();
 	mLeftScore.fontSize = .27f;
 
-	mRightScore.text = std::to_wstring(ctx.P2Score);
+	mRightScore.text = std::to_wstring(mP2Score);
 	mRightScore.position = { .65f, .025f };
 	mRightScore.brush = renderer->getWhiteBrush();
 	mRightScore.fontSize = .27f;
@@ -199,8 +199,8 @@ void Scene::update(std::chrono::milliseconds delta) {
 	}
 
 	// Skip the update whether the countdown is still in progress.
-	if (ctx.Countdown > 0) {
-		ctx.Countdown--;
+	if (mCountdown > 0) {
+		mCountdown--;
 		return;
 	}
 
@@ -245,22 +245,22 @@ void Scene::update(std::chrono::milliseconds delta) {
 				mAudio->playSound(mBeepSound);
 				break;
 			case CandidateType::LGOAL:
-				ctx.P2Score++;
-				if (ctx.P2Score >= 10) {
+				mP2Score++;
+				if (mP2Score >= 10) {
 					mDialogVisible = true;
 					mDialogTopic.text = L"Right player wins!";
 				} else {
-					mRightScore.text = std::to_wstring(ctx.P2Score);
+					mRightScore.text = std::to_wstring(mP2Score);
 				}
 				mustStartGame = true;
 				break;
 			case CandidateType::RGOAL:
-				ctx.P1Score++;
-				if (ctx.P1Score >= 10) {
+				mP1Score++;
+				if (mP1Score >= 10) {
 					mDialogVisible = true;
 					mDialogTopic.text = L"Left player wins!";
 				} else {
-					mLeftScore.text = std::to_wstring(ctx.P1Score);
+					mLeftScore.text = std::to_wstring(mP1Score);
 				}
 				mustStartGame = true;
 				break;
@@ -377,14 +377,14 @@ void Scene::newRound() {
 	mBall.velocity = NewRandomDirection() * BallInitialVelocity;
 	mLeftPaddle.position.y = CenterY;
 	mRightPaddle.position.y = CenterY;
-	ctx.Countdown = CountdownTicks;
+	mCountdown = CountdownTicks;
 }
 
 void Scene::newGame() {
-	ctx.P1Score = 0;
-	ctx.P2Score = 0;
-	mRightScore.text = std::to_wstring(ctx.P2Score);
-	mLeftScore.text = std::to_wstring(ctx.P1Score);
+	mP1Score = 0;
+	mP2Score = 0;
+	mRightScore.text = std::to_wstring(mP2Score);
+	mLeftScore.text = std::to_wstring(mP1Score);
 	newRound();
 }
 
