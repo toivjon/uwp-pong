@@ -29,8 +29,6 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 		view.Activated({ this, &App::OnActivated });
 		CoreApplication::EnteredBackground({ this, &App::OnEnteredBackground });
 		CoreApplication::LeavingBackground({ this, &App::OnLeavingBackground });
-		CoreApplication::Suspending({ this, &App::OnSuspending });
-		CoreApplication::Resuming({ this, &App::OnResuming });
 		Gamepad::GamepadAdded({ this, &App::OnGamepadAdded });
 		Gamepad::GamepadRemoved({ this, &App::OnGamepadRemoved });
 		mRenderer = std::make_unique<Renderer>();
@@ -54,16 +52,6 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 	void OnLeavingBackground(const IInspectable&, const LeavingBackgroundEventArgs&) {
 		OutputDebugStringA("App::OnLeavingBackground\n");
 		mForeground = true;
-		// TODO resume simulation, restore state and acquire resources.
-	}
-
-	void OnSuspending(const IInspectable&, const SuspendingEventArgs&) {
-		OutputDebugStringA("App::OnSuspend\n");
-		// TODO pause simulation, store state and release resources.
-	}
-
-	void OnResuming(const IInspectable&, const IInspectable&) {
-		OutputDebugStringA("App::OnResuming\n");
 		// TODO resume simulation, restore state and acquire resources.
 	}
 
