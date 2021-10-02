@@ -226,19 +226,20 @@ void Scene::update(std::chrono::milliseconds delta) {
 		const auto collisionMS = collision.hitTime * deltaMS;
 		deltaMS -= collisionMS;
 
+		// Apply movement to dynamic entities.
+		mBall.position += mBall.velocity * collisionMS;
+		mLeftPaddle.position += vL * collisionMS;
+		mRightPaddle.position += vR * collisionMS;
+
 		switch (collision.candidate.lhs) {
 		case CandidateType::BALL:
-			mLeftPaddle.position += vL * collisionMS;
-			mRightPaddle.position += vR * collisionMS;
 			switch (collision.candidate.rhs) {
 			case CandidateType::BWALL:
-				mBall.position += mBall.velocity * collisionMS;
 				mBall.position.y = RectangleToAABB(mLowerWall).min.y - (mBall.size / 2.f).y - Nudge;
 				mBall.velocity.y = -mBall.velocity.y;
 				mAudio->playSound(mBeepSound);
 				break;
 			case CandidateType::TWALL:
-				mBall.position += mBall.velocity * collisionMS;
 				mBall.position.y = RectangleToAABB(mUpperWall).max.y + (mBall.size / 2.f).y + Nudge;
 				mBall.velocity.y = -mBall.velocity.y;
 				mAudio->playSound(mBeepSound);
@@ -264,7 +265,6 @@ void Scene::update(std::chrono::milliseconds delta) {
 				mustStartGame = true;
 				break;
 			case CandidateType::LPADDLE: {
-				mBall.position += mBall.velocity * collisionMS;
 				mBall.position.x = RectangleToAABB(mLeftPaddle).max.x + (mBall.size / 2.f).x + Nudge;
 				mBall.velocity.x = -mBall.velocity.x;
 				mBall.velocity = mBall.velocity.normalized() * (mBall.velocity.length() + BallVelocityIncrement);
@@ -272,7 +272,6 @@ void Scene::update(std::chrono::milliseconds delta) {
 				break;
 			}
 			case CandidateType::RPADDLE:
-				mBall.position += mBall.velocity * collisionMS;
 				mBall.position.x = RectangleToAABB(mRightPaddle).min.x - (mBall.size / 2.f).x - Nudge;
 				mBall.velocity.x = -mBall.velocity.x;
 				mBall.velocity = mBall.velocity.normalized() * (mBall.velocity.length() + BallVelocityIncrement);
@@ -281,8 +280,6 @@ void Scene::update(std::chrono::milliseconds delta) {
 			}
 			break;
 		case CandidateType::LPADDLE:
-			mRightPaddle.position += vR * collisionMS;
-			mBall.position += mBall.velocity * collisionMS;
 			switch (collision.candidate.rhs) {
 			case CandidateType::BWALL:
 				mLeftPaddle.position.y = RectangleToAABB(mLowerWall).min.y - (mLeftPaddle.size / 2.f).y - Nudge;
@@ -295,8 +292,6 @@ void Scene::update(std::chrono::milliseconds delta) {
 			}
 			break;
 		case CandidateType::RPADDLE:
-			mLeftPaddle.position += vL * collisionMS;
-			mBall.position += mBall.velocity * collisionMS;
 			switch (collision.candidate.rhs) {
 			case CandidateType::BWALL:
 				mRightPaddle.position.y = RectangleToAABB(mLowerWall).min.y - (mRightPaddle.size / 2.f).y - Nudge;
