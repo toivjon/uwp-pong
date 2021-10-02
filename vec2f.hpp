@@ -12,9 +12,6 @@ public:
 	auto operator*(float s) const -> Vec2f { return { x * s, y * s }; }
 	auto operator/(float s) const -> Vec2f { return { x / s, y / s }; }
 
-	auto length() const -> float { return sqrtf(x * x + y * y); }
-	auto normalized() const -> Vec2f { auto l = length();  return { x / l, y / l}; }
-
 	auto operator[](int index) const -> float { return index == 0 ? x : y; }
 
 	float x;

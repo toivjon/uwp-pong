@@ -22,7 +22,7 @@ static const auto Center = Vec2f{ CenterX, CenterY };
 static const auto CountdownTicks = 50;
 
 // The initial velocity of the ball.
-static const auto BallInitialVelocity = .0005f;
+static const auto BallInitialVelocity = .0004f;
 
 // The amount of velocity to multiply during each ball-paddle collision.
 static const auto BallVelocityMultiplier = 1.1f;
@@ -38,10 +38,10 @@ inline auto NewRandomDirection() -> Vec2f {
 	static std::default_random_engine rng;
 	static std::uniform_int_distribution<std::mt19937::result_type> dist(0, 3);
 	static const std::array<Vec2f, 4> dirs = {
-		Vec2f{1.f, 1.f}.normalized(),
-		Vec2f{1.f, -1.f}.normalized(),
-		Vec2f{-1.f, 1.f}.normalized(),
-		Vec2f{-1.f, -1.f}.normalized()
+		Vec2f{BallInitialVelocity, BallInitialVelocity},
+		Vec2f{BallInitialVelocity, -BallInitialVelocity},
+		Vec2f{-BallInitialVelocity, BallInitialVelocity},
+		Vec2f{-BallInitialVelocity, -BallInitialVelocity}
 	};
 	return dirs[dist(rng)];
 }
@@ -374,7 +374,7 @@ void Scene::onKeyUp(const KeyEventArgs& args) {
 
 void Scene::newRound() {
 	mBall.position = Center;
-	mBall.velocity = NewRandomDirection() * BallInitialVelocity;
+	mBall.velocity = NewRandomDirection();
 	mLeftPaddle.position.y = CenterY;
 	mRightPaddle.position.y = CenterY;
 	mCountdown = CountdownTicks;
