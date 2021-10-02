@@ -10,18 +10,6 @@ public:
 		max = center + extent;
 	}
 
-	// TODO Perhaps we should use a bit more simpler solution for this?
-	auto operator+(const AABB& aabb) const -> AABB {
-		const auto xmin = std::min(min.x, aabb.min.x);
-		const auto ymin = std::min(min.y, aabb.min.y);
-		const auto xmax = std::max(max.x, aabb.max.x);
-		const auto ymax = std::max(max.y, aabb.max.y);
-		auto result = AABB{ {},{} };
-		result.min = { xmin, ymin };
-		result.max = { xmax, ymax };
-		return result;
-	}
-
 	struct Intersection {
 		bool  collides;
 		float time;
