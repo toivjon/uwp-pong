@@ -46,21 +46,19 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 	void OnEnteredBackground(const IInspectable&, const EnteredBackgroundEventArgs&) {
 		OutputDebugStringA("App::OnEnteredBackground\n");
 		mForeground = false;
-		// TODO pause simulation, store state and release resources.
 	}
 
 	void OnLeavingBackground(const IInspectable&, const LeavingBackgroundEventArgs&) {
 		OutputDebugStringA("App::OnLeavingBackground\n");
 		mForeground = true;
-		// TODO resume simulation, restore state and acquire resources.
 	}
 
 	void Load(const hstring&) {
-		OutputDebugStringA("App::Load\n");
+		// nothing...
 	}
 
 	void Uninitialize() {
-		// TODO
+		// nothing...
 	}
 
 	void Run() {
