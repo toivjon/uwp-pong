@@ -213,17 +213,12 @@ void Scene::update(std::chrono::milliseconds delta) {
 	// TODO A temporary solution which should be handled in a more elegant way.
 	auto mustStartGame = false;
 	do {
-		// Calculate the new ideal positions for the dynamic entities.
-		const auto pL = mLeftPaddle.position + vL * deltaMS;
-		const auto pR = mRightPaddle.position + vR * deltaMS;
-		const auto pB = mBall.position + mBall.velocity * deltaMS;
-
 		// Perform collision detection to find out the first collision.
 		const auto collision = detectCollision(vL, vR, deltaMS);
 		if (!collision.hasHit) {
-			mLeftPaddle.position = pL;
-			mRightPaddle.position = pR;
-			mBall.position = pB;
+			mLeftPaddle.position = mLeftPaddle.position + vL * deltaMS;
+			mRightPaddle.position = mRightPaddle.position + vR * deltaMS;
+			mBall.position = mBall.position + mBall.velocity * deltaMS;
 			break;
 		}
 
