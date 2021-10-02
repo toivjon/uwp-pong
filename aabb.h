@@ -69,7 +69,7 @@ public:
 			}
 			if (tmin > tmax) return intersection;
 		}
-		intersection.collides = true;
+		intersection.collides = (tmin <= 1.f);
 		intersection.time = tmin;
 		return intersection;
 	}

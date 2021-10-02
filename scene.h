@@ -25,14 +25,13 @@ private:
 		CandidateType rhs;
 	};
 
-	struct NarrowCDResult {
+	struct CollisionResult {
 		bool		hasHit;
 		float		hitTime;
 		Candidate	candidate;
 	};
-	auto broadCD(const Vec2f& pL, const Vec2f& pR, const Vec2f& pB)const->std::vector<Candidate>;
 
-	auto narrowCD(const std::vector<Candidate>& candidates, const Vec2f& vL, const Vec2f& vR, float deltaMS)const->NarrowCDResult;
+	auto narrowCD(const Vec2f& vL, const Vec2f& vR, float deltaMS)const->CollisionResult;
 
 	struct GameContext {
 		int Countdown = 0;

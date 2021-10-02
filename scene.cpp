@@ -115,111 +115,90 @@ Scene::Scene(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(
 	newGame();
 }
 
-auto Scene::broadCD(const Vec2f& pL, const Vec2f& pR, const Vec2f& pB) const -> std::vector<Candidate> {
-	// Build bounding boxes for dynamic entities based on their current and ideal new positions.
-	auto bbL = RectangleToAABB(mLeftPaddle) + AABB(pL, mLeftPaddle.size / 2.f);
-	auto bbR = RectangleToAABB(mRightPaddle) + AABB(pR, mRightPaddle.size / 2.f);
-	auto bbBX = RectangleToAABB(mBall);
-	auto bbB = RectangleToAABB(mBall) + AABB(pB, mBall.size / 2.f);
-
-	// Go through and pick all possible collision candidates.
-	std::vector<Candidate> candidates;
-	if (AABB::intersect(bbB, bbL)) {
-		candidates.push_back({ CandidateType::BALL, CandidateType::LPADDLE });
-	} else if (AABB::intersect(bbB, bbR)) {
-		candidates.push_back({ CandidateType::BALL, CandidateType::RPADDLE });
-	}
-	if (AABB::intersect(bbB, RectangleToAABB(mUpperWall))) {
-		candidates.push_back({ CandidateType::BALL, CandidateType::TWALL });
-	} else if (AABB::intersect(bbB, RectangleToAABB(mLowerWall))) {
-		candidates.push_back({ CandidateType::BALL, CandidateType::BWALL });
-	}
-	if (AABB::intersect(bbB, RectangleToAABB(mLeftGoal))) {
-		candidates.push_back({ CandidateType::BALL, CandidateType::LGOAL });
-	} else if (AABB::intersect(bbB, RectangleToAABB(mRightGoal))) {
-		candidates.push_back({ CandidateType::BALL, CandidateType::RGOAL });
-	}
-	if (AABB::intersect(bbR, RectangleToAABB(mUpperWall))) {
-		candidates.push_back({ CandidateType::RPADDLE, CandidateType::TWALL });
-	} else if (AABB::intersect(bbR, RectangleToAABB(mLowerWall))) {
-		candidates.push_back({ CandidateType::RPADDLE, CandidateType::BWALL });
-	}
-	if (AABB::intersect(bbL, RectangleToAABB(mUpperWall))) {
-		candidates.push_back({ CandidateType::LPADDLE, CandidateType::TWALL });
-	} else if (AABB::intersect(bbL, RectangleToAABB(mLowerWall))) {
-		candidates.push_back({ CandidateType::LPADDLE, CandidateType::BWALL });
-	}
-	return candidates;
-}
-
-auto Scene::narrowCD(const std::vector<Candidate>& candidates, const Vec2f& vL, const Vec2f& vR, float deltaMS) const -> NarrowCDResult {
+auto Scene::narrowCD(const Vec2f& vL, const Vec2f& vR, float deltaMS) const -> CollisionResult {
 	const auto& ballAABB = RectangleToAABB(mBall);
-
-	auto result = NarrowCDResult{};
+	auto result = CollisionResult{};
 	result.hasHit = false;
 	result.hitTime = FLT_MAX;
-	for (auto& candidate : candidates) {
-		AABB::Intersection hit = {};
-		switch (candidate.lhs) {
-		case CandidateType::BALL:
-			switch (candidate.rhs) {
-			case CandidateType::LPADDLE:
-				if (mBall.velocity.x < 0.f) {
-					hit = AABB::intersect(ballAABB, RectangleToAABB(mLeftPaddle), mBall.velocity * deltaMS, vL);
-				}
-				break;
-			case CandidateType::RPADDLE:
-				if (mBall.velocity.x > 0.f) {
-					hit = AABB::intersect(ballAABB, RectangleToAABB(mRightPaddle), mBall.velocity * deltaMS, vR);
-				}
-				break;
-			case CandidateType::TWALL:
-				hit = AABB::intersect(ballAABB, RectangleToAABB(mUpperWall), mBall.velocity * deltaMS, { 0.f, 0.f });
-				break;
-			case CandidateType::BWALL:
-				hit = AABB::intersect(ballAABB, RectangleToAABB(mLowerWall), mBall.velocity * deltaMS, { 0.f, 0.f });
-				break;
-			case CandidateType::LGOAL:
-				hit = AABB::intersect(ballAABB, RectangleToAABB(mLeftGoal), mBall.velocity * deltaMS, { 0.f, 0.f });
-				break;
-			case CandidateType::RGOAL:
-				hit = AABB::intersect(ballAABB, RectangleToAABB(mRightGoal), mBall.velocity * deltaMS, { 0.f, 0.f });
-				break;
-			}
-			break;
-		case CandidateType::LPADDLE:
-			switch (candidate.rhs) {
-			case CandidateType::TWALL:
-				if (vL.y < 0.f) {
-					hit = AABB::intersect(RectangleToAABB(mLeftPaddle), RectangleToAABB(mUpperWall), vL * deltaMS, { 0.f, 0.f });
-				}
-				break;
-			case CandidateType::BWALL:
-				if (vL.y > 0.f) {
-					hit = AABB::intersect(RectangleToAABB(mLeftPaddle), RectangleToAABB(mLowerWall), vL * deltaMS, { 0.f, 0.f });
-				}
-				break;
-			}
-			break;
-		case CandidateType::RPADDLE:
-			switch (candidate.rhs) {
-			case CandidateType::TWALL:
-				if (vR.y < 0.f) {
-					hit = AABB::intersect(RectangleToAABB(mRightPaddle), RectangleToAABB(mUpperWall), vR * deltaMS, { 0.f,0.f });
-				}
-				break;
-			case CandidateType::BWALL:
-				if (vR.y > 0.f) {
-					hit = AABB::intersect(RectangleToAABB(mRightPaddle), RectangleToAABB(mLowerWall), vR * deltaMS, { 0.f,0.f });
-				}
-				break;
-			}
-			break;
-		}
+	if (mBall.velocity.x < 0.f) {
+		auto hit = AABB::intersect(ballAABB, RectangleToAABB(mLeftPaddle), mBall.velocity * deltaMS, vL);
 		if (hit.collides && hit.time < result.hitTime) {
 			result.hitTime = hit.time;
 			result.hasHit = true;
-			result.candidate = candidate;
+			result.candidate.lhs = CandidateType::BALL;
+			result.candidate.rhs = CandidateType::LPADDLE;
+		}
+	} else if (mBall.velocity.x > 0.f) {
+		auto hit = AABB::intersect(ballAABB, RectangleToAABB(mRightPaddle), mBall.velocity * deltaMS, vR);
+		if (hit.collides && hit.time < result.hitTime) {
+			result.hitTime = hit.time;
+			result.hasHit = true;
+			result.candidate.lhs = CandidateType::BALL;
+			result.candidate.rhs = CandidateType::RPADDLE;
+		}
+	}
+	auto hit = AABB::intersect(ballAABB, RectangleToAABB(mUpperWall), mBall.velocity * deltaMS, { 0.f, 0.f });
+	if (hit.collides && hit.time < result.hitTime) {
+		result.hitTime = hit.time;
+		result.hasHit = true;
+		result.candidate.lhs = CandidateType::BALL;
+		result.candidate.rhs = CandidateType::TWALL;
+	}
+	hit = AABB::intersect(ballAABB, RectangleToAABB(mLowerWall), mBall.velocity * deltaMS, { 0.f, 0.f });
+	if (hit.collides && hit.time < result.hitTime) {
+		result.hitTime = hit.time;
+		result.hasHit = true;
+		result.candidate.lhs = CandidateType::BALL;
+		result.candidate.rhs = CandidateType::BWALL;
+	}
+	hit = AABB::intersect(ballAABB, RectangleToAABB(mLeftGoal), mBall.velocity * deltaMS, { 0.f, 0.f });
+	if (hit.collides && hit.time < result.hitTime) {
+		result.hitTime = hit.time;
+		result.hasHit = true;
+		result.candidate.lhs = CandidateType::BALL;
+		result.candidate.rhs = CandidateType::LGOAL;
+	}
+	hit = AABB::intersect(ballAABB, RectangleToAABB(mRightGoal), mBall.velocity * deltaMS, { 0.f, 0.f });
+	if (hit.collides && hit.time < result.hitTime) {
+		result.hitTime = hit.time;
+		result.hasHit = true;
+		result.candidate.lhs = CandidateType::BALL;
+		result.candidate.rhs = CandidateType::RGOAL;
+	}
+	if (vL.y < 0.f) {
+		hit = AABB::intersect(RectangleToAABB(mLeftPaddle), RectangleToAABB(mUpperWall), vL * deltaMS, { 0.f, 0.f });
+		if (hit.collides && hit.time < result.hitTime) {
+			result.hitTime = hit.time;
+			result.hasHit = true;
+			result.candidate.lhs = CandidateType::LPADDLE;
+			result.candidate.rhs = CandidateType::TWALL;
+		}
+	}
+	if (vL.y > 0.f) {
+		hit = AABB::intersect(RectangleToAABB(mLeftPaddle), RectangleToAABB(mLowerWall), vL * deltaMS, { 0.f, 0.f });
+		if (hit.collides && hit.time < result.hitTime) {
+			result.hitTime = hit.time;
+			result.hasHit = true;
+			result.candidate.lhs = CandidateType::LPADDLE;
+			result.candidate.rhs = CandidateType::BWALL;
+		}
+	}
+	if (vR.y < 0.f) {
+		hit = AABB::intersect(RectangleToAABB(mRightPaddle), RectangleToAABB(mUpperWall), vR * deltaMS, { 0.f,0.f });
+		if (hit.collides && hit.time < result.hitTime) {
+			result.hitTime = hit.time;
+			result.hasHit = true;
+			result.candidate.lhs = CandidateType::RPADDLE;
+			result.candidate.rhs = CandidateType::TWALL;
+		}
+	}
+	if (vR.y > 0.f) {
+		hit = AABB::intersect(RectangleToAABB(mRightPaddle), RectangleToAABB(mLowerWall), vR * deltaMS, { 0.f,0.f });
+		if (hit.collides && hit.time < result.hitTime) {
+			result.hitTime = hit.time;
+			result.hasHit = true;
+			result.candidate.lhs = CandidateType::RPADDLE;
+			result.candidate.rhs = CandidateType::BWALL;
 		}
 	}
 	return result;
@@ -251,17 +230,8 @@ void Scene::update(std::chrono::milliseconds delta) {
 		const auto pR = mRightPaddle.position + vR * deltaMS;
 		const auto pB = mBall.position + mBall.velocity * deltaMS;
 
-		// Find collision cadidates with the broad phase of the collision detection.
-		const auto collisionCandidates = broadCD(pL, pR, pB);
-		if (collisionCandidates.empty()) {
-			mLeftPaddle.position = pL;
-			mRightPaddle.position = pR;
-			mBall.position = pB;
-			break;
-		}
-
-		// Use the narrow phase of the collision detection to find out the first collision.
-		const auto collision = narrowCD(collisionCandidates, vL, vR, deltaMS);
+		// Perform collision detection to find out the first collision.
+		const auto collision = narrowCD(vL, vR, deltaMS);
 		if (!collision.hasHit) {
 			mLeftPaddle.position = pL;
 			mRightPaddle.position = pR;
