@@ -120,24 +120,21 @@ auto Scene::detectCollision(const Vec2f& vL, const Vec2f& vR, float deltaMS) con
 	auto result = CollisionResult{};
 	result.hasHit = false;
 	result.hitTime = FLT_MAX;
-	if (mBall.velocity.x < 0.f) {
-		auto hit = AABB::intersect(ballAABB, RectangleToAABB(mLeftPaddle), mBall.velocity * deltaMS, vL);
-		if (hit.collides && hit.time < result.hitTime) {
-			result.hitTime = hit.time;
-			result.hasHit = true;
-			result.candidate.lhs = CandidateType::BALL;
-			result.candidate.rhs = CandidateType::LPADDLE;
-		}
-	} else if (mBall.velocity.x > 0.f) {
-		auto hit = AABB::intersect(ballAABB, RectangleToAABB(mRightPaddle), mBall.velocity * deltaMS, vR);
-		if (hit.collides && hit.time < result.hitTime) {
-			result.hitTime = hit.time;
-			result.hasHit = true;
-			result.candidate.lhs = CandidateType::BALL;
-			result.candidate.rhs = CandidateType::RPADDLE;
-		}
+	auto hit = AABB::intersect(ballAABB, RectangleToAABB(mLeftPaddle), mBall.velocity * deltaMS, vL);
+	if (hit.collides && hit.time < result.hitTime) {
+		result.hitTime = hit.time;
+		result.hasHit = true;
+		result.candidate.lhs = CandidateType::BALL;
+		result.candidate.rhs = CandidateType::LPADDLE;
 	}
-	auto hit = AABB::intersect(ballAABB, RectangleToAABB(mUpperWall), mBall.velocity * deltaMS, { 0.f, 0.f });
+	hit = AABB::intersect(ballAABB, RectangleToAABB(mRightPaddle), mBall.velocity * deltaMS, vR);
+	if (hit.collides && hit.time < result.hitTime) {
+		result.hitTime = hit.time;
+		result.hasHit = true;
+		result.candidate.lhs = CandidateType::BALL;
+		result.candidate.rhs = CandidateType::RPADDLE;
+	}
+	hit = AABB::intersect(ballAABB, RectangleToAABB(mUpperWall), mBall.velocity * deltaMS, { 0.f, 0.f });
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
@@ -274,6 +271,7 @@ void Scene::update(std::chrono::milliseconds delta) {
 				break;
 			case CandidateType::LPADDLE: {
 				mBall.position += mBall.velocity * collisionMS;
+				mBall.position.x = RectangleToAABB(mLeftPaddle).max.x + (mBall.size / 2.f).x + Nudge;
 				mBall.velocity.x = -mBall.velocity.x;
 				mBall.velocity = mBall.velocity.normalized() * (mBall.velocity.length() + BallVelocityIncrement);
 				mAudio->playSound(mBeepSound);
@@ -281,6 +279,7 @@ void Scene::update(std::chrono::milliseconds delta) {
 			}
 			case CandidateType::RPADDLE:
 				mBall.position += mBall.velocity * collisionMS;
+				mBall.position.x = RectangleToAABB(mRightPaddle).min.x - (mBall.size / 2.f).x - Nudge;
 				mBall.velocity.x = -mBall.velocity.x;
 				mBall.velocity = mBall.velocity.normalized() * (mBall.velocity.length() + BallVelocityIncrement);
 				mAudio->playSound(mBeepSound);
