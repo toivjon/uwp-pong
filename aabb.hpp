@@ -3,8 +3,7 @@
 #include "vec2f.hpp"
 
 // A simple 2D axis aligned bounding box implementation.
-class AABB {
-public:
+struct AABB final {
 	AABB(const Vec2f& center, const Vec2f& extent) {
 		min = center - extent;
 		max = center + extent;
