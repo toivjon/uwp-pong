@@ -1,7 +1,5 @@
 #pragma once
 
-#include <array>
-
 // Vec2f represents a 2D vector with floating point values.
 class Vec2f final {
 public:
