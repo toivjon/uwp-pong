@@ -1,5 +1,4 @@
 #include "pch.hpp"
-#include "aabb.hpp"
 #include "scene.hpp"
 
 #include <array>
@@ -46,9 +45,72 @@ inline auto NewRandomDirection() -> Vec2f {
 	return dirs[dist(rng)];
 }
 
-// Build a new AABB from a Rectangle instance.
-inline auto RectangleToAABB(const Rectangle& rect) -> AABB {
-	return AABB(rect.position, rect.extent);
+auto Intersects(const Rectangle& a, const Rectangle& b) -> bool {
+	const auto amin = a.position - a.extent;
+	const auto amax = a.position + a.extent;
+	const auto bmin = b.position - b.extent;
+	const auto bmax = b.position + b.extent;
+	return amin.x <= bmax.x && amax.x >= bmin.x && amin.y <= bmax.y && amax.y >= bmin.y;
+}
+
+struct Intersection {
+	bool  collides;
+	float time;
+};
+
+auto Intersects(const Rectangle& a, const Rectangle& b, const Vec2f& va, const Vec2f& vb) -> Intersection {
+	Intersection intersection = {};
+	intersection.collides = false;
+	intersection.time = 0.f;
+
+	// Exit early whether boxes initially collide.
+	if (Intersects(a, b)) {
+		intersection.collides = true;
+		intersection.time = 0.f;
+		return intersection;
+	}
+
+	const auto amin = a.position - a.extent;
+	const auto amax = a.position + a.extent;
+	const auto bmin = b.position - b.extent;
+	const auto bmax = b.position + b.extent;
+
+	// We will use relative velocity where 'a' is treated as stationary.
+	const auto v = vb - va;
+
+	// Initialize times for the first and last contact.
+	auto tmin = -FLT_MAX;
+	auto tmax = FLT_MAX;
+
+	// Find the first and last contact from x-axis.
+	if (v.x < .0f) {
+		if (bmax.x < amin.x) return intersection;
+		if (amax.x < bmin.x) tmin = std::max((amax.x - bmin.x) / v.x, tmin);
+		if (bmax.x > amin.x) tmax = std::min((amin.x - bmax.x) / v.x, tmax);
+	}
+	if (v.x > .0f) {
+		if (bmin.x > amax.x) return intersection;
+		if (bmax.x < amin.x) tmin = std::max((amin.x - bmax.x) / v.x, tmin);
+		if (amax.x > bmin.x) tmax = std::min((amax.x - bmin.x) / v.x, tmax);
+	}
+	if (tmin > tmax) return intersection;
+
+	// Find the first and last contact from y-axis.
+	if (v.y < .0f) {
+		if (bmax.y < amin.y) return intersection;
+		if (amax.y < bmin.y) tmin = std::max((amax.y - bmin.y) / v.y, tmin);
+		if (bmax.y > amin.y) tmax = std::min((amin.y - bmax.y) / v.y, tmax);
+	}
+	if (v.y > .0f) {
+		if (bmin.y > amax.y) return intersection;
+		if (bmax.y < amin.y) tmin = std::max((amin.y - bmax.y) / v.y, tmin);
+		if (amax.y > bmin.y) tmax = std::min((amax.y - bmin.y) / v.y, tmax);
+	}
+	if (tmin > tmax) return intersection;
+
+	intersection.collides = (tmin >= 0.f && tmin <= 1.f);
+	intersection.time = tmin;
+	return intersection;
 }
 
 Scene::Scene(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(true), mAudio(audio) {
@@ -119,70 +181,70 @@ auto Scene::detectCollision(const Vec2f& vL, const Vec2f& vR, float deltaMS) con
 	auto result = CollisionResult{};
 	result.hasHit = false;
 	result.hitTime = FLT_MAX;
-	auto hit = AABB::intersect(RectangleToAABB(mBall), RectangleToAABB(mLeftPaddle), mBall.velocity * deltaMS, vL);
+	auto hit = Intersects(mBall, mLeftPaddle, mBall.velocity * deltaMS, vL);
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
 		result.candidate.lhs = CandidateType::BALL;
 		result.candidate.rhs = CandidateType::LPADDLE;
 	}
-	hit = AABB::intersect(RectangleToAABB(mBall), RectangleToAABB(mRightPaddle), mBall.velocity * deltaMS, vR);
+	hit = Intersects(mBall, mRightPaddle, mBall.velocity * deltaMS, vR);
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
 		result.candidate.lhs = CandidateType::BALL;
 		result.candidate.rhs = CandidateType::RPADDLE;
 	}
-	hit = AABB::intersect(RectangleToAABB(mBall), RectangleToAABB(mUpperWall), mBall.velocity * deltaMS, { 0.f, 0.f });
+	hit = Intersects(mBall, mUpperWall, mBall.velocity * deltaMS, { 0.f, 0.f });
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
 		result.candidate.lhs = CandidateType::BALL;
 		result.candidate.rhs = CandidateType::TWALL;
 	}
-	hit = AABB::intersect(RectangleToAABB(mBall), RectangleToAABB(mLowerWall), mBall.velocity * deltaMS, { 0.f, 0.f });
+	hit = Intersects(mBall, mLowerWall, mBall.velocity * deltaMS, { 0.f, 0.f });
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
 		result.candidate.lhs = CandidateType::BALL;
 		result.candidate.rhs = CandidateType::BWALL;
 	}
-	hit = AABB::intersect(RectangleToAABB(mBall), RectangleToAABB(mLeftGoal), mBall.velocity * deltaMS, { 0.f, 0.f });
+	hit = Intersects(mBall, mLeftGoal, mBall.velocity * deltaMS, { 0.f, 0.f });
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
 		result.candidate.lhs = CandidateType::BALL;
 		result.candidate.rhs = CandidateType::LGOAL;
 	}
-	hit = AABB::intersect(RectangleToAABB(mBall), RectangleToAABB(mRightGoal), mBall.velocity * deltaMS, { 0.f, 0.f });
+	hit = Intersects(mBall, mRightGoal, mBall.velocity * deltaMS, { 0.f, 0.f });
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
 		result.candidate.lhs = CandidateType::BALL;
 		result.candidate.rhs = CandidateType::RGOAL;
 	}
-	hit = AABB::intersect(RectangleToAABB(mLeftPaddle), RectangleToAABB(mUpperWall), vL * deltaMS, { 0.f, 0.f });
+	hit = Intersects(mLeftPaddle, mUpperWall, vL * deltaMS, { 0.f, 0.f });
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
 		result.candidate.lhs = CandidateType::LPADDLE;
 		result.candidate.rhs = CandidateType::TWALL;
 	}
-	hit = AABB::intersect(RectangleToAABB(mLeftPaddle), RectangleToAABB(mLowerWall), vL * deltaMS, { 0.f, 0.f });
+	hit = Intersects(mLeftPaddle, mLowerWall, vL * deltaMS, { 0.f, 0.f });
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
 		result.candidate.lhs = CandidateType::LPADDLE;
 		result.candidate.rhs = CandidateType::BWALL;
 	}
-	hit = AABB::intersect(RectangleToAABB(mRightPaddle), RectangleToAABB(mUpperWall), vR * deltaMS, { 0.f,0.f });
+	hit = Intersects(mRightPaddle, mUpperWall, vR * deltaMS, { 0.f,0.f });
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
 		result.candidate.lhs = CandidateType::RPADDLE;
 		result.candidate.rhs = CandidateType::TWALL;
 	}
-	hit = AABB::intersect(RectangleToAABB(mRightPaddle), RectangleToAABB(mLowerWall), vR * deltaMS, { 0.f,0.f });
+	hit = Intersects(mRightPaddle, mLowerWall, vR * deltaMS, { 0.f,0.f });
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;

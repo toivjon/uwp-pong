@@ -84,7 +84,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="aabb.hpp" />
     <ClInclude Include="audio.hpp" />
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="renderer.hpp" />
