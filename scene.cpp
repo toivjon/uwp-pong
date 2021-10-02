@@ -116,46 +116,45 @@ Scene::Scene(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(
 }
 
 auto Scene::detectCollision(const Vec2f& vL, const Vec2f& vR, float deltaMS) const -> CollisionResult {
-	const auto& ballAABB = RectangleToAABB(mBall);
 	auto result = CollisionResult{};
 	result.hasHit = false;
 	result.hitTime = FLT_MAX;
-	auto hit = AABB::intersect(ballAABB, RectangleToAABB(mLeftPaddle), mBall.velocity * deltaMS, vL);
+	auto hit = AABB::intersect(RectangleToAABB(mBall), RectangleToAABB(mLeftPaddle), mBall.velocity * deltaMS, vL);
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
 		result.candidate.lhs = CandidateType::BALL;
 		result.candidate.rhs = CandidateType::LPADDLE;
 	}
-	hit = AABB::intersect(ballAABB, RectangleToAABB(mRightPaddle), mBall.velocity * deltaMS, vR);
+	hit = AABB::intersect(RectangleToAABB(mBall), RectangleToAABB(mRightPaddle), mBall.velocity * deltaMS, vR);
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
 		result.candidate.lhs = CandidateType::BALL;
 		result.candidate.rhs = CandidateType::RPADDLE;
 	}
-	hit = AABB::intersect(ballAABB, RectangleToAABB(mUpperWall), mBall.velocity * deltaMS, { 0.f, 0.f });
+	hit = AABB::intersect(RectangleToAABB(mBall), RectangleToAABB(mUpperWall), mBall.velocity * deltaMS, { 0.f, 0.f });
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
 		result.candidate.lhs = CandidateType::BALL;
 		result.candidate.rhs = CandidateType::TWALL;
 	}
-	hit = AABB::intersect(ballAABB, RectangleToAABB(mLowerWall), mBall.velocity * deltaMS, { 0.f, 0.f });
+	hit = AABB::intersect(RectangleToAABB(mBall), RectangleToAABB(mLowerWall), mBall.velocity * deltaMS, { 0.f, 0.f });
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
 		result.candidate.lhs = CandidateType::BALL;
 		result.candidate.rhs = CandidateType::BWALL;
 	}
-	hit = AABB::intersect(ballAABB, RectangleToAABB(mLeftGoal), mBall.velocity * deltaMS, { 0.f, 0.f });
+	hit = AABB::intersect(RectangleToAABB(mBall), RectangleToAABB(mLeftGoal), mBall.velocity * deltaMS, { 0.f, 0.f });
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
 		result.candidate.lhs = CandidateType::BALL;
 		result.candidate.rhs = CandidateType::LGOAL;
 	}
-	hit = AABB::intersect(ballAABB, RectangleToAABB(mRightGoal), mBall.velocity * deltaMS, { 0.f, 0.f });
+	hit = AABB::intersect(RectangleToAABB(mBall), RectangleToAABB(mRightGoal), mBall.velocity * deltaMS, { 0.f, 0.f });
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
