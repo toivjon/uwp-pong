@@ -15,8 +15,11 @@ public:
 	void onReadGamepad(int player, const winrt::Windows::Gaming::Input::GamepadReading& reading);
 
 private:
+	enum class MoveDirection { NONE, UP, DOWN };
+
 	void newRound();
 	void newGame();
+	void applyMoveDirection(Rectangle& rect, MoveDirection direction);
 
 	enum class CandidateType { LPADDLE, RPADDLE, BALL, TWALL, BWALL, LGOAL, RGOAL };
 
@@ -53,7 +56,6 @@ private:
 	int mP1Score = 0;
 	int mP2Score = 0;
 
-	enum class MoveDirection { NONE, UP, DOWN };
 
 	MoveDirection mP1MoveDirection = MoveDirection::NONE;
 	MoveDirection mP2MoveDirection = MoveDirection::NONE;

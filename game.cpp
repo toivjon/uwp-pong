@@ -270,28 +270,8 @@ void Game::update(std::chrono::milliseconds delta) {
 	auto deltaMS = static_cast<float>(delta.count());
 
 	// Apply the keyboard and gamepad input to paddle velocities.
-	switch (mP1MoveDirection) {
-	case MoveDirection::NONE:
-		mLeftPaddle.velocity.y = 0.f;
-		break;
-	case MoveDirection::UP:
-		mLeftPaddle.velocity.y = -PaddleVelocity;
-		break;
-	case MoveDirection::DOWN:
-		mLeftPaddle.velocity.y = PaddleVelocity;
-		break;
-	}
-	switch (mP2MoveDirection) {
-	case MoveDirection::NONE:
-		mRightPaddle.velocity.y = 0.f;
-		break;
-	case MoveDirection::UP:
-		mRightPaddle.velocity.y = -PaddleVelocity;
-		break;
-	case MoveDirection::DOWN:
-		mRightPaddle.velocity.y = PaddleVelocity;
-		break;
-	}
+	applyMoveDirection(mLeftPaddle, mP1MoveDirection);
+	applyMoveDirection(mRightPaddle, mP2MoveDirection);
 
 	// TODO A temporary solution which should be handled in a more elegant way.
 	auto mustStartGame = false;
@@ -470,6 +450,20 @@ void Game::newGame() {
 	newRound();
 }
 
+void Game::applyMoveDirection(Rectangle& rect, MoveDirection direction) {
+	switch (direction) {
+	case MoveDirection::NONE:
+		rect.velocity.y = 0.f;
+		break;
+	case MoveDirection::UP:
+		rect.velocity.y = -PaddleVelocity;
+		break;
+	case MoveDirection::DOWN:
+		rect.velocity.y = PaddleVelocity;
+		break;
+	}
+}
+
 void Game::onReadGamepad(int player, const GamepadReading& reading) {
 	if (mDialogVisible) {
 		if (GamepadButtons::X == (reading.Buttons & GamepadButtons::X)) {
@@ -478,7 +472,6 @@ void Game::onReadGamepad(int player, const GamepadReading& reading) {
 		}
 	} else {
 		static const auto DeadZone = .25f;
-		auto velocity = 0.f;
 		auto moveDirection = MoveDirection::NONE;
 		if (reading.LeftThumbstickY > DeadZone) {
 			moveDirection = MoveDirection::UP;
