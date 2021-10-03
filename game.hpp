@@ -14,15 +14,6 @@ public:
 	void onKeyUp(const winrt::Windows::UI::Core::KeyEventArgs& args);
 	void onReadGamepad(int player, const winrt::Windows::Gaming::Input::GamepadReading& reading);
 
-private:
-	enum class MoveDirection { NONE, UP, DOWN };
-
-	void newRound();
-	void newGame();
-	void applyMoveDirection(Rectangle& rect, MoveDirection direction);
-
-	enum class CandidateType { LPADDLE, RPADDLE, BALL, TWALL, BWALL, LGOAL, RGOAL };
-
 	struct Candidate {
 		CandidateType lhs;
 		CandidateType rhs;
@@ -33,8 +24,15 @@ private:
 		float		hitTime;
 		Candidate	candidate;
 	};
+private:
+	enum class MoveDirection { NONE, UP, DOWN };
 
-	auto detectCollision(float deltaMS)const->CollisionResult;
+	void newRound();
+	void newGame();
+	void applyMoveDirection(Rectangle& rect, MoveDirection direction);
+
+	auto detectCollision(float deltaMS) const->CollisionResult;
+	void detectCollision(float deltaMS, const Rectangle& r1, const Rectangle& r2, CollisionResult& result) const;
 
 	Rectangle   mDialogBackground;
 	Rectangle   mDialogForeground;
@@ -60,6 +58,6 @@ private:
 	MoveDirection mP1MoveDirection = MoveDirection::NONE;
 	MoveDirection mP2MoveDirection = MoveDirection::NONE;
 
-	Audio::Ptr&  mAudio;
+	Audio::Ptr& mAudio;
 	Audio::Sound mBeepSound;
 };

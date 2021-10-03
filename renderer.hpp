@@ -13,7 +13,10 @@
 // An alias for the CoreWindow to avoid using the full name monster.
 using ApplicationWindow = winrt::Windows::UI::Core::CoreWindow;
 
+enum class CandidateType { LPADDLE, RPADDLE, BALL, TWALL, BWALL, LGOAL, RGOAL };
+
 struct Rectangle {
+	CandidateType              id;
 	Vec2f					   extent = { 0.f,0.f };
 	Vec2f					   position = { 0.f,0.f };
 	Vec2f					   velocity = { 0.f, 0.f };

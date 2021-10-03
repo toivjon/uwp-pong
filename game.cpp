@@ -135,24 +135,29 @@ Game::Game(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(tr
 	mBall.extent = { .0115f, .015f };
 	mBall.position = Center;
 	mBall.brush = renderer->getWhiteBrush();
+	mBall.id = CandidateType::BALL;
 
 	mUpperWall.extent = { .5f, .015f };
 	mUpperWall.position = { CenterX, .015f };
 	mUpperWall.brush = renderer->getWhiteBrush();
+	mUpperWall.id = CandidateType::TWALL;
 
 	mLowerWall.extent = mUpperWall.extent;
 	mLowerWall.position = { CenterX, .985f };
 	mLowerWall.brush = renderer->getWhiteBrush();
+	mLowerWall.id = CandidateType::BWALL;
 
 	mLeftPaddle.extent = { .0125f, .075f };
 	mLeftPaddle.position = { .05f, CenterY };
 	mLeftPaddle.brush = renderer->getWhiteBrush();
 	mLeftPaddle.velocity = { 0.f, 0.f };
+	mLeftPaddle.id = CandidateType::LPADDLE;
 
 	mRightPaddle.extent = mLeftPaddle.extent;
 	mRightPaddle.position = { .95f, CenterY };
 	mRightPaddle.brush = renderer->getWhiteBrush();
 	mRightPaddle.velocity = { 0.f, 0.f };
+	mRightPaddle.id = CandidateType::RPADDLE;
 
 	mLeftScore.text = std::to_wstring(mP1Score);
 	mLeftScore.position = { .35f, .025f };
@@ -167,91 +172,44 @@ Game::Game(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(tr
 	mLeftGoal.extent = { .5f, .5f };
 	mLeftGoal.position = { -.5f - mBall.extent.x * 4.f, CenterY };
 	mLeftGoal.brush = renderer->getWhiteBrush();
+	mLeftGoal.id = CandidateType::LGOAL;
 
 	mRightGoal.extent = mLeftGoal.extent;
 	mRightGoal.position = { 1.5f + mBall.extent.x * 4.f, CenterY };
 	mRightGoal.brush = renderer->getWhiteBrush();
+	mRightGoal.id = CandidateType::RGOAL;
 
 	mBeepSound = mAudio->createSound(L"Assets/beep.wav");
 
 	newGame();
 }
 
+
 auto Game::detectCollision(float deltaMS) const -> CollisionResult {
 	auto result = CollisionResult{};
 	result.hasHit = false;
 	result.hitTime = FLT_MAX;
-	auto hit = Intersects(mBall, mLeftPaddle, mBall.velocity * deltaMS, mLeftPaddle.velocity * deltaMS);
-	if (hit.collides && hit.time < result.hitTime) {
-		result.hitTime = hit.time;
-		result.hasHit = true;
-		result.candidate.lhs = CandidateType::BALL;
-		result.candidate.rhs = CandidateType::LPADDLE;
-	}
-	hit = Intersects(mBall, mRightPaddle, mBall.velocity * deltaMS, mRightPaddle.velocity * deltaMS);
-	if (hit.collides && hit.time < result.hitTime) {
-		result.hitTime = hit.time;
-		result.hasHit = true;
-		result.candidate.lhs = CandidateType::BALL;
-		result.candidate.rhs = CandidateType::RPADDLE;
-	}
-	hit = Intersects(mBall, mUpperWall, mBall.velocity * deltaMS, { 0.f, 0.f });
-	if (hit.collides && hit.time < result.hitTime) {
-		result.hitTime = hit.time;
-		result.hasHit = true;
-		result.candidate.lhs = CandidateType::BALL;
-		result.candidate.rhs = CandidateType::TWALL;
-	}
-	hit = Intersects(mBall, mLowerWall, mBall.velocity * deltaMS, { 0.f, 0.f });
-	if (hit.collides && hit.time < result.hitTime) {
-		result.hitTime = hit.time;
-		result.hasHit = true;
-		result.candidate.lhs = CandidateType::BALL;
-		result.candidate.rhs = CandidateType::BWALL;
-	}
-	hit = Intersects(mBall, mLeftGoal, mBall.velocity * deltaMS, { 0.f, 0.f });
-	if (hit.collides && hit.time < result.hitTime) {
-		result.hitTime = hit.time;
-		result.hasHit = true;
-		result.candidate.lhs = CandidateType::BALL;
-		result.candidate.rhs = CandidateType::LGOAL;
-	}
-	hit = Intersects(mBall, mRightGoal, mBall.velocity * deltaMS, { 0.f, 0.f });
-	if (hit.collides && hit.time < result.hitTime) {
-		result.hitTime = hit.time;
-		result.hasHit = true;
-		result.candidate.lhs = CandidateType::BALL;
-		result.candidate.rhs = CandidateType::RGOAL;
-	}
-	hit = Intersects(mLeftPaddle, mUpperWall, mLeftPaddle.velocity * deltaMS, { 0.f, 0.f });
-	if (hit.collides && hit.time < result.hitTime) {
-		result.hitTime = hit.time;
-		result.hasHit = true;
-		result.candidate.lhs = CandidateType::LPADDLE;
-		result.candidate.rhs = CandidateType::TWALL;
-	}
-	hit = Intersects(mLeftPaddle, mLowerWall, mLeftPaddle.velocity * deltaMS, { 0.f, 0.f });
-	if (hit.collides && hit.time < result.hitTime) {
-		result.hitTime = hit.time;
-		result.hasHit = true;
-		result.candidate.lhs = CandidateType::LPADDLE;
-		result.candidate.rhs = CandidateType::BWALL;
-	}
-	hit = Intersects(mRightPaddle, mUpperWall, mRightPaddle.velocity * deltaMS, { 0.f,0.f });
-	if (hit.collides && hit.time < result.hitTime) {
-		result.hitTime = hit.time;
-		result.hasHit = true;
-		result.candidate.lhs = CandidateType::RPADDLE;
-		result.candidate.rhs = CandidateType::TWALL;
-	}
-	hit = Intersects(mRightPaddle, mLowerWall, mRightPaddle.velocity * deltaMS, { 0.f,0.f });
-	if (hit.collides && hit.time < result.hitTime) {
-		result.hitTime = hit.time;
-		result.hasHit = true;
-		result.candidate.lhs = CandidateType::RPADDLE;
-		result.candidate.rhs = CandidateType::BWALL;
-	}
+	detectCollision(deltaMS, mBall, mLeftPaddle, result);
+	detectCollision(deltaMS, mBall, mRightPaddle, result);
+	detectCollision(deltaMS, mBall, mUpperWall, result);
+	detectCollision(deltaMS, mBall, mLowerWall, result);
+	detectCollision(deltaMS, mBall, mLeftGoal, result);
+	detectCollision(deltaMS, mBall, mRightGoal, result);
+	detectCollision(deltaMS, mLeftPaddle, mUpperWall, result);
+	detectCollision(deltaMS, mLeftPaddle, mLowerWall, result);
+	detectCollision(deltaMS, mRightPaddle, mUpperWall, result);
+	detectCollision(deltaMS, mRightPaddle, mLowerWall, result);
 	return result;
+}
+
+void Game::detectCollision(float deltaMS, const Rectangle& r1, const Rectangle& r2, CollisionResult& result) const {
+	auto hit = Intersects(r1, r2, r1.velocity * deltaMS, r2.velocity * deltaMS);
+	if (hit.collides && hit.time < result.hitTime) {
+		result.hitTime = hit.time;
+		result.hasHit = true;
+		result.candidate.lhs = r1.id;
+		result.candidate.rhs = r2.id;
+	}
 }
 
 void Game::update(std::chrono::milliseconds delta) {
