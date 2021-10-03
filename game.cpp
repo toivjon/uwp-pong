@@ -187,8 +187,6 @@ Game::Game(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(tr
 
 auto Game::detectCollision(float deltaMS) const -> CollisionResult {
 	auto result = CollisionResult{};
-	result.hasHit = false;
-	result.hitTime = FLT_MAX;
 	detectCollision(deltaMS, mBall, mLeftPaddle, result);
 	detectCollision(deltaMS, mBall, mRightPaddle, result);
 	detectCollision(deltaMS, mBall, mUpperWall, result);

@@ -20,8 +20,8 @@ public:
 	};
 
 	struct CollisionResult {
-		bool		hasHit;
-		float		hitTime;
+		bool		hasHit = false;
+		float		hitTime = FLT_MAX;
 		Candidate	candidate;
 	};
 private:
