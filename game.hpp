@@ -31,7 +31,7 @@ private:
 		Candidate	candidate;
 	};
 
-	auto detectCollision(const Vec2f& vL, const Vec2f& vR, float deltaMS)const->CollisionResult;
+	auto detectCollision(float deltaMS)const->CollisionResult;
 
 	Rectangle   mDialogBackground;
 	Rectangle   mDialogForeground;
@@ -52,6 +52,11 @@ private:
 	int mCountdown = 0;
 	int mP1Score = 0;
 	int mP2Score = 0;
+
+	enum class MoveDirection { NONE, UP, DOWN };
+
+	MoveDirection mP1MoveDirection = MoveDirection::NONE;
+	MoveDirection mP2MoveDirection = MoveDirection::NONE;
 
 	Audio::Ptr&  mAudio;
 	Audio::Sound mBeepSound;

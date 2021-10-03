@@ -177,18 +177,18 @@ Game::Game(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(tr
 	newGame();
 }
 
-auto Game::detectCollision(const Vec2f& vL, const Vec2f& vR, float deltaMS) const -> CollisionResult {
+auto Game::detectCollision(float deltaMS) const -> CollisionResult {
 	auto result = CollisionResult{};
 	result.hasHit = false;
 	result.hitTime = FLT_MAX;
-	auto hit = Intersects(mBall, mLeftPaddle, mBall.velocity * deltaMS, vL);
+	auto hit = Intersects(mBall, mLeftPaddle, mBall.velocity * deltaMS, mLeftPaddle.velocity * deltaMS);
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
 		result.candidate.lhs = CandidateType::BALL;
 		result.candidate.rhs = CandidateType::LPADDLE;
 	}
-	hit = Intersects(mBall, mRightPaddle, mBall.velocity * deltaMS, vR);
+	hit = Intersects(mBall, mRightPaddle, mBall.velocity * deltaMS, mRightPaddle.velocity * deltaMS);
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
@@ -223,28 +223,28 @@ auto Game::detectCollision(const Vec2f& vL, const Vec2f& vR, float deltaMS) cons
 		result.candidate.lhs = CandidateType::BALL;
 		result.candidate.rhs = CandidateType::RGOAL;
 	}
-	hit = Intersects(mLeftPaddle, mUpperWall, vL * deltaMS, { 0.f, 0.f });
+	hit = Intersects(mLeftPaddle, mUpperWall, mLeftPaddle.velocity * deltaMS, { 0.f, 0.f });
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
 		result.candidate.lhs = CandidateType::LPADDLE;
 		result.candidate.rhs = CandidateType::TWALL;
 	}
-	hit = Intersects(mLeftPaddle, mLowerWall, vL * deltaMS, { 0.f, 0.f });
+	hit = Intersects(mLeftPaddle, mLowerWall, mLeftPaddle.velocity * deltaMS, { 0.f, 0.f });
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
 		result.candidate.lhs = CandidateType::LPADDLE;
 		result.candidate.rhs = CandidateType::BWALL;
 	}
-	hit = Intersects(mRightPaddle, mUpperWall, vR * deltaMS, { 0.f,0.f });
+	hit = Intersects(mRightPaddle, mUpperWall, mRightPaddle.velocity * deltaMS, { 0.f,0.f });
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
 		result.candidate.lhs = CandidateType::RPADDLE;
 		result.candidate.rhs = CandidateType::TWALL;
 	}
-	hit = Intersects(mRightPaddle, mLowerWall, vR * deltaMS, { 0.f,0.f });
+	hit = Intersects(mRightPaddle, mLowerWall, mRightPaddle.velocity * deltaMS, { 0.f,0.f });
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
@@ -266,20 +266,41 @@ void Game::update(std::chrono::milliseconds delta) {
 		return;
 	}
 
-	// Get the time (in milliseconds) we must consume during this simulation step and also lock
-	// the current velocities of the paddles to prevent input to change velocity on-the-fly.
+	// Get the time (in milliseconds) we must consume during this simulation step.
 	auto deltaMS = static_cast<float>(delta.count());
-	Vec2f vL = mLeftPaddle.velocity;
-	Vec2f vR = mRightPaddle.velocity;
+
+	// Apply the keyboard and gamepad input to paddle velocities.
+	switch (mP1MoveDirection) {
+	case MoveDirection::NONE:
+		mLeftPaddle.velocity.y = 0.f;
+		break;
+	case MoveDirection::UP:
+		mLeftPaddle.velocity.y = -PaddleVelocity;
+		break;
+	case MoveDirection::DOWN:
+		mLeftPaddle.velocity.y = PaddleVelocity;
+		break;
+	}
+	switch (mP2MoveDirection) {
+	case MoveDirection::NONE:
+		mRightPaddle.velocity.y = 0.f;
+		break;
+	case MoveDirection::UP:
+		mRightPaddle.velocity.y = -PaddleVelocity;
+		break;
+	case MoveDirection::DOWN:
+		mRightPaddle.velocity.y = PaddleVelocity;
+		break;
+	}
 
 	// TODO A temporary solution which should be handled in a more elegant way.
 	auto mustStartGame = false;
 	do {
 		// Perform collision detection to find out the first collision.
-		const auto collision = detectCollision(vL, vR, deltaMS);
+		const auto collision = detectCollision(deltaMS);
 		if (!collision.hasHit) {
-			mLeftPaddle.position = mLeftPaddle.position + vL * deltaMS;
-			mRightPaddle.position = mRightPaddle.position + vR * deltaMS;
+			mLeftPaddle.position = mLeftPaddle.position + mLeftPaddle.velocity * deltaMS;
+			mRightPaddle.position = mRightPaddle.position + mRightPaddle.velocity * deltaMS;
 			mBall.position = mBall.position + mBall.velocity * deltaMS;
 			break;
 		}
@@ -290,8 +311,8 @@ void Game::update(std::chrono::milliseconds delta) {
 
 		// Apply movement to dynamic entities.
 		mBall.position += mBall.velocity * collisionMS;
-		mLeftPaddle.position += vL * collisionMS;
-		mRightPaddle.position += vR * collisionMS;
+		mLeftPaddle.position += mLeftPaddle.velocity * collisionMS;
+		mRightPaddle.position += mRightPaddle.velocity * collisionMS;
 
 		switch (collision.candidate.lhs) {
 		case CandidateType::BALL:
@@ -350,7 +371,7 @@ void Game::update(std::chrono::milliseconds delta) {
 				mLeftPaddle.position.y = mUpperWall.position.y + mUpperWall.extent.y + mLeftPaddle.extent.y + Nudge;
 				break;
 			}
-			vL.y = 0.f;
+			mLeftPaddle.velocity.y = 0.f;
 			break;
 		case CandidateType::RPADDLE:
 			switch (collision.candidate.rhs) {
@@ -361,7 +382,7 @@ void Game::update(std::chrono::milliseconds delta) {
 				mRightPaddle.position.y = mUpperWall.position.y + mUpperWall.extent.y + mRightPaddle.extent.y + Nudge;
 				break;
 			}
-			vR.y = 0.f;
+			mRightPaddle.velocity.y = 0.f;
 			break;
 		}
 		if (mustStartGame) {
@@ -396,16 +417,20 @@ void Game::render(const Renderer::Ptr& renderer) const {
 void Game::onKeyDown(const KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
-		mRightPaddle.velocity.y = -PaddleVelocity;
+		mP2MoveDirection = MoveDirection::UP;
+		// TODO mRightPaddle.velocity.y = -PaddleVelocity;
 		break;
 	case VirtualKey::Down:
-		mRightPaddle.velocity.y = PaddleVelocity;
+		mP2MoveDirection = MoveDirection::DOWN;
+		// TODO mRightPaddle.velocity.y = PaddleVelocity;
 		break;
 	case VirtualKey::W:
-		mLeftPaddle.velocity.y = -PaddleVelocity;
+		mP1MoveDirection = MoveDirection::UP;
+		// TODO mLeftPaddle.velocity.y = -PaddleVelocity;
 		break;
 	case VirtualKey::S:
-		mLeftPaddle.velocity.y = PaddleVelocity;
+		mP1MoveDirection = MoveDirection::DOWN;
+		// TODO mLeftPaddle.velocity.y = PaddleVelocity;
 		break;
 	case VirtualKey::X:
 		if (mDialogVisible) {
@@ -419,16 +444,20 @@ void Game::onKeyDown(const KeyEventArgs& args) {
 void Game::onKeyUp(const KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
-		mRightPaddle.velocity.y = std::max(0.f, mRightPaddle.velocity.y);
+		mP2MoveDirection = (mP2MoveDirection == MoveDirection::UP ? MoveDirection::NONE : mP2MoveDirection);
+		// TODO mRightPaddle.velocity.y = std::max(0.f, mRightPaddle.velocity.y);
 		break;
 	case VirtualKey::Down:
-		mRightPaddle.velocity.y = std::min(0.f, mRightPaddle.velocity.y);
+		mP2MoveDirection = (mP2MoveDirection == MoveDirection::DOWN ? MoveDirection::NONE : mP2MoveDirection);
+		// TODO mRightPaddle.velocity.y = std::min(0.f, mRightPaddle.velocity.y);
 		break;
 	case VirtualKey::W:
-		mLeftPaddle.velocity.y = std::max(0.f, mLeftPaddle.velocity.y);
+		mP1MoveDirection = (mP1MoveDirection == MoveDirection::UP ? MoveDirection::NONE : mP1MoveDirection);
+		// TODO mLeftPaddle.velocity.y = std::max(0.f, mLeftPaddle.velocity.y);
 		break;
 	case VirtualKey::S:
-		mLeftPaddle.velocity.y = std::min(0.f, mLeftPaddle.velocity.y);
+		mP1MoveDirection = (mP1MoveDirection == MoveDirection::DOWN ? MoveDirection::NONE : mP1MoveDirection);
+		// mLeftPaddle.velocity.y = std::min(0.f, mLeftPaddle.velocity.y);
 		break;
 	}
 }
@@ -458,15 +487,20 @@ void Game::onReadGamepad(int player, const GamepadReading& reading) {
 	} else {
 		static const auto DeadZone = .25f;
 		auto velocity = 0.f;
+		auto moveDirection = MoveDirection::NONE;
 		if (reading.LeftThumbstickY > DeadZone) {
-			velocity = -PaddleVelocity;
+			moveDirection = MoveDirection::UP;
+			// TODO velocity = -PaddleVelocity;
 		} else if (reading.LeftThumbstickY < -DeadZone) {
-			velocity = PaddleVelocity;
+			moveDirection = MoveDirection::DOWN;
+			// velocity = PaddleVelocity;
 		}
 		if (player == 0) {
-			mLeftPaddle.velocity.y = velocity;
+			mP1MoveDirection = moveDirection;
+			// TODO mLeftPaddle.velocity.y = velocity;
 		} else {
-			mRightPaddle.velocity.y = velocity;
+			mP2MoveDirection = moveDirection;
+			// TODO mRightPaddle.velocity.y = velocity;
 		}
 	}
 }
