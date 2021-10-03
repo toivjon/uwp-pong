@@ -345,25 +345,24 @@ void Scene::update(std::chrono::milliseconds delta) {
 			switch (collision.candidate.rhs) {
 			case CandidateType::BWALL:
 				mLeftPaddle.position.y = mLowerWall.position.y - mLowerWall.extent.y - mLeftPaddle.extent.y - Nudge;
-				vL.y = 0.f;
 				break;
 			case CandidateType::TWALL:
 				mLeftPaddle.position.y = mUpperWall.position.y + mUpperWall.extent.y + mLeftPaddle.extent.y + Nudge;
-				vL.y = 0.f;
 				break;
 			}
+			vL.y = 0.f;
 			break;
 		case CandidateType::RPADDLE:
 			switch (collision.candidate.rhs) {
 			case CandidateType::BWALL:
 				mRightPaddle.position.y = mLowerWall.position.y - mLowerWall.extent.y - mRightPaddle.extent.y - Nudge;
-				vR.y = 0.f;
 				break;
 			case CandidateType::TWALL:
 				mRightPaddle.position.y = mUpperWall.position.y + mUpperWall.extent.y + mRightPaddle.extent.y + Nudge;
-				vR.y = 0.f;
 				break;
 			}
+			vR.y = 0.f;
+			break;
 		}
 		if (mustStartGame) {
 			break;
