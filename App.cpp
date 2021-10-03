@@ -131,8 +131,9 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 
 	void OnGamepadAdded(const IInspectable&, const Gamepad& gamepad) {
 		OutputDebugStringA("App::OnGamepadAdded\n");
+		static const auto MaxPlayers = 2;
 		critical_section::scoped_lock lock{ mGamepadLock };
-		if (mGamepads.size() < 2) {
+		if (mGamepads.size() < MaxPlayers) {
 			auto finder = std::find(begin(mGamepads), end(mGamepads), gamepad);
 			if (finder == end(mGamepads)) {
 				mGamepads.push_back(gamepad);
