@@ -50,7 +50,7 @@ struct Intersection {
 	float time;
 };
 
-auto Collides(const Rectangle& a, const Rectangle& b, const Vec2f& va, const Vec2f& vb) -> Intersection {
+auto Collides(float deltaMS, const Rectangle& a, const Rectangle& b) -> Intersection {
 	Intersection intersection = {};
 	intersection.collides = false;
 	intersection.time = 0.f;
@@ -68,7 +68,7 @@ auto Collides(const Rectangle& a, const Rectangle& b, const Vec2f& va, const Vec
 	}
 
 	// We will use relative velocity where 'a' is treated as stationary.
-	const auto v = vb - va;
+	const auto v = (b.velocity - a.velocity) * deltaMS;
 
 	// Initialize times for the first and last contact.
 	auto tmin = -FLT_MAX;
@@ -193,7 +193,7 @@ auto Game::detectCollision(float deltaMS) const -> Collision {
 }
 
 void Game::detectCollision(float deltaMS, const Rectangle& r1, const Rectangle& r2, Collision& result) const {
-	auto hit = Collides(r1, r2, r1.velocity * deltaMS, r2.velocity * deltaMS);
+	auto hit = Collides(deltaMS, r1, r2);
 	if (hit.collides && hit.time < result.time) {
 		result.time = hit.time;
 		result.lhs = r1.id;
