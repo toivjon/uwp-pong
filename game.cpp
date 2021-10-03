@@ -45,14 +45,6 @@ inline auto NewRandomDirection() -> Vec2f {
 	return dirs[dist(rng)];
 }
 
-auto Collides(const Rectangle& a, const Rectangle& b) -> bool {
-	const auto amin = a.position - a.extent;
-	const auto amax = a.position + a.extent;
-	const auto bmin = b.position - b.extent;
-	const auto bmax = b.position + b.extent;
-	return amin.x <= bmax.x && amax.x >= bmin.x && amin.y <= bmax.y && amax.y >= bmin.y;
-}
-
 struct Intersection {
 	bool  collides;
 	float time;
@@ -63,17 +55,17 @@ auto Collides(const Rectangle& a, const Rectangle& b, const Vec2f& va, const Vec
 	intersection.collides = false;
 	intersection.time = 0.f;
 
-	// Exit early whether boxes initially collide.
-	if (Collides(a, b)) {
-		intersection.collides = true;
-		intersection.time = 0.f;
-		return intersection;
-	}
-
 	const auto amin = a.position - a.extent;
 	const auto amax = a.position + a.extent;
 	const auto bmin = b.position - b.extent;
 	const auto bmax = b.position + b.extent;
+
+	// Exit early whether boxes initially collide.
+	if (amin.x <= bmax.x && amax.x >= bmin.x && amin.y <= bmax.y && amax.y >= bmin.y) {
+		intersection.collides = true;
+		intersection.time = 0.f;
+		return intersection;
+	}
 
 	// We will use relative velocity where 'a' is treated as stationary.
 	const auto v = vb - va;
