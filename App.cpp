@@ -1,7 +1,7 @@
 #include "pch.hpp"
 #include "audio.hpp"
 #include "renderer.hpp"
-#include "scene.hpp"
+#include "game.hpp"
 
 using namespace std::chrono;
 using namespace winrt;
@@ -33,7 +33,7 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 		Gamepad::GamepadRemoved({ this, &App::OnGamepadRemoved });
 		mRenderer = std::make_unique<Renderer>();
 		mAudio = std::make_unique<Audio>();
-		mScene = std::make_unique<Scene>(mRenderer, mAudio);
+		mGame = std::make_unique<Game>(mRenderer, mAudio);
 	}
 
 	void OnActivated(const CoreApplicationView&, const IActivatedEventArgs&) {
@@ -81,10 +81,10 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 				}
 				previousTime = currentTime;
 
-				// Update game world by the amount of time passed and render the scene.
-				mScene->update(duration_cast<milliseconds>(frameTime));
+				// Update game world by the amount of time passed and render the game scene.
+				mGame->update(duration_cast<milliseconds>(frameTime));
 				mRenderer->clear();
-				mScene->render(mRenderer);
+				mGame->render(mRenderer);
 				mRenderer->present();
 			} else {
 				dispatcher.ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
@@ -121,12 +121,12 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 
 	void OnKeyDown(const CoreWindow&, const KeyEventArgs& args) {
 		OutputDebugStringA("App::OnKeyDown\n");
-		mScene->onKeyDown(args);
+		mGame->onKeyDown(args);
 	}
 
 	void OnKeyUp(const CoreWindow&, const KeyEventArgs& args) {
 		OutputDebugStringA("App::OnKeyUp\n");
-		mScene->onKeyUp(args);
+		mGame->onKeyUp(args);
 	}
 
 	void OnGamepadAdded(const IInspectable&, const Gamepad& gamepad) {
@@ -153,7 +153,7 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 		critical_section::scoped_lock lock{ mGamepadLock };
 		for (auto i = 0; i < mGamepads.size(); i++) {
 			auto reading = mGamepads[i].GetCurrentReading();
-			mScene->onReadGamepad(i, reading);
+			mGame->onReadGamepad(i, reading);
 		}
 	}
 
@@ -161,7 +161,7 @@ private:
 	Renderer::Ptr        mRenderer;
 	Audio::Ptr           mAudio;
 	bool                 mForeground = false;
-	Scene::Ptr           mScene;
+	Game::Ptr            mGame;
 	critical_section     mGamepadLock;
 	std::vector<Gamepad> mGamepads;
 };

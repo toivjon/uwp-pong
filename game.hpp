@@ -3,11 +3,11 @@
 #include "audio.hpp"
 #include "renderer.hpp"
 
-class Scene {
+class Game {
 public:
-	using Ptr = std::unique_ptr<Scene>;
+	using Ptr = std::unique_ptr<Game>;
 
-	Scene(const Renderer::Ptr& renderer, Audio::Ptr& audio);
+	Game(const Renderer::Ptr& renderer, Audio::Ptr& audio);
 	void update(std::chrono::milliseconds delta);
 	void render(const Renderer::Ptr& renderer) const;
 	void onKeyDown(const winrt::Windows::UI::Core::KeyEventArgs& args);

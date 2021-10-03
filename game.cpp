@@ -1,5 +1,5 @@
 #include "pch.hpp"
-#include "scene.hpp"
+#include "game.hpp"
 
 #include <array>
 #include <random>
@@ -113,7 +113,7 @@ auto Intersects(const Rectangle& a, const Rectangle& b, const Vec2f& va, const V
 	return intersection;
 }
 
-Scene::Scene(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(true), mAudio(audio) {
+Game::Game(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(true), mAudio(audio) {
 	mDialogBackground.extent = { 0.375f, 0.40f };
 	mDialogBackground.position = { Center };
 	mDialogBackground.brush = renderer->getWhiteBrush();
@@ -177,7 +177,7 @@ Scene::Scene(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(
 	newGame();
 }
 
-auto Scene::detectCollision(const Vec2f& vL, const Vec2f& vR, float deltaMS) const -> CollisionResult {
+auto Game::detectCollision(const Vec2f& vL, const Vec2f& vR, float deltaMS) const -> CollisionResult {
 	auto result = CollisionResult{};
 	result.hasHit = false;
 	result.hitTime = FLT_MAX;
@@ -254,7 +254,7 @@ auto Scene::detectCollision(const Vec2f& vL, const Vec2f& vR, float deltaMS) con
 	return result;
 }
 
-void Scene::update(std::chrono::milliseconds delta) {
+void Game::update(std::chrono::milliseconds delta) {
 	// Skip the update whether the game has been just launched or the game has ended.
 	if (mDialogVisible) {
 		return;
@@ -374,7 +374,7 @@ void Scene::update(std::chrono::milliseconds delta) {
 	}
 }
 
-void Scene::render(const Renderer::Ptr& renderer) const {
+void Game::render(const Renderer::Ptr& renderer) const {
 	// Base game entities are always shown.
 	renderer->draw(mLeftScore);
 	renderer->draw(mRightScore);
@@ -393,7 +393,7 @@ void Scene::render(const Renderer::Ptr& renderer) const {
 	}
 }
 
-void Scene::onKeyDown(const KeyEventArgs& args) {
+void Game::onKeyDown(const KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
 		mRightPaddle.velocity.y = -PaddleVelocity;
@@ -416,7 +416,7 @@ void Scene::onKeyDown(const KeyEventArgs& args) {
 	}
 }
 
-void Scene::onKeyUp(const KeyEventArgs& args) {
+void Game::onKeyUp(const KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
 		mRightPaddle.velocity.y = std::max(0.f, mRightPaddle.velocity.y);
@@ -433,7 +433,7 @@ void Scene::onKeyUp(const KeyEventArgs& args) {
 	}
 }
 
-void Scene::newRound() {
+void Game::newRound() {
 	mBall.position = Center;
 	mBall.velocity = NewRandomDirection();
 	mLeftPaddle.position.y = CenterY;
@@ -441,7 +441,7 @@ void Scene::newRound() {
 	mCountdown = CountdownTicks;
 }
 
-void Scene::newGame() {
+void Game::newGame() {
 	mP1Score = 0;
 	mP2Score = 0;
 	mRightScore.text = std::to_wstring(mP2Score);
@@ -449,7 +449,7 @@ void Scene::newGame() {
 	newRound();
 }
 
-void Scene::onReadGamepad(int player, const GamepadReading& reading) {
+void Game::onReadGamepad(int player, const GamepadReading& reading) {
 	if (mDialogVisible) {
 		if (GamepadButtons::X == (reading.Buttons & GamepadButtons::X)) {
 			newGame();
