@@ -17,10 +17,9 @@ private:
 	enum class MoveDirection { NONE, UP, DOWN };
 
 	struct CollisionResult {
-		bool	 hasHit = false;
-		float	 hitTime = FLT_MAX;
-		ObjectID lhs;
-		ObjectID rhs;
+		ObjectID lhs = ObjectID::NONE;
+		ObjectID rhs = ObjectID::NONE;
+		float	 time = FLT_MAX;
 	};
 
 	void newRound();

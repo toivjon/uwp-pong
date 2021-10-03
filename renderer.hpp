@@ -13,7 +13,7 @@
 // An alias for the CoreWindow to avoid using the full name monster.
 using ApplicationWindow = winrt::Windows::UI::Core::CoreWindow;
 
-enum class ObjectID { LPADDLE, RPADDLE, BALL, TWALL, BWALL, LGOAL, RGOAL };
+enum class ObjectID { NONE, LPADDLE, RPADDLE, BALL, TWALL, BWALL, LGOAL, RGOAL };
 
 struct Rectangle {
 	ObjectID                   id;

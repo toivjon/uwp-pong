@@ -202,9 +202,8 @@ auto Game::detectCollision(float deltaMS) const -> CollisionResult {
 
 void Game::detectCollision(float deltaMS, const Rectangle& r1, const Rectangle& r2, CollisionResult& result) const {
 	auto hit = Intersects(r1, r2, r1.velocity * deltaMS, r2.velocity * deltaMS);
-	if (hit.collides && hit.time < result.hitTime) {
-		result.hitTime = hit.time;
-		result.hasHit = true;
+	if (hit.collides && hit.time < result.time) {
+		result.time = hit.time;
 		result.lhs = r1.id;
 		result.rhs = r2.id;
 	}
@@ -234,7 +233,7 @@ void Game::update(std::chrono::milliseconds delta) {
 	do {
 		// Perform collision detection to find out the first collision.
 		const auto collision = detectCollision(deltaMS);
-		if (!collision.hasHit) {
+		if (collision.lhs == ObjectID::NONE && collision.rhs == ObjectID::NONE) {
 			mLeftPaddle.position = mLeftPaddle.position + mLeftPaddle.velocity * deltaMS;
 			mRightPaddle.position = mRightPaddle.position + mRightPaddle.velocity * deltaMS;
 			mBall.position = mBall.position + mBall.velocity * deltaMS;
@@ -242,7 +241,7 @@ void Game::update(std::chrono::milliseconds delta) {
 		}
 
 		// Consume simulation time and resolve collisions based on the first collision.
-		const auto collisionMS = collision.hitTime * deltaMS;
+		const auto collisionMS = collision.time * deltaMS;
 		deltaMS -= collisionMS;
 
 		// Apply movement to dynamic entities.
