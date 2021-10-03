@@ -418,19 +418,15 @@ void Game::onKeyDown(const KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
 		mP2MoveDirection = MoveDirection::UP;
-		// TODO mRightPaddle.velocity.y = -PaddleVelocity;
 		break;
 	case VirtualKey::Down:
 		mP2MoveDirection = MoveDirection::DOWN;
-		// TODO mRightPaddle.velocity.y = PaddleVelocity;
 		break;
 	case VirtualKey::W:
 		mP1MoveDirection = MoveDirection::UP;
-		// TODO mLeftPaddle.velocity.y = -PaddleVelocity;
 		break;
 	case VirtualKey::S:
 		mP1MoveDirection = MoveDirection::DOWN;
-		// TODO mLeftPaddle.velocity.y = PaddleVelocity;
 		break;
 	case VirtualKey::X:
 		if (mDialogVisible) {
@@ -445,19 +441,15 @@ void Game::onKeyUp(const KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
 		mP2MoveDirection = (mP2MoveDirection == MoveDirection::UP ? MoveDirection::NONE : mP2MoveDirection);
-		// TODO mRightPaddle.velocity.y = std::max(0.f, mRightPaddle.velocity.y);
 		break;
 	case VirtualKey::Down:
 		mP2MoveDirection = (mP2MoveDirection == MoveDirection::DOWN ? MoveDirection::NONE : mP2MoveDirection);
-		// TODO mRightPaddle.velocity.y = std::min(0.f, mRightPaddle.velocity.y);
 		break;
 	case VirtualKey::W:
 		mP1MoveDirection = (mP1MoveDirection == MoveDirection::UP ? MoveDirection::NONE : mP1MoveDirection);
-		// TODO mLeftPaddle.velocity.y = std::max(0.f, mLeftPaddle.velocity.y);
 		break;
 	case VirtualKey::S:
 		mP1MoveDirection = (mP1MoveDirection == MoveDirection::DOWN ? MoveDirection::NONE : mP1MoveDirection);
-		// mLeftPaddle.velocity.y = std::min(0.f, mLeftPaddle.velocity.y);
 		break;
 	}
 }
@@ -490,17 +482,13 @@ void Game::onReadGamepad(int player, const GamepadReading& reading) {
 		auto moveDirection = MoveDirection::NONE;
 		if (reading.LeftThumbstickY > DeadZone) {
 			moveDirection = MoveDirection::UP;
-			// TODO velocity = -PaddleVelocity;
 		} else if (reading.LeftThumbstickY < -DeadZone) {
 			moveDirection = MoveDirection::DOWN;
-			// velocity = PaddleVelocity;
 		}
 		if (player == 0) {
 			mP1MoveDirection = moveDirection;
-			// TODO mLeftPaddle.velocity.y = velocity;
 		} else {
 			mP2MoveDirection = moveDirection;
-			// TODO mRightPaddle.velocity.y = velocity;
 		}
 	}
 }
