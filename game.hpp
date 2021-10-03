@@ -14,15 +14,11 @@ public:
 	void onKeyUp(const winrt::Windows::UI::Core::KeyEventArgs& args);
 	void onReadGamepad(int player, const winrt::Windows::Gaming::Input::GamepadReading& reading);
 
-	struct Candidate {
+	struct CollisionResult {
+		bool	 hasHit = false;
+		float	 hitTime = FLT_MAX;
 		ObjectID lhs;
 		ObjectID rhs;
-	};
-
-	struct CollisionResult {
-		bool		hasHit = false;
-		float		hitTime = FLT_MAX;
-		Candidate	candidate;
 	};
 private:
 	enum class MoveDirection { NONE, UP, DOWN };

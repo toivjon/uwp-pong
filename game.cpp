@@ -205,8 +205,8 @@ void Game::detectCollision(float deltaMS, const Rectangle& r1, const Rectangle& 
 	if (hit.collides && hit.time < result.hitTime) {
 		result.hitTime = hit.time;
 		result.hasHit = true;
-		result.candidate.lhs = r1.id;
-		result.candidate.rhs = r2.id;
+		result.lhs = r1.id;
+		result.rhs = r2.id;
 	}
 }
 
@@ -250,9 +250,9 @@ void Game::update(std::chrono::milliseconds delta) {
 		mLeftPaddle.position += mLeftPaddle.velocity * collisionMS;
 		mRightPaddle.position += mRightPaddle.velocity * collisionMS;
 
-		switch (collision.candidate.lhs) {
+		switch (collision.lhs) {
 		case ObjectID::BALL:
-			switch (collision.candidate.rhs) {
+			switch (collision.rhs) {
 			case ObjectID::BWALL:
 				mBall.position.y = mLowerWall.position.y - mLowerWall.extent.y - mBall.extent.y - Nudge;
 				mBall.velocity.y = -mBall.velocity.y;
@@ -299,7 +299,7 @@ void Game::update(std::chrono::milliseconds delta) {
 			}
 			break;
 		case ObjectID::LPADDLE:
-			switch (collision.candidate.rhs) {
+			switch (collision.rhs) {
 			case ObjectID::BWALL:
 				mLeftPaddle.position.y = mLowerWall.position.y - mLowerWall.extent.y - mLeftPaddle.extent.y - Nudge;
 				break;
@@ -310,7 +310,7 @@ void Game::update(std::chrono::milliseconds delta) {
 			mLeftPaddle.velocity.y = 0.f;
 			break;
 		case ObjectID::RPADDLE:
-			switch (collision.candidate.rhs) {
+			switch (collision.rhs) {
 			case ObjectID::BWALL:
 				mRightPaddle.position.y = mLowerWall.position.y - mLowerWall.extent.y - mRightPaddle.extent.y - Nudge;
 				break;
