@@ -15,8 +15,8 @@ public:
 	void onReadGamepad(int player, const winrt::Windows::Gaming::Input::GamepadReading& reading);
 
 	struct Candidate {
-		CandidateType lhs;
-		CandidateType rhs;
+		ObjectID lhs;
+		ObjectID rhs;
 	};
 
 	struct CollisionResult {

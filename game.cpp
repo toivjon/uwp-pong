@@ -135,29 +135,29 @@ Game::Game(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(tr
 	mBall.extent = { .0115f, .015f };
 	mBall.position = Center;
 	mBall.brush = renderer->getWhiteBrush();
-	mBall.id = CandidateType::BALL;
+	mBall.id = ObjectID::BALL;
 
 	mUpperWall.extent = { .5f, .015f };
 	mUpperWall.position = { CenterX, .015f };
 	mUpperWall.brush = renderer->getWhiteBrush();
-	mUpperWall.id = CandidateType::TWALL;
+	mUpperWall.id = ObjectID::TWALL;
 
 	mLowerWall.extent = mUpperWall.extent;
 	mLowerWall.position = { CenterX, .985f };
 	mLowerWall.brush = renderer->getWhiteBrush();
-	mLowerWall.id = CandidateType::BWALL;
+	mLowerWall.id = ObjectID::BWALL;
 
 	mLeftPaddle.extent = { .0125f, .075f };
 	mLeftPaddle.position = { .05f, CenterY };
 	mLeftPaddle.brush = renderer->getWhiteBrush();
 	mLeftPaddle.velocity = { 0.f, 0.f };
-	mLeftPaddle.id = CandidateType::LPADDLE;
+	mLeftPaddle.id = ObjectID::LPADDLE;
 
 	mRightPaddle.extent = mLeftPaddle.extent;
 	mRightPaddle.position = { .95f, CenterY };
 	mRightPaddle.brush = renderer->getWhiteBrush();
 	mRightPaddle.velocity = { 0.f, 0.f };
-	mRightPaddle.id = CandidateType::RPADDLE;
+	mRightPaddle.id = ObjectID::RPADDLE;
 
 	mLeftScore.text = std::to_wstring(mP1Score);
 	mLeftScore.position = { .35f, .025f };
@@ -172,12 +172,12 @@ Game::Game(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(tr
 	mLeftGoal.extent = { .5f, .5f };
 	mLeftGoal.position = { -.5f - mBall.extent.x * 4.f, CenterY };
 	mLeftGoal.brush = renderer->getWhiteBrush();
-	mLeftGoal.id = CandidateType::LGOAL;
+	mLeftGoal.id = ObjectID::LGOAL;
 
 	mRightGoal.extent = mLeftGoal.extent;
 	mRightGoal.position = { 1.5f + mBall.extent.x * 4.f, CenterY };
 	mRightGoal.brush = renderer->getWhiteBrush();
-	mRightGoal.id = CandidateType::RGOAL;
+	mRightGoal.id = ObjectID::RGOAL;
 
 	mBeepSound = mAudio->createSound(L"Assets/beep.wav");
 
@@ -251,19 +251,19 @@ void Game::update(std::chrono::milliseconds delta) {
 		mRightPaddle.position += mRightPaddle.velocity * collisionMS;
 
 		switch (collision.candidate.lhs) {
-		case CandidateType::BALL:
+		case ObjectID::BALL:
 			switch (collision.candidate.rhs) {
-			case CandidateType::BWALL:
+			case ObjectID::BWALL:
 				mBall.position.y = mLowerWall.position.y - mLowerWall.extent.y - mBall.extent.y - Nudge;
 				mBall.velocity.y = -mBall.velocity.y;
 				mAudio->playSound(mBeepSound);
 				break;
-			case CandidateType::TWALL:
+			case ObjectID::TWALL:
 				mBall.position.y = mUpperWall.position.y + mUpperWall.extent.y + mBall.extent.y + Nudge;
 				mBall.velocity.y = -mBall.velocity.y;
 				mAudio->playSound(mBeepSound);
 				break;
-			case CandidateType::LGOAL:
+			case ObjectID::LGOAL:
 				mP2Score++;
 				if (mP2Score >= 10) {
 					mDialogVisible = true;
@@ -273,7 +273,7 @@ void Game::update(std::chrono::milliseconds delta) {
 				}
 				mustStartGame = true;
 				break;
-			case CandidateType::RGOAL:
+			case ObjectID::RGOAL:
 				mP1Score++;
 				if (mP1Score >= 10) {
 					mDialogVisible = true;
@@ -283,14 +283,14 @@ void Game::update(std::chrono::milliseconds delta) {
 				}
 				mustStartGame = true;
 				break;
-			case CandidateType::LPADDLE: {
+			case ObjectID::LPADDLE: {
 				mBall.position.x = mLeftPaddle.position.x + mLeftPaddle.extent.x + mBall.extent.x + Nudge;
 				mBall.velocity.x = -mBall.velocity.x;
 				mBall.velocity = mBall.velocity * BallVelocityMultiplier;
 				mAudio->playSound(mBeepSound);
 				break;
 			}
-			case CandidateType::RPADDLE:
+			case ObjectID::RPADDLE:
 				mBall.position.x = mRightPaddle.position.x - mRightPaddle.extent.x - mBall.extent.x - Nudge;
 				mBall.velocity.x = -mBall.velocity.x;
 				mBall.velocity = mBall.velocity * BallVelocityMultiplier;
@@ -298,23 +298,23 @@ void Game::update(std::chrono::milliseconds delta) {
 				break;
 			}
 			break;
-		case CandidateType::LPADDLE:
+		case ObjectID::LPADDLE:
 			switch (collision.candidate.rhs) {
-			case CandidateType::BWALL:
+			case ObjectID::BWALL:
 				mLeftPaddle.position.y = mLowerWall.position.y - mLowerWall.extent.y - mLeftPaddle.extent.y - Nudge;
 				break;
-			case CandidateType::TWALL:
+			case ObjectID::TWALL:
 				mLeftPaddle.position.y = mUpperWall.position.y + mUpperWall.extent.y + mLeftPaddle.extent.y + Nudge;
 				break;
 			}
 			mLeftPaddle.velocity.y = 0.f;
 			break;
-		case CandidateType::RPADDLE:
+		case ObjectID::RPADDLE:
 			switch (collision.candidate.rhs) {
-			case CandidateType::BWALL:
+			case ObjectID::BWALL:
 				mRightPaddle.position.y = mLowerWall.position.y - mLowerWall.extent.y - mRightPaddle.extent.y - Nudge;
 				break;
-			case CandidateType::TWALL:
+			case ObjectID::TWALL:
 				mRightPaddle.position.y = mUpperWall.position.y + mUpperWall.extent.y + mRightPaddle.extent.y + Nudge;
 				break;
 			}
