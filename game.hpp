@@ -16,7 +16,7 @@ public:
 private:
 	enum class MoveDirection { NONE, UP, DOWN };
 
-	struct CollisionResult {
+	struct Collision {
 		ObjectID lhs = ObjectID::NONE;
 		ObjectID rhs = ObjectID::NONE;
 		float	 time = FLT_MAX;
@@ -26,8 +26,8 @@ private:
 	void newGame();
 	void applyMoveDirection(Rectangle& rect, MoveDirection direction);
 
-	auto detectCollision(float deltaMS) const->CollisionResult;
-	void detectCollision(float deltaMS, const Rectangle& r1, const Rectangle& r2, CollisionResult& result) const;
+	auto detectCollision(float deltaMS) const->Collision;
+	void detectCollision(float deltaMS, const Rectangle& r1, const Rectangle& r2, Collision& result) const;
 
 	Rectangle   mDialogBackground;
 	Rectangle   mDialogForeground;

@@ -45,7 +45,7 @@ inline auto NewRandomDirection() -> Vec2f {
 	return dirs[dist(rng)];
 }
 
-auto Intersects(const Rectangle& a, const Rectangle& b) -> bool {
+auto Collides(const Rectangle& a, const Rectangle& b) -> bool {
 	const auto amin = a.position - a.extent;
 	const auto amax = a.position + a.extent;
 	const auto bmin = b.position - b.extent;
@@ -58,13 +58,13 @@ struct Intersection {
 	float time;
 };
 
-auto Intersects(const Rectangle& a, const Rectangle& b, const Vec2f& va, const Vec2f& vb) -> Intersection {
+auto Collides(const Rectangle& a, const Rectangle& b, const Vec2f& va, const Vec2f& vb) -> Intersection {
 	Intersection intersection = {};
 	intersection.collides = false;
 	intersection.time = 0.f;
 
 	// Exit early whether boxes initially collide.
-	if (Intersects(a, b)) {
+	if (Collides(a, b)) {
 		intersection.collides = true;
 		intersection.time = 0.f;
 		return intersection;
@@ -185,8 +185,8 @@ Game::Game(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(tr
 }
 
 
-auto Game::detectCollision(float deltaMS) const -> CollisionResult {
-	auto result = CollisionResult{};
+auto Game::detectCollision(float deltaMS) const -> Collision {
+	auto result = Collision{};
 	detectCollision(deltaMS, mBall, mLeftPaddle, result);
 	detectCollision(deltaMS, mBall, mRightPaddle, result);
 	detectCollision(deltaMS, mBall, mUpperWall, result);
@@ -200,8 +200,8 @@ auto Game::detectCollision(float deltaMS) const -> CollisionResult {
 	return result;
 }
 
-void Game::detectCollision(float deltaMS, const Rectangle& r1, const Rectangle& r2, CollisionResult& result) const {
-	auto hit = Intersects(r1, r2, r1.velocity * deltaMS, r2.velocity * deltaMS);
+void Game::detectCollision(float deltaMS, const Rectangle& r1, const Rectangle& r2, Collision& result) const {
+	auto hit = Collides(r1, r2, r1.velocity * deltaMS, r2.velocity * deltaMS);
 	if (hit.collides && hit.time < result.time) {
 		result.time = hit.time;
 		result.lhs = r1.id;
