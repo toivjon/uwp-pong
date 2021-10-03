@@ -13,6 +13,8 @@ public:
 	void onKeyDown(const winrt::Windows::UI::Core::KeyEventArgs& args);
 	void onKeyUp(const winrt::Windows::UI::Core::KeyEventArgs& args);
 	void onReadGamepad(int player, const winrt::Windows::Gaming::Input::GamepadReading& reading);
+private:
+	enum class MoveDirection { NONE, UP, DOWN };
 
 	struct CollisionResult {
 		bool	 hasHit = false;
@@ -20,8 +22,6 @@ public:
 		ObjectID lhs;
 		ObjectID rhs;
 	};
-private:
-	enum class MoveDirection { NONE, UP, DOWN };
 
 	void newRound();
 	void newGame();
