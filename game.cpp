@@ -45,66 +45,6 @@ inline auto NewRandomDirection() -> Vec2f {
 	return dirs[dist(rng)];
 }
 
-struct Intersection {
-	bool  collides;
-	float time;
-};
-
-auto Collides(float deltaMS, const Rectangle& a, const Rectangle& b) -> Intersection {
-	Intersection intersection = {};
-	intersection.collides = false;
-	intersection.time = 0.f;
-
-	const auto amin = a.position - a.extent;
-	const auto amax = a.position + a.extent;
-	const auto bmin = b.position - b.extent;
-	const auto bmax = b.position + b.extent;
-
-	// Exit early whether boxes initially collide.
-	if (amin.x <= bmax.x && amax.x >= bmin.x && amin.y <= bmax.y && amax.y >= bmin.y) {
-		intersection.collides = true;
-		intersection.time = 0.f;
-		return intersection;
-	}
-
-	// We will use relative velocity where 'a' is treated as stationary.
-	const auto v = (b.velocity - a.velocity) * deltaMS;
-
-	// Initialize times for the first and last contact.
-	auto tmin = -FLT_MAX;
-	auto tmax = FLT_MAX;
-
-	// Find the first and last contact from x-axis.
-	if (v.x < .0f) {
-		if (bmax.x < amin.x) return intersection;
-		if (amax.x < bmin.x) tmin = std::max((amax.x - bmin.x) / v.x, tmin);
-		if (bmax.x > amin.x) tmax = std::min((amin.x - bmax.x) / v.x, tmax);
-	}
-	if (v.x > .0f) {
-		if (bmin.x > amax.x) return intersection;
-		if (bmax.x < amin.x) tmin = std::max((amin.x - bmax.x) / v.x, tmin);
-		if (amax.x > bmin.x) tmax = std::min((amax.x - bmin.x) / v.x, tmax);
-	}
-	if (tmin > tmax) return intersection;
-
-	// Find the first and last contact from y-axis.
-	if (v.y < .0f) {
-		if (bmax.y < amin.y) return intersection;
-		if (amax.y < bmin.y) tmin = std::max((amax.y - bmin.y) / v.y, tmin);
-		if (bmax.y > amin.y) tmax = std::min((amin.y - bmax.y) / v.y, tmax);
-	}
-	if (v.y > .0f) {
-		if (bmin.y > amax.y) return intersection;
-		if (bmax.y < amin.y) tmin = std::max((amin.y - bmax.y) / v.y, tmin);
-		if (amax.y > bmin.y) tmax = std::min((amax.y - bmin.y) / v.y, tmax);
-	}
-	if (tmin > tmax) return intersection;
-
-	intersection.collides = (tmin >= 0.f && tmin <= 1.f);
-	intersection.time = tmin;
-	return intersection;
-}
-
 Game::Game(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(true), mAudio(audio) {
 	mDialogBackground.extent = { 0.375f, 0.40f };
 	mDialogBackground.position = { Center };
@@ -193,12 +133,69 @@ auto Game::detectCollision(float deltaMS) const -> Collision {
 }
 
 void Game::detectCollision(float deltaMS, const Rectangle& r1, const Rectangle& r2, Collision& result) const {
-	auto hit = Collides(deltaMS, r1, r2);
-	if (hit.collides && hit.time < result.time) {
+	auto hit = detectCollision(deltaMS, r1, r2);
+	if (hit.lhs != ObjectID::NONE && hit.time < result.time) {
 		result.time = hit.time;
 		result.lhs = r1.id;
 		result.rhs = r2.id;
 	}
+}
+
+auto Game::detectCollision(float deltaMS, const Rectangle& a, const Rectangle& b) const->Collision {
+	auto collision = Collision{};
+
+	const auto amin = a.position - a.extent;
+	const auto amax = a.position + a.extent;
+	const auto bmin = b.position - b.extent;
+	const auto bmax = b.position + b.extent;
+
+	// Exit early whether boxes initially collide.
+	if (amin.x <= bmax.x && amax.x >= bmin.x && amin.y <= bmax.y && amax.y >= bmin.y) {
+		collision.lhs = a.id;
+		collision.rhs = b.id;
+		collision.time = 0.f;
+		return collision;
+	}
+
+	// We will use relative velocity where 'a' is treated as stationary.
+	const auto v = (b.velocity - a.velocity) * deltaMS;
+
+	// Initialize times for the first and last contact.
+	auto tmin = -FLT_MAX;
+	auto tmax = FLT_MAX;
+
+	// Find the first and last contact from x-axis.
+	if (v.x < .0f) {
+		if (bmax.x < amin.x) return collision;
+		if (amax.x < bmin.x) tmin = std::max((amax.x - bmin.x) / v.x, tmin);
+		if (bmax.x > amin.x) tmax = std::min((amin.x - bmax.x) / v.x, tmax);
+	}
+	if (v.x > .0f) {
+		if (bmin.x > amax.x) return collision;
+		if (bmax.x < amin.x) tmin = std::max((amin.x - bmax.x) / v.x, tmin);
+		if (amax.x > bmin.x) tmax = std::min((amax.x - bmin.x) / v.x, tmax);
+	}
+	if (tmin > tmax) return collision;
+
+	// Find the first and last contact from y-axis.
+	if (v.y < .0f) {
+		if (bmax.y < amin.y) return collision;
+		if (amax.y < bmin.y) tmin = std::max((amax.y - bmin.y) / v.y, tmin);
+		if (bmax.y > amin.y) tmax = std::min((amin.y - bmax.y) / v.y, tmax);
+	}
+	if (v.y > .0f) {
+		if (bmin.y > amax.y) return collision;
+		if (bmax.y < amin.y) tmin = std::max((amin.y - bmax.y) / v.y, tmin);
+		if (amax.y > bmin.y) tmax = std::min((amax.y - bmin.y) / v.y, tmax);
+	}
+	if (tmin > tmax) return collision;
+
+	if (tmin >= 0.f && tmin <= 1.f) {
+		collision.lhs = a.id;
+		collision.rhs = b.id;
+		collision.time = tmin;
+	}
+	return collision;
 }
 
 void Game::update(std::chrono::milliseconds delta) {

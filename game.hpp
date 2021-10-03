@@ -28,6 +28,7 @@ private:
 
 	auto detectCollision(float deltaMS) const->Collision;
 	void detectCollision(float deltaMS, const Rectangle& r1, const Rectangle& r2, Collision& result) const;
+	auto detectCollision(float deltaMS, const Rectangle& r1, const Rectangle& r2) const->Collision;
 
 	Rectangle   mDialogBackground;
 	Rectangle   mDialogForeground;
