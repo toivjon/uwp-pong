@@ -295,9 +295,9 @@ void Game::update(std::chrono::milliseconds delta) {
 		// Perform collision detection to find out the first collision.
 		const auto collision = detectCollision(deltaMS);
 		if (collision.lhs == ObjectID::NONE && collision.rhs == ObjectID::NONE) {
-			mLeftPaddle.position = mLeftPaddle.position + mLeftPaddle.velocity * deltaMS;
-			mRightPaddle.position = mRightPaddle.position + mRightPaddle.velocity * deltaMS;
-			mBall.position = mBall.position + mBall.velocity * deltaMS;
+			mLeftPaddle.position += mLeftPaddle.velocity * deltaMS;
+			mRightPaddle.position += mRightPaddle.velocity * deltaMS;
+			mBall.position += mBall.velocity * deltaMS;
 			break;
 		}
 
