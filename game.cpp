@@ -198,6 +198,80 @@ auto Game::detectCollision(float deltaMS, const Rectangle& a, const Rectangle& b
 	return collision;
 }
 
+void Game::resolveCollision(const Collision& collision) {
+	switch (collision.lhs) {
+	case ObjectID::BALL:
+		switch (collision.rhs) {
+		case ObjectID::BWALL:
+			mBall.position.y = mLowerWall.position.y - mLowerWall.extent.y - mBall.extent.y - Nudge;
+			mBall.velocity.y = -mBall.velocity.y;
+			mAudio->playSound(mBeepSound);
+			break;
+		case ObjectID::TWALL:
+			mBall.position.y = mUpperWall.position.y + mUpperWall.extent.y + mBall.extent.y + Nudge;
+			mBall.velocity.y = -mBall.velocity.y;
+			mAudio->playSound(mBeepSound);
+			break;
+		case ObjectID::LGOAL:
+			mP2Score++;
+			if (mP2Score >= 10) {
+				mDialogVisible = true;
+				mDialogTopic.text = L"Right player wins!";
+			} else {
+				mRightScore.text = std::to_wstring(mP2Score);
+			}
+			mNewRound = true;
+			break;
+		case ObjectID::RGOAL:
+			mP1Score++;
+			if (mP1Score >= 10) {
+				mDialogVisible = true;
+				mDialogTopic.text = L"Left player wins!";
+			} else {
+				mLeftScore.text = std::to_wstring(mP1Score);
+			}
+			mNewRound = true;
+			break;
+		case ObjectID::LPADDLE: {
+			mBall.position.x = mLeftPaddle.position.x + mLeftPaddle.extent.x + mBall.extent.x + Nudge;
+			mBall.velocity.x = -mBall.velocity.x;
+			mBall.velocity = mBall.velocity * BallVelocityMultiplier;
+			mAudio->playSound(mBeepSound);
+			break;
+		}
+		case ObjectID::RPADDLE:
+			mBall.position.x = mRightPaddle.position.x - mRightPaddle.extent.x - mBall.extent.x - Nudge;
+			mBall.velocity.x = -mBall.velocity.x;
+			mBall.velocity = mBall.velocity * BallVelocityMultiplier;
+			mAudio->playSound(mBeepSound);
+			break;
+		}
+		break;
+	case ObjectID::LPADDLE:
+		switch (collision.rhs) {
+		case ObjectID::BWALL:
+			mLeftPaddle.position.y = mLowerWall.position.y - mLowerWall.extent.y - mLeftPaddle.extent.y - Nudge;
+			break;
+		case ObjectID::TWALL:
+			mLeftPaddle.position.y = mUpperWall.position.y + mUpperWall.extent.y + mLeftPaddle.extent.y + Nudge;
+			break;
+		}
+		mLeftPaddle.velocity.y = 0.f;
+		break;
+	case ObjectID::RPADDLE:
+		switch (collision.rhs) {
+		case ObjectID::BWALL:
+			mRightPaddle.position.y = mLowerWall.position.y - mLowerWall.extent.y - mRightPaddle.extent.y - Nudge;
+			break;
+		case ObjectID::TWALL:
+			mRightPaddle.position.y = mUpperWall.position.y + mUpperWall.extent.y + mRightPaddle.extent.y + Nudge;
+			break;
+		}
+		mRightPaddle.velocity.y = 0.f;
+		break;
+	}
+}
+
 void Game::update(std::chrono::milliseconds delta) {
 	// Skip the update whether the game has been just launched or the game has ended.
 	if (mDialogVisible) {
@@ -217,8 +291,6 @@ void Game::update(std::chrono::milliseconds delta) {
 	applyMoveDirection(mLeftPaddle, mP1MoveDirection);
 	applyMoveDirection(mRightPaddle, mP2MoveDirection);
 
-	// TODO A temporary solution which should be handled in a more elegant way.
-	auto mustStartGame = false;
 	do {
 		// Perform collision detection to find out the first collision.
 		const auto collision = detectCollision(deltaMS);
@@ -238,84 +310,13 @@ void Game::update(std::chrono::milliseconds delta) {
 		mLeftPaddle.position += mLeftPaddle.velocity * collisionMS;
 		mRightPaddle.position += mRightPaddle.velocity * collisionMS;
 
-		switch (collision.lhs) {
-		case ObjectID::BALL:
-			switch (collision.rhs) {
-			case ObjectID::BWALL:
-				mBall.position.y = mLowerWall.position.y - mLowerWall.extent.y - mBall.extent.y - Nudge;
-				mBall.velocity.y = -mBall.velocity.y;
-				mAudio->playSound(mBeepSound);
-				break;
-			case ObjectID::TWALL:
-				mBall.position.y = mUpperWall.position.y + mUpperWall.extent.y + mBall.extent.y + Nudge;
-				mBall.velocity.y = -mBall.velocity.y;
-				mAudio->playSound(mBeepSound);
-				break;
-			case ObjectID::LGOAL:
-				mP2Score++;
-				if (mP2Score >= 10) {
-					mDialogVisible = true;
-					mDialogTopic.text = L"Right player wins!";
-				} else {
-					mRightScore.text = std::to_wstring(mP2Score);
-				}
-				mustStartGame = true;
-				break;
-			case ObjectID::RGOAL:
-				mP1Score++;
-				if (mP1Score >= 10) {
-					mDialogVisible = true;
-					mDialogTopic.text = L"Left player wins!";
-				} else {
-					mLeftScore.text = std::to_wstring(mP1Score);
-				}
-				mustStartGame = true;
-				break;
-			case ObjectID::LPADDLE: {
-				mBall.position.x = mLeftPaddle.position.x + mLeftPaddle.extent.x + mBall.extent.x + Nudge;
-				mBall.velocity.x = -mBall.velocity.x;
-				mBall.velocity = mBall.velocity * BallVelocityMultiplier;
-				mAudio->playSound(mBeepSound);
-				break;
-			}
-			case ObjectID::RPADDLE:
-				mBall.position.x = mRightPaddle.position.x - mRightPaddle.extent.x - mBall.extent.x - Nudge;
-				mBall.velocity.x = -mBall.velocity.x;
-				mBall.velocity = mBall.velocity * BallVelocityMultiplier;
-				mAudio->playSound(mBeepSound);
-				break;
-			}
-			break;
-		case ObjectID::LPADDLE:
-			switch (collision.rhs) {
-			case ObjectID::BWALL:
-				mLeftPaddle.position.y = mLowerWall.position.y - mLowerWall.extent.y - mLeftPaddle.extent.y - Nudge;
-				break;
-			case ObjectID::TWALL:
-				mLeftPaddle.position.y = mUpperWall.position.y + mUpperWall.extent.y + mLeftPaddle.extent.y + Nudge;
-				break;
-			}
-			mLeftPaddle.velocity.y = 0.f;
-			break;
-		case ObjectID::RPADDLE:
-			switch (collision.rhs) {
-			case ObjectID::BWALL:
-				mRightPaddle.position.y = mLowerWall.position.y - mLowerWall.extent.y - mRightPaddle.extent.y - Nudge;
-				break;
-			case ObjectID::TWALL:
-				mRightPaddle.position.y = mUpperWall.position.y + mUpperWall.extent.y + mRightPaddle.extent.y + Nudge;
-				break;
-			}
-			mRightPaddle.velocity.y = 0.f;
-			break;
-		}
-		if (mustStartGame) {
-			break;
-		}
-	} while (true);
+		// Perform collision resolvement.
+		resolveCollision(collision);
+	} while (!mNewRound);
 
-	if (mustStartGame) {
+	if (mNewRound) {
 		newRound();
+		mNewRound = false;
 	}
 }
 

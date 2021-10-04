@@ -30,6 +30,8 @@ private:
 	void detectCollision(float deltaMS, const Rectangle& r1, const Rectangle& r2, Collision& result) const;
 	auto detectCollision(float deltaMS, const Rectangle& r1, const Rectangle& r2) const->Collision;
 
+	void resolveCollision(const Collision& collision);
+
 	Rectangle   mDialogBackground;
 	Rectangle   mDialogForeground;
 	Text        mDialogTopic;
@@ -49,7 +51,7 @@ private:
 	int mCountdown = 0;
 	int mP1Score = 0;
 	int mP2Score = 0;
-
+	bool mNewRound = false;
 
 	MoveDirection mP1MoveDirection = MoveDirection::NONE;
 	MoveDirection mP2MoveDirection = MoveDirection::NONE;
