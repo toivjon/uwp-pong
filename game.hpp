@@ -39,8 +39,8 @@ private:
 	bool        mDialogVisible;
 
 	Rectangle	mBall;
-	Rectangle	mUpperWall;
-	Rectangle	mLowerWall;
+	Rectangle	mTopWall;
+	Rectangle	mBottomWall;
 	Rectangle	mLeftPaddle;
 	Rectangle	mRightPaddle;
 	Rectangle   mLeftGoal;

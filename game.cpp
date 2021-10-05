@@ -69,15 +69,15 @@ Game::Game(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(tr
 	mBall.brush = renderer->getWhiteBrush();
 	mBall.id = ObjectID::BALL;
 
-	mUpperWall.extent = { .5f, .015f };
-	mUpperWall.position = { CenterX, .015f };
-	mUpperWall.brush = renderer->getWhiteBrush();
-	mUpperWall.id = ObjectID::TWALL;
+	mTopWall.extent = { .5f, .015f };
+	mTopWall.position = { CenterX, .015f };
+	mTopWall.brush = renderer->getWhiteBrush();
+	mTopWall.id = ObjectID::TWALL;
 
-	mLowerWall.extent = mUpperWall.extent;
-	mLowerWall.position = { CenterX, .985f };
-	mLowerWall.brush = renderer->getWhiteBrush();
-	mLowerWall.id = ObjectID::BWALL;
+	mBottomWall.extent = mTopWall.extent;
+	mBottomWall.position = { CenterX, .985f };
+	mBottomWall.brush = renderer->getWhiteBrush();
+	mBottomWall.id = ObjectID::BWALL;
 
 	mLeftPaddle.extent = { .0125f, .075f };
 	mLeftPaddle.position = { .05f, CenterY };
@@ -121,14 +121,14 @@ auto Game::detectCollision(float deltaMS) const -> Collision {
 	auto result = Collision{};
 	detectCollision(deltaMS, mBall, mLeftPaddle, result);
 	detectCollision(deltaMS, mBall, mRightPaddle, result);
-	detectCollision(deltaMS, mBall, mUpperWall, result);
-	detectCollision(deltaMS, mBall, mLowerWall, result);
+	detectCollision(deltaMS, mBall, mTopWall, result);
+	detectCollision(deltaMS, mBall, mBottomWall, result);
 	detectCollision(deltaMS, mBall, mLeftGoal, result);
 	detectCollision(deltaMS, mBall, mRightGoal, result);
-	detectCollision(deltaMS, mLeftPaddle, mUpperWall, result);
-	detectCollision(deltaMS, mLeftPaddle, mLowerWall, result);
-	detectCollision(deltaMS, mRightPaddle, mUpperWall, result);
-	detectCollision(deltaMS, mRightPaddle, mLowerWall, result);
+	detectCollision(deltaMS, mLeftPaddle, mTopWall, result);
+	detectCollision(deltaMS, mLeftPaddle, mBottomWall, result);
+	detectCollision(deltaMS, mRightPaddle, mTopWall, result);
+	detectCollision(deltaMS, mRightPaddle, mBottomWall, result);
 	return result;
 }
 
@@ -203,12 +203,12 @@ void Game::resolveCollision(const Collision& collision) {
 	case ObjectID::BALL:
 		switch (collision.rhs) {
 		case ObjectID::BWALL:
-			mBall.position.y = mLowerWall.position.y - mLowerWall.extent.y - mBall.extent.y - Nudge;
+			mBall.position.y = mBottomWall.position.y - mBottomWall.extent.y - mBall.extent.y - Nudge;
 			mBall.velocity.y = -mBall.velocity.y;
 			mAudio->playSound(mBeepSound);
 			break;
 		case ObjectID::TWALL:
-			mBall.position.y = mUpperWall.position.y + mUpperWall.extent.y + mBall.extent.y + Nudge;
+			mBall.position.y = mTopWall.position.y + mTopWall.extent.y + mBall.extent.y + Nudge;
 			mBall.velocity.y = -mBall.velocity.y;
 			mAudio->playSound(mBeepSound);
 			break;
@@ -250,10 +250,10 @@ void Game::resolveCollision(const Collision& collision) {
 	case ObjectID::LPADDLE:
 		switch (collision.rhs) {
 		case ObjectID::BWALL:
-			mLeftPaddle.position.y = mLowerWall.position.y - mLowerWall.extent.y - mLeftPaddle.extent.y - Nudge;
+			mLeftPaddle.position.y = mBottomWall.position.y - mBottomWall.extent.y - mLeftPaddle.extent.y - Nudge;
 			break;
 		case ObjectID::TWALL:
-			mLeftPaddle.position.y = mUpperWall.position.y + mUpperWall.extent.y + mLeftPaddle.extent.y + Nudge;
+			mLeftPaddle.position.y = mTopWall.position.y + mTopWall.extent.y + mLeftPaddle.extent.y + Nudge;
 			break;
 		}
 		mLeftPaddle.velocity.y = 0.f;
@@ -261,10 +261,10 @@ void Game::resolveCollision(const Collision& collision) {
 	case ObjectID::RPADDLE:
 		switch (collision.rhs) {
 		case ObjectID::BWALL:
-			mRightPaddle.position.y = mLowerWall.position.y - mLowerWall.extent.y - mRightPaddle.extent.y - Nudge;
+			mRightPaddle.position.y = mBottomWall.position.y - mBottomWall.extent.y - mRightPaddle.extent.y - Nudge;
 			break;
 		case ObjectID::TWALL:
-			mRightPaddle.position.y = mUpperWall.position.y + mUpperWall.extent.y + mRightPaddle.extent.y + Nudge;
+			mRightPaddle.position.y = mTopWall.position.y + mTopWall.extent.y + mRightPaddle.extent.y + Nudge;
 			break;
 		}
 		mRightPaddle.velocity.y = 0.f;
@@ -325,8 +325,8 @@ void Game::render(const Renderer::Ptr& renderer) const {
 	renderer->draw(mLeftScore);
 	renderer->draw(mRightScore);
 	renderer->draw(mBall);
-	renderer->draw(mUpperWall);
-	renderer->draw(mLowerWall);
+	renderer->draw(mTopWall);
+	renderer->draw(mBottomWall);
 	renderer->draw(mLeftPaddle);
 	renderer->draw(mRightPaddle);
 
