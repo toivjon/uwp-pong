@@ -60,7 +60,7 @@ private:
 	winrt::agile_ref<ApplicationWindow>  mWindow;
 	winrt::Windows::Foundation::Size	 mWindowSize;
 	winrt::Windows::Foundation::Size	 mWindowOffset = { 0,0 };
-	float								 mDpi;
+	float								 mDpi = 0.f;
 
 	winrt::com_ptr<ID3D11Device>		 m3DDevice;
 	winrt::com_ptr<ID3D11DeviceContext>  m3DDeviceCtx;
