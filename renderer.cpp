@@ -260,15 +260,23 @@ void Renderer::present() {
 }
 
 void Renderer::draw(const Rectangle& rect) {
-	m2DDeviceCtx->FillRectangle({
-		mWindowOffset.Width + (-rect.extent.x + rect.position.x) * (mWindowSize.Width - mWindowOffset.Width * 2),
-		mWindowOffset.Height + (-rect.extent.y + rect.position.y) * (mWindowSize.Height - mWindowOffset.Height * 2),
-		mWindowOffset.Width + (rect.extent.x + rect.position.x) * (mWindowSize.Width - mWindowOffset.Width * 2),
-		mWindowOffset.Height + (rect.extent.y + rect.position.y) * (mWindowSize.Height - mWindowOffset.Height * 2),
-		}, rect.brush.get());
+	draw(rect.brush, rect);
 }
 
 void Renderer::draw(const Text& text) {
+	draw(text.brush, text);
+}
+
+void Renderer::draw(winrt::com_ptr<ID2D1Brush> brush, const Rectangle& rect) {
+	m2DDeviceCtx->FillRectangle({
+	mWindowOffset.Width + (-rect.extent.x + rect.position.x) * (mWindowSize.Width - mWindowOffset.Width * 2),
+	mWindowOffset.Height + (-rect.extent.y + rect.position.y) * (mWindowSize.Height - mWindowOffset.Height * 2),
+	mWindowOffset.Width + (rect.extent.x + rect.position.x) * (mWindowSize.Width - mWindowOffset.Width * 2),
+	mWindowOffset.Height + (rect.extent.y + rect.position.y) * (mWindowSize.Height - mWindowOffset.Height * 2),
+		}, brush.get());
+}
+
+void Renderer::draw(winrt::com_ptr<ID2D1Brush> brush, const Text& text) {
 	auto size = text.fontSize * (mWindowSize.Height - mWindowOffset.Height * 2.f);
 	winrt::com_ptr<IDWriteTextFormat> format;
 	mDWriteFactory->CreateTextFormat(
@@ -289,6 +297,6 @@ void Renderer::draw(const Text& text) {
 		UINT32(text.text.size()),
 		format.get(),
 		{ x - text.text.length() * size * .5f,y,x + text.text.length() * size * .5f,y },
-		text.brush.get()
+		brush.get()
 	);
 }

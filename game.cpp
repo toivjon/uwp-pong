@@ -45,24 +45,8 @@ inline auto NewRandomDirection() -> Vec2f {
 	return dirs[dist(rng)];
 }
 
-Game::Game(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(true), mAudio(audio) {
-	mDialogBackground.extent = { 0.375f, 0.40f };
-	mDialogBackground.position = { Center };
-	mDialogBackground.brush = renderer->getWhiteBrush();
-
-	mDialogForeground.extent = { 0.35f, 0.375f };
-	mDialogForeground.position = { Center };
-	mDialogForeground.brush = renderer->getBlackBrush();
-
-	mDialogTopic.brush = renderer->getWhiteBrush();
-	mDialogTopic.text = L"UWP Pong";
-	mDialogTopic.position = { CenterX, .3f };
-	mDialogTopic.fontSize = .1f;
-
-	mDialogDescription.brush = renderer->getWhiteBrush();
-	mDialogDescription.text = L"Press X key or button to start a game";
-	mDialogDescription.position = { CenterX, .6f };
-	mDialogDescription.fontSize = .05f;
+Game::Game(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mAudio(audio) {
+	setState(std::make_shared<Game::DialogState>(L"Press X key or button to start a game"));
 
 	mBall.extent = { .0115f, .015f };
 	mBall.position = Center;
@@ -112,8 +96,6 @@ Game::Game(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mDialogVisible(tr
 	mRightGoal.id = ObjectID::RIGHT_GOAL;
 
 	mBeepSound = mAudio->createSound(L"Assets/beep.wav");
-
-	newGame();
 }
 
 
@@ -215,22 +197,20 @@ void Game::resolveCollision(const Collision& collision) {
 		case ObjectID::LEFT_GOAL:
 			mP2Score++;
 			if (mP2Score >= 10) {
-				mDialogVisible = true;
-				mDialogTopic.text = L"Right player wins!";
+				setState(std::make_shared<DialogState>(L"Right player wins! Press X for rematch."));
 			} else {
 				mRightScore.text = std::to_wstring(mP2Score);
+				mNewRound = true;
 			}
-			mNewRound = true;
 			break;
 		case ObjectID::RIGHT_GOAL:
 			mP1Score++;
 			if (mP1Score >= 10) {
-				mDialogVisible = true;
-				mDialogTopic.text = L"Left player wins!";
+				setState(std::make_shared<DialogState>(L"Left player wins! Press X for rematch."));
 			} else {
 				mLeftScore.text = std::to_wstring(mP1Score);
+				mNewRound = true;
 			}
-			mNewRound = true;
 			break;
 		case ObjectID::LEFT_PADDLE: {
 			mBall.position.x = mLeftPaddle.position.x + mLeftPaddle.extent.x + mBall.extent.x + Nudge;
@@ -272,32 +252,88 @@ void Game::resolveCollision(const Collision& collision) {
 	}
 }
 
-void Game::update(std::chrono::milliseconds delta) {
-	// Skip the update whether the game has been just launched or the game has ended.
-	if (mDialogVisible) {
-		return;
-	}
+Game::DialogState::DialogState(const std::wstring& descriptionText) {
+	background.extent = { 0.375f, 0.40f };
+	background.position = { Center };
 
-	// Skip the update whether the countdown is still in progress.
-	if (mCountdown > 0) {
-		mCountdown--;
-		return;
-	}
+	foreground.extent = { 0.35f, 0.375f };
+	foreground.position = { Center };
 
+	topic.text = L"UWP Pong";
+	topic.position = { CenterX, .3f };
+	topic.fontSize = .1f;
+
+	description.text = descriptionText;
+	description.position = { CenterX, .6f };
+	description.fontSize = .05f;
+}
+
+void Game::DialogState::render(Game&, const Renderer::Ptr& renderer) {
+	renderer->draw(renderer->getWhiteBrush(), background);
+	renderer->draw(renderer->getBlackBrush(), foreground);
+	renderer->draw(renderer->getWhiteBrush(), topic);
+	renderer->draw(renderer->getWhiteBrush(), description);
+}
+
+void Game::DialogState::onKeyDown(Game& game, const winrt::Windows::UI::Core::KeyEventArgs& args) {
+	if (args.VirtualKey() == VirtualKey::X) {
+		startGame(game);
+	}
+}
+
+void Game::DialogState::onReadGamepad(Game& game, int, const winrt::Windows::Gaming::Input::GamepadReading& reading) {
+	if (GamepadButtons::X == (reading.Buttons & GamepadButtons::X)) {
+		startGame(game);
+	}
+}
+
+void Game::DialogState::startGame(Game& game) {
+	game.mP1Score = 0;
+	game.mP2Score = 0;
+	game.mRightScore.text = std::to_wstring(game.mP2Score);
+	game.mLeftScore.text = std::to_wstring(game.mP1Score);
+	game.setState(std::make_shared<CountdownState>(game));
+}
+
+Game::CountdownState::CountdownState(Game& game) {
+	game.mBall.position = Center;
+	game.mBall.velocity = NewRandomDirection();
+	game.mLeftPaddle.position.y = CenterY;
+	game.mRightPaddle.position.y = CenterY;
+}
+
+void Game::CountdownState::update(Game& game, std::chrono::milliseconds) {
+	countdown--;
+	if (countdown <= 0) {
+		game.setState(std::make_shared<PlayState>());
+	}
+}
+
+void Game::CountdownState::render(Game& game, const Renderer::Ptr& renderer) {
+	renderer->draw(game.mLeftScore);
+	renderer->draw(game.mRightScore);
+	renderer->draw(game.mBall);
+	renderer->draw(game.mTopWall);
+	renderer->draw(game.mBottomWall);
+	renderer->draw(game.mLeftPaddle);
+	renderer->draw(game.mRightPaddle);
+}
+
+void Game::PlayState::update(Game& game, std::chrono::milliseconds delta) {
 	// Get the time (in milliseconds) we must consume during this simulation step.
 	auto deltaMS = static_cast<float>(delta.count());
 
 	// Apply the keyboard and gamepad input to paddle velocities.
-	applyMoveDirection(mLeftPaddle, mP1MoveDirection);
-	applyMoveDirection(mRightPaddle, mP2MoveDirection);
+	game.applyMoveDirection(game.mLeftPaddle, game.mP1MoveDirection);
+	game.applyMoveDirection(game.mRightPaddle, game.mP2MoveDirection);
 
 	do {
 		// Perform collision detection to find out the first collision.
-		const auto collision = detectCollision(deltaMS);
+		const auto collision = game.detectCollision(deltaMS);
 		if (collision.lhs == ObjectID::NONE && collision.rhs == ObjectID::NONE) {
-			mLeftPaddle.position += mLeftPaddle.velocity * deltaMS;
-			mRightPaddle.position += mRightPaddle.velocity * deltaMS;
-			mBall.position += mBall.velocity * deltaMS;
+			game.mLeftPaddle.position += game.mLeftPaddle.velocity * deltaMS;
+			game.mRightPaddle.position += game.mRightPaddle.velocity * deltaMS;
+			game.mBall.position += game.mBall.velocity * deltaMS;
 			break;
 		}
 
@@ -306,93 +342,77 @@ void Game::update(std::chrono::milliseconds delta) {
 		deltaMS -= collisionMS;
 
 		// Apply movement to dynamic entities.
-		mBall.position += mBall.velocity * collisionMS;
-		mLeftPaddle.position += mLeftPaddle.velocity * collisionMS;
-		mRightPaddle.position += mRightPaddle.velocity * collisionMS;
+		game.mBall.position += game.mBall.velocity * collisionMS;
+		game.mLeftPaddle.position += game.mLeftPaddle.velocity * collisionMS;
+		game.mRightPaddle.position += game.mRightPaddle.velocity * collisionMS;
 
 		// Perform collision resolvement.
-		resolveCollision(collision);
-	} while (!mNewRound);
+		game.resolveCollision(collision);
+	} while (!game.mNewRound);
 
-	if (mNewRound) {
-		newRound();
-		mNewRound = false;
+	if (game.mNewRound) {
+		game.setState(std::make_shared<CountdownState>(game));
+		game.mNewRound = false;
 	}
 }
 
-void Game::render(const Renderer::Ptr& renderer) const {
-	// Base game entities are always shown.
-	renderer->draw(mLeftScore);
-	renderer->draw(mRightScore);
-	renderer->draw(mBall);
-	renderer->draw(mTopWall);
-	renderer->draw(mBottomWall);
-	renderer->draw(mLeftPaddle);
-	renderer->draw(mRightPaddle);
-
-	// Dialog stuff is shown only on game enter or end game.
-	if (mDialogVisible) {
-		renderer->draw(mDialogBackground);
-		renderer->draw(mDialogForeground);
-		renderer->draw(mDialogTopic);
-		renderer->draw(mDialogDescription);
-	}
+void Game::PlayState::render(Game& game, const Renderer::Ptr& renderer) {
+	renderer->draw(game.mLeftScore);
+	renderer->draw(game.mRightScore);
+	renderer->draw(game.mBall);
+	renderer->draw(game.mTopWall);
+	renderer->draw(game.mBottomWall);
+	renderer->draw(game.mLeftPaddle);
+	renderer->draw(game.mRightPaddle);
 }
 
-void Game::onKeyDown(const KeyEventArgs& args) {
+void Game::PlayState::onKeyDown(Game& game, const winrt::Windows::UI::Core::KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
-		mP2MoveDirection = MoveDirection::UP;
+		game.mP2MoveDirection = MoveDirection::UP;
 		break;
 	case VirtualKey::Down:
-		mP2MoveDirection = MoveDirection::DOWN;
+		game.mP2MoveDirection = MoveDirection::DOWN;
 		break;
 	case VirtualKey::W:
-		mP1MoveDirection = MoveDirection::UP;
+		game.mP1MoveDirection = MoveDirection::UP;
 		break;
 	case VirtualKey::S:
-		mP1MoveDirection = MoveDirection::DOWN;
-		break;
-	case VirtualKey::X:
-		if (mDialogVisible) {
-			newGame();
-			mDialogVisible = false;
-		}
+		game.mP1MoveDirection = MoveDirection::DOWN;
 		break;
 	}
 }
 
-void Game::onKeyUp(const KeyEventArgs& args) {
+void Game::PlayState::onKeyUp(Game& game, const winrt::Windows::UI::Core::KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
-		mP2MoveDirection = (mP2MoveDirection == MoveDirection::UP ? MoveDirection::NONE : mP2MoveDirection);
+		game.mP2MoveDirection = (game.mP2MoveDirection == MoveDirection::UP ? MoveDirection::NONE : game.mP2MoveDirection);
 		break;
 	case VirtualKey::Down:
-		mP2MoveDirection = (mP2MoveDirection == MoveDirection::DOWN ? MoveDirection::NONE : mP2MoveDirection);
+		game.mP2MoveDirection = (game.mP2MoveDirection == MoveDirection::DOWN ? MoveDirection::NONE : game.mP2MoveDirection);
 		break;
 	case VirtualKey::W:
-		mP1MoveDirection = (mP1MoveDirection == MoveDirection::UP ? MoveDirection::NONE : mP1MoveDirection);
+		game.mP1MoveDirection = (game.mP1MoveDirection == MoveDirection::UP ? MoveDirection::NONE : game.mP1MoveDirection);
 		break;
 	case VirtualKey::S:
-		mP1MoveDirection = (mP1MoveDirection == MoveDirection::DOWN ? MoveDirection::NONE : mP1MoveDirection);
+		game.mP1MoveDirection = (game.mP1MoveDirection == MoveDirection::DOWN ? MoveDirection::NONE : game.mP1MoveDirection);
 		break;
 	}
 }
 
-void Game::newRound() {
-	mBall.position = Center;
-	mBall.velocity = NewRandomDirection();
-	mLeftPaddle.position.y = CenterY;
-	mRightPaddle.position.y = CenterY;
-	mCountdown = CountdownTicks;
-}
-
-void Game::newGame() {
-	mP1Score = 0;
-	mP2Score = 0;
-	mRightScore.text = std::to_wstring(mP2Score);
-	mLeftScore.text = std::to_wstring(mP1Score);
-	newRound();
+void Game::PlayState::onReadGamepad(Game& game, int player, const winrt::Windows::Gaming::Input::GamepadReading& reading) {
+	static const auto DeadZone = .25f;
+	auto moveDirection = MoveDirection::NONE;
+	if (reading.LeftThumbstickY > DeadZone) {
+		moveDirection = MoveDirection::UP;
+	} else if (reading.LeftThumbstickY < -DeadZone) {
+		moveDirection = MoveDirection::DOWN;
+	}
+	if (player == 0) {
+		game.mP1MoveDirection = moveDirection;
+	} else {
+		game.mP2MoveDirection = moveDirection;
+	}
 }
 
 void Game::applyMoveDirection(Rectangle& rect, MoveDirection direction) {
@@ -406,27 +426,5 @@ void Game::applyMoveDirection(Rectangle& rect, MoveDirection direction) {
 	case MoveDirection::DOWN:
 		rect.velocity.y = PaddleVelocity;
 		break;
-	}
-}
-
-void Game::onReadGamepad(int player, const GamepadReading& reading) {
-	if (mDialogVisible) {
-		if (GamepadButtons::X == (reading.Buttons & GamepadButtons::X)) {
-			newGame();
-			mDialogVisible = false;
-		}
-	} else {
-		static const auto DeadZone = .25f;
-		auto moveDirection = MoveDirection::NONE;
-		if (reading.LeftThumbstickY > DeadZone) {
-			moveDirection = MoveDirection::UP;
-		} else if (reading.LeftThumbstickY < -DeadZone) {
-			moveDirection = MoveDirection::DOWN;
-		}
-		if (player == 0) {
-			mP1MoveDirection = moveDirection;
-		} else {
-			mP2MoveDirection = moveDirection;
-		}
 	}
 }

@@ -55,6 +55,8 @@ public:
 
 	void draw(const Rectangle& rect);
 	void draw(const Text& text);
+	void draw(winrt::com_ptr<ID2D1Brush> brush, const Rectangle& rect);
+	void draw(winrt::com_ptr<ID2D1Brush> brush, const Text& text);
 
 private:
 	winrt::agile_ref<ApplicationWindow>  mWindow;

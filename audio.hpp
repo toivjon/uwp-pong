@@ -12,7 +12,7 @@ public:
 	using Ptr = std::unique_ptr<Audio>;
 
 	struct Sound {
-		IXAudio2SourceVoice* ptr;
+		IXAudio2SourceVoice* ptr = nullptr;
 		std::vector<BYTE>    bytes;
 	};
 
