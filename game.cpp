@@ -339,7 +339,7 @@ void Game::PlayState::update(Game& game, std::chrono::milliseconds delta) {
 
 		// Perform collision resolvement.
 		game.resolveCollision(collision);
-	} while (!game.mNewRound);
+	} while (!game.mNewRound && game.mP1Score < 10 && game.mP2Score < 10);
 
 	if (game.mNewRound) {
 		game.setState(std::make_shared<CountdownState>(game));
