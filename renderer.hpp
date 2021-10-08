@@ -16,18 +16,16 @@ using ApplicationWindow = winrt::Windows::UI::Core::CoreWindow;
 enum class ObjectID { NONE, LEFT_PADDLE, RIGHT_PADDLE, BALL, TOP_WALL, BOTTOM_WALL, LEFT_GOAL, RIGHT_GOAL };
 
 struct Rectangle {
-	ObjectID                   id;
-	Vec2f					   extent = { 0.f,0.f };
-	Vec2f					   position = { 0.f,0.f };
-	Vec2f					   velocity = { 0.f, 0.f };
-	winrt::com_ptr<ID2D1Brush> brush;
+	ObjectID id;
+	Vec2f	 extent = { 0.f,0.f };
+	Vec2f	 position = { 0.f,0.f };
+	Vec2f	 velocity = { 0.f, 0.f };
 };
 
 struct Text {
-	Vec2f					   position = { 0.f,0.f };
-	std::wstring			   text;
-	winrt::com_ptr<ID2D1Brush> brush;
-	float					   fontSize = 0.f;
+	Vec2f		 position = { 0.f,0.f };
+	std::wstring text;
+	float		 fontSize = 0.f;
 };
 
 class Renderer {
@@ -53,8 +51,6 @@ public:
 	winrt::com_ptr<ID2D1Brush> getWhiteBrush() const { return mWhiteBrush; }
 	winrt::com_ptr<ID2D1Brush> getBlackBrush() const { return mBlackBrush; }
 
-	void draw(const Rectangle& rect);
-	void draw(const Text& text);
 	void draw(winrt::com_ptr<ID2D1Brush> brush, const Rectangle& rect);
 	void draw(winrt::com_ptr<ID2D1Brush> brush, const Text& text);
 

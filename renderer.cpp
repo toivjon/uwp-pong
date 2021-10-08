@@ -259,14 +259,6 @@ void Renderer::present() {
 	}
 }
 
-void Renderer::draw(const Rectangle& rect) {
-	draw(rect.brush, rect);
-}
-
-void Renderer::draw(const Text& text) {
-	draw(text.brush, text);
-}
-
 void Renderer::draw(winrt::com_ptr<ID2D1Brush> brush, const Rectangle& rect) {
 	m2DDeviceCtx->FillRectangle({
 	mWindowOffset.Width + (-rect.extent.x + rect.position.x) * (mWindowSize.Width - mWindowOffset.Width * 2),

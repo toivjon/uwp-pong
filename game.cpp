@@ -50,49 +50,40 @@ Game::Game(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mAudio(audio) {
 
 	mBall.extent = { .0115f, .015f };
 	mBall.position = Center;
-	mBall.brush = renderer->getWhiteBrush();
 	mBall.id = ObjectID::BALL;
 
 	mTopWall.extent = { .5f, .015f };
 	mTopWall.position = { CenterX, .015f };
-	mTopWall.brush = renderer->getWhiteBrush();
 	mTopWall.id = ObjectID::TOP_WALL;
 
 	mBottomWall.extent = mTopWall.extent;
 	mBottomWall.position = { CenterX, .985f };
-	mBottomWall.brush = renderer->getWhiteBrush();
 	mBottomWall.id = ObjectID::BOTTOM_WALL;
 
 	mLeftPaddle.extent = { .0125f, .075f };
 	mLeftPaddle.position = { .05f, CenterY };
-	mLeftPaddle.brush = renderer->getWhiteBrush();
 	mLeftPaddle.velocity = { 0.f, 0.f };
 	mLeftPaddle.id = ObjectID::LEFT_PADDLE;
 
 	mRightPaddle.extent = mLeftPaddle.extent;
 	mRightPaddle.position = { .95f, CenterY };
-	mRightPaddle.brush = renderer->getWhiteBrush();
 	mRightPaddle.velocity = { 0.f, 0.f };
 	mRightPaddle.id = ObjectID::RIGHT_PADDLE;
 
 	mLeftScore.text = std::to_wstring(mP1Score);
 	mLeftScore.position = { .35f, .025f };
-	mLeftScore.brush = renderer->getWhiteBrush();
 	mLeftScore.fontSize = .27f;
 
 	mRightScore.text = std::to_wstring(mP2Score);
 	mRightScore.position = { .65f, .025f };
-	mRightScore.brush = renderer->getWhiteBrush();
 	mRightScore.fontSize = .27f;
 
 	mLeftGoal.extent = { .5f, .5f };
 	mLeftGoal.position = { -.5f - mBall.extent.x * 4.f, CenterY };
-	mLeftGoal.brush = renderer->getWhiteBrush();
 	mLeftGoal.id = ObjectID::LEFT_GOAL;
 
 	mRightGoal.extent = mLeftGoal.extent;
 	mRightGoal.position = { 1.5f + mBall.extent.x * 4.f, CenterY };
-	mRightGoal.brush = renderer->getWhiteBrush();
 	mRightGoal.id = ObjectID::RIGHT_GOAL;
 
 	mBeepSound = mAudio->createSound(L"Assets/beep.wav");
@@ -310,13 +301,13 @@ void Game::CountdownState::update(Game& game, std::chrono::milliseconds) {
 }
 
 void Game::CountdownState::render(Game& game, const Renderer::Ptr& renderer) {
-	renderer->draw(game.mLeftScore);
-	renderer->draw(game.mRightScore);
-	renderer->draw(game.mBall);
-	renderer->draw(game.mTopWall);
-	renderer->draw(game.mBottomWall);
-	renderer->draw(game.mLeftPaddle);
-	renderer->draw(game.mRightPaddle);
+	renderer->draw(renderer->getWhiteBrush(), game.mLeftScore);
+	renderer->draw(renderer->getWhiteBrush(), game.mRightScore);
+	renderer->draw(renderer->getWhiteBrush(), game.mBall);
+	renderer->draw(renderer->getWhiteBrush(), game.mTopWall);
+	renderer->draw(renderer->getWhiteBrush(), game.mBottomWall);
+	renderer->draw(renderer->getWhiteBrush(), game.mLeftPaddle);
+	renderer->draw(renderer->getWhiteBrush(), game.mRightPaddle);
 }
 
 void Game::PlayState::update(Game& game, std::chrono::milliseconds delta) {
@@ -357,13 +348,13 @@ void Game::PlayState::update(Game& game, std::chrono::milliseconds delta) {
 }
 
 void Game::PlayState::render(Game& game, const Renderer::Ptr& renderer) {
-	renderer->draw(game.mLeftScore);
-	renderer->draw(game.mRightScore);
-	renderer->draw(game.mBall);
-	renderer->draw(game.mTopWall);
-	renderer->draw(game.mBottomWall);
-	renderer->draw(game.mLeftPaddle);
-	renderer->draw(game.mRightPaddle);
+	renderer->draw(renderer->getWhiteBrush(), game.mLeftScore);
+	renderer->draw(renderer->getWhiteBrush(), game.mRightScore);
+	renderer->draw(renderer->getWhiteBrush(), game.mBall);
+	renderer->draw(renderer->getWhiteBrush(), game.mTopWall);
+	renderer->draw(renderer->getWhiteBrush(), game.mBottomWall);
+	renderer->draw(renderer->getWhiteBrush(), game.mLeftPaddle);
+	renderer->draw(renderer->getWhiteBrush(), game.mRightPaddle);
 }
 
 void Game::PlayState::onKeyDown(Game& game, const winrt::Windows::UI::Core::KeyEventArgs& args) {
