@@ -68,6 +68,9 @@ private:
 
 	State::Ref state;
 
+	int player1Score = 0;
+	int player2Score = 0;
+
 	struct Collision {
 		ObjectID lhs = ObjectID::NONE;
 		ObjectID rhs = ObjectID::NONE;
@@ -91,8 +94,6 @@ private:
 	Text		mLeftScore;
 	Text		mRightScore;
 
-	int mP1Score = 0;
-	int mP2Score = 0;
 	bool mNewRound = false;
 
 	MoveDirection mP1MoveDirection = MoveDirection::NONE;

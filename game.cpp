@@ -47,11 +47,11 @@ Game::Game(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mAudio(audio) {
 	mRightPaddle.velocity = { 0.f, 0.f };
 	mRightPaddle.id = ObjectID::RIGHT_PADDLE;
 
-	mLeftScore.text = std::to_wstring(mP1Score);
+	mLeftScore.text = std::to_wstring(player1Score);
 	mLeftScore.position = { .35f, .025f };
 	mLeftScore.fontSize = .27f;
 
-	mRightScore.text = std::to_wstring(mP2Score);
+	mRightScore.text = std::to_wstring(player2Score);
 	mRightScore.position = { .65f, .025f };
 	mRightScore.fontSize = .27f;
 
@@ -165,20 +165,20 @@ void Game::resolveCollision(const Collision& collision) {
 			mAudio->playSound(mBeepSound);
 			break;
 		case ObjectID::LEFT_GOAL:
-			mP2Score++;
-			if (mP2Score >= 10) {
+			player2Score++;
+			if (player2Score >= 10) {
 				setState(std::make_shared<DialogState>(L"Right player wins! Press X for rematch."));
 			} else {
-				mRightScore.text = std::to_wstring(mP2Score);
+				mRightScore.text = std::to_wstring(player2Score);
 				mNewRound = true;
 			}
 			break;
 		case ObjectID::RIGHT_GOAL:
-			mP1Score++;
-			if (mP1Score >= 10) {
+			player1Score++;
+			if (player1Score >= 10) {
 				setState(std::make_shared<DialogState>(L"Left player wins! Press X for rematch."));
 			} else {
-				mLeftScore.text = std::to_wstring(mP1Score);
+				mLeftScore.text = std::to_wstring(player1Score);
 				mNewRound = true;
 			}
 			break;
@@ -258,10 +258,10 @@ void Game::DialogState::onReadGamepad(Game& game, int, const winrt::Windows::Gam
 }
 
 void Game::DialogState::startGame(Game& game) {
-	game.mP1Score = 0;
-	game.mP2Score = 0;
-	game.mRightScore.text = std::to_wstring(game.mP2Score);
-	game.mLeftScore.text = std::to_wstring(game.mP1Score);
+	game.player1Score = 0;
+	game.player2Score = 0;
+	game.mRightScore.text = std::to_wstring(game.player2Score);
+	game.mLeftScore.text = std::to_wstring(game.player1Score);
 	game.setState(std::make_shared<CountdownState>(game));
 }
 
@@ -317,7 +317,7 @@ void Game::PlayState::update(Game& game, std::chrono::milliseconds delta) {
 
 		// Perform collision resolvement.
 		game.resolveCollision(collision);
-	} while (!game.mNewRound && game.mP1Score < 10 && game.mP2Score < 10);
+	} while (!game.mNewRound && game.player1Score < 10 && game.player2Score < 10);
 
 	if (game.mNewRound) {
 		game.setState(std::make_shared<CountdownState>(game));
