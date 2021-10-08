@@ -17,9 +17,6 @@ static const auto BallVelocityMultiplier = 1.1f;
 // The amount of additional nudge to add to collision response to separate collded objects.
 static const auto Nudge = .001f;
 
-// The velocity of player controlled paddles.
-static const auto PaddleVelocity = .001f;
-
 // Build a randomly selected direction vector from 45, 135, 225 and 315 degrees.
 inline auto NewRandomDirection() -> Vec2f {
 	static std::default_random_engine rng;
@@ -379,7 +376,7 @@ void Game::PlayState::onKeyUp(Game& game, const winrt::Windows::UI::Core::KeyEve
 }
 
 void Game::PlayState::onReadGamepad(Game& game, int player, const winrt::Windows::Gaming::Input::GamepadReading& reading) {
-	static const auto DeadZone = .25f;
+	constexpr auto DeadZone = .25f;
 	auto moveDirection = MoveDirection::NONE;
 	if (reading.LeftThumbstickY > DeadZone) {
 		moveDirection = MoveDirection::UP;
@@ -394,6 +391,7 @@ void Game::PlayState::onReadGamepad(Game& game, int player, const winrt::Windows
 }
 
 void Game::applyMoveDirection(Rectangle& rect, MoveDirection direction) {
+	constexpr auto PaddleVelocity = .001f;
 	switch (direction) {
 	case MoveDirection::NONE:
 		rect.velocity.y = 0.f;
