@@ -22,7 +22,7 @@ inline auto NewRandomDirection() -> Vec2f {
 	return dirs[dist(rng)];
 }
 
-Game::Game(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mAudio(audio) {
+Game::Game(Audio::Ptr& audio) : mAudio(audio) {
 	setState(std::make_shared<Game::DialogState>(L"Press X key or button to start a game"));
 
 	mBall.extent = { .0115f, .015f };
