@@ -294,8 +294,7 @@ Game::CountdownState::CountdownState(Game& game) {
 }
 
 void Game::CountdownState::update(Game& game, std::chrono::milliseconds) {
-	countdown--;
-	if (countdown <= 0) {
+	if (--countdown <= 0) {
 		game.setState(std::make_shared<PlayState>());
 	}
 }
