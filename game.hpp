@@ -62,6 +62,9 @@ private:
 		void onKeyUp(Game& game, const winrt::Windows::UI::Core::KeyEventArgs& args) override;
 		void onReadGamepad(Game& game, int player, const winrt::Windows::Gaming::Input::GamepadReading& reading) override;
 		void applyMoveDirection(Rectangle& rect, MoveDirection direction);
+	private:
+		MoveDirection player1MoveDirection = MoveDirection::NONE;
+		MoveDirection player2MoveDirection = MoveDirection::NONE;
 	};
 
 	State::Ref state;
@@ -74,7 +77,6 @@ private:
 		ObjectID rhs = ObjectID::NONE;
 		float	 time = FLT_MAX;
 	};
-
 
 	auto detectCollision(float deltaMS) const->Collision;
 	void detectCollision(float deltaMS, const Rectangle& r1, const Rectangle& r2, Collision& result) const;
@@ -93,9 +95,6 @@ private:
 	Text		mRightScore;
 
 	bool mNewRound = false;
-
-	MoveDirection mP1MoveDirection = MoveDirection::NONE;
-	MoveDirection mP2MoveDirection = MoveDirection::NONE;
 
 	Audio::Ptr& mAudio;
 	Audio::Sound mBeepSound;
