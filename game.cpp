@@ -22,7 +22,7 @@ inline auto NewRandomDirection() -> Vec2f {
 	return dirs[dist(rng)];
 }
 
-Game::Game(Audio::Ptr& audio) : mAudio(audio) {
+Game::Game(Audio::Ptr& audio) : audio(audio) {
 	state = std::make_shared<Game::DialogState>(L"Press X key or button to start a game");
 
 	mBall.extent = { .0115f, .015f };
@@ -63,7 +63,7 @@ Game::Game(Audio::Ptr& audio) : mAudio(audio) {
 	mRightGoal.position = { 1.5f + mBall.extent.x * 4.f, .5f };
 	mRightGoal.id = ObjectID::RIGHT_GOAL;
 
-	mBeepSound = mAudio->createSound(L"Assets/beep.wav");
+	mBeepSound = audio->createSound(L"Assets/beep.wav");
 }
 
 
@@ -157,12 +157,12 @@ void Game::resolveCollision(const Collision& collision) {
 		case ObjectID::BOTTOM_WALL:
 			mBall.position.y = mBottomWall.position.y - mBottomWall.extent.y - mBall.extent.y - Nudge;
 			mBall.velocity.y = -mBall.velocity.y;
-			mAudio->playSound(mBeepSound);
+			audio->playSound(mBeepSound);
 			break;
 		case ObjectID::TOP_WALL:
 			mBall.position.y = mTopWall.position.y + mTopWall.extent.y + mBall.extent.y + Nudge;
 			mBall.velocity.y = -mBall.velocity.y;
-			mAudio->playSound(mBeepSound);
+			audio->playSound(mBeepSound);
 			break;
 		case ObjectID::LEFT_GOAL:
 			player2Score++;
@@ -186,14 +186,14 @@ void Game::resolveCollision(const Collision& collision) {
 			mBall.position.x = mLeftPaddle.position.x + mLeftPaddle.extent.x + mBall.extent.x + Nudge;
 			mBall.velocity.x = -mBall.velocity.x;
 			mBall.velocity = mBall.velocity * BallVelocityMultiplier;
-			mAudio->playSound(mBeepSound);
+			audio->playSound(mBeepSound);
 			break;
 		}
 		case ObjectID::RIGHT_PADDLE:
 			mBall.position.x = mRightPaddle.position.x - mRightPaddle.extent.x - mBall.extent.x - Nudge;
 			mBall.velocity.x = -mBall.velocity.x;
 			mBall.velocity = mBall.velocity * BallVelocityMultiplier;
-			mAudio->playSound(mBeepSound);
+			audio->playSound(mBeepSound);
 			break;
 		}
 		break;

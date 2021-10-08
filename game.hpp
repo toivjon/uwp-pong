@@ -67,7 +67,8 @@ private:
 		MoveDirection player2MoveDirection = MoveDirection::NONE;
 	};
 
-	State::Ref state;
+	Audio::Ptr& audio;
+	State::Ref  state;
 
 	int player1Score = 0;
 	int player2Score = 0;
@@ -96,6 +97,5 @@ private:
 
 	bool mNewRound = false;
 
-	Audio::Ptr& mAudio;
 	Audio::Sound mBeepSound;
 };
