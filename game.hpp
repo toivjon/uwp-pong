@@ -63,8 +63,8 @@ private:
 		void onReadGamepad(Game& game, int player, const winrt::Windows::Gaming::Input::GamepadReading& reading) override;
 		void applyMoveDirection(Rectangle& rect, MoveDirection direction);
 	private:
-		MoveDirection player1MoveDirection = MoveDirection::NONE;
-		MoveDirection player2MoveDirection = MoveDirection::NONE;
+		MoveDirection player1Movement = MoveDirection::NONE;
+		MoveDirection player2Movement = MoveDirection::NONE;
 	};
 
 	Audio::Ptr& audio;

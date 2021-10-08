@@ -293,8 +293,8 @@ void Game::PlayState::update(Game& game, std::chrono::milliseconds delta) {
 	auto deltaMS = static_cast<float>(delta.count());
 
 	// Apply the keyboard and gamepad input to paddle velocities.
-	applyMoveDirection(game.mLeftPaddle, player1MoveDirection);
-	applyMoveDirection(game.mRightPaddle, player2MoveDirection);
+	applyMoveDirection(game.mLeftPaddle, player1Movement);
+	applyMoveDirection(game.mRightPaddle, player2Movement);
 
 	do {
 		// Perform collision detection to find out the first collision.
@@ -338,16 +338,16 @@ void Game::PlayState::render(Game& game, const Renderer::Ptr& renderer) {
 void Game::PlayState::onKeyDown(Game&, const winrt::Windows::UI::Core::KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
-		player2MoveDirection = MoveDirection::UP;
+		player2Movement = MoveDirection::UP;
 		break;
 	case VirtualKey::Down:
-		player2MoveDirection = MoveDirection::DOWN;
+		player2Movement = MoveDirection::DOWN;
 		break;
 	case VirtualKey::W:
-		player1MoveDirection = MoveDirection::UP;
+		player1Movement = MoveDirection::UP;
 		break;
 	case VirtualKey::S:
-		player1MoveDirection = MoveDirection::DOWN;
+		player1Movement = MoveDirection::DOWN;
 		break;
 	}
 }
@@ -355,16 +355,16 @@ void Game::PlayState::onKeyDown(Game&, const winrt::Windows::UI::Core::KeyEventA
 void Game::PlayState::onKeyUp(Game&, const winrt::Windows::UI::Core::KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
-		player2MoveDirection = (player2MoveDirection == MoveDirection::UP ? MoveDirection::NONE : player2MoveDirection);
+		player2Movement = (player2Movement == MoveDirection::UP ? MoveDirection::NONE : player2Movement);
 		break;
 	case VirtualKey::Down:
-		player2MoveDirection = (player2MoveDirection == MoveDirection::DOWN ? MoveDirection::NONE : player2MoveDirection);
+		player2Movement = (player2Movement == MoveDirection::DOWN ? MoveDirection::NONE : player2Movement);
 		break;
 	case VirtualKey::W:
-		player1MoveDirection = (player1MoveDirection == MoveDirection::UP ? MoveDirection::NONE : player1MoveDirection);
+		player1Movement = (player1Movement == MoveDirection::UP ? MoveDirection::NONE : player1Movement);
 		break;
 	case VirtualKey::S:
-		player1MoveDirection = (player1MoveDirection == MoveDirection::DOWN ? MoveDirection::NONE : player1MoveDirection);
+		player1Movement = (player1Movement == MoveDirection::DOWN ? MoveDirection::NONE : player1Movement);
 		break;
 	}
 }
@@ -378,9 +378,9 @@ void Game::PlayState::onReadGamepad(Game&, int player, const winrt::Windows::Gam
 		moveDirection = MoveDirection::DOWN;
 	}
 	if (player == 0) {
-		player1MoveDirection = moveDirection;
+		player1Movement = moveDirection;
 	} else {
-		player2MoveDirection = moveDirection;
+		player2Movement = moveDirection;
 	}
 }
 
