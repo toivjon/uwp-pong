@@ -384,7 +384,7 @@ void Game::PlayState::onReadGamepad(Game&, int player, const winrt::Windows::Gam
 	}
 }
 
-void Game::PlayState::applyMoveDirection(Rectangle& rect, MoveDirection direction) {
+void Game::PlayState::applyMovement(Rectangle& rect, MoveDirection direction) {
 	constexpr auto PaddleVelocity = .001f;
 	switch (direction) {
 	case MoveDirection::NONE:
