@@ -8,18 +8,6 @@ using namespace winrt::Windows::Gaming::Input;
 using namespace winrt::Windows::UI::Core;
 using namespace winrt::Windows::System;
 
-// The center of the courtyard in y-axis.
-static const auto CenterY = .5f;
-
-// The center of the courtyard in x-axis.
-static const auto CenterX = .5f;
-
-// A constant presenting the center of the courtyard.
-static const auto Center = Vec2f{ CenterX, CenterY };
-
-// The amount of update ticks to wait before ball is launched after a game reset.
-static const auto CountdownTicks = 50;
-
 // The initial velocity of the ball.
 static const auto BallInitialVelocity = .0004f;
 
@@ -49,24 +37,24 @@ Game::Game(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mAudio(audio) {
 	setState(std::make_shared<Game::DialogState>(L"Press X key or button to start a game"));
 
 	mBall.extent = { .0115f, .015f };
-	mBall.position = Center;
+	mBall.position = {.5f, .5f};
 	mBall.id = ObjectID::BALL;
 
 	mTopWall.extent = { .5f, .015f };
-	mTopWall.position = { CenterX, .015f };
+	mTopWall.position = { .5f, .015f };
 	mTopWall.id = ObjectID::TOP_WALL;
 
 	mBottomWall.extent = mTopWall.extent;
-	mBottomWall.position = { CenterX, .985f };
+	mBottomWall.position = { .5f, .985f };
 	mBottomWall.id = ObjectID::BOTTOM_WALL;
 
 	mLeftPaddle.extent = { .0125f, .075f };
-	mLeftPaddle.position = { .05f, CenterY };
+	mLeftPaddle.position = { .05f, .5f};
 	mLeftPaddle.velocity = { 0.f, 0.f };
 	mLeftPaddle.id = ObjectID::LEFT_PADDLE;
 
 	mRightPaddle.extent = mLeftPaddle.extent;
-	mRightPaddle.position = { .95f, CenterY };
+	mRightPaddle.position = { .95f, .5f};
 	mRightPaddle.velocity = { 0.f, 0.f };
 	mRightPaddle.id = ObjectID::RIGHT_PADDLE;
 
@@ -79,11 +67,11 @@ Game::Game(const Renderer::Ptr& renderer, Audio::Ptr& audio) : mAudio(audio) {
 	mRightScore.fontSize = .27f;
 
 	mLeftGoal.extent = { .5f, .5f };
-	mLeftGoal.position = { -.5f - mBall.extent.x * 4.f, CenterY };
+	mLeftGoal.position = { -.5f - mBall.extent.x * 4.f, .5f };
 	mLeftGoal.id = ObjectID::LEFT_GOAL;
 
 	mRightGoal.extent = mLeftGoal.extent;
-	mRightGoal.position = { 1.5f + mBall.extent.x * 4.f, CenterY };
+	mRightGoal.position = { 1.5f + mBall.extent.x * 4.f, .5f };
 	mRightGoal.id = ObjectID::RIGHT_GOAL;
 
 	mBeepSound = mAudio->createSound(L"Assets/beep.wav");
@@ -245,17 +233,17 @@ void Game::resolveCollision(const Collision& collision) {
 
 Game::DialogState::DialogState(const std::wstring& descriptionText) {
 	background.extent = { 0.375f, 0.40f };
-	background.position = { Center };
+	background.position = { .5f, .5f };
 
 	foreground.extent = { 0.35f, 0.375f };
-	foreground.position = { Center };
+	foreground.position = { .5f, .5f };
 
 	topic.text = L"UWP Pong";
-	topic.position = { CenterX, .3f };
+	topic.position = { .5f, .3f };
 	topic.fontSize = .1f;
 
 	description.text = descriptionText;
-	description.position = { CenterX, .6f };
+	description.position = { .5f, .6f };
 	description.fontSize = .05f;
 }
 
@@ -287,10 +275,10 @@ void Game::DialogState::startGame(Game& game) {
 }
 
 Game::CountdownState::CountdownState(Game& game) {
-	game.mBall.position = Center;
+	game.mBall.position = { .5f, .5f };
 	game.mBall.velocity = NewRandomDirection();
-	game.mLeftPaddle.position.y = CenterY;
-	game.mRightPaddle.position.y = CenterY;
+	game.mLeftPaddle.position.y = .5f;
+	game.mRightPaddle.position.y = .5f;
 }
 
 void Game::CountdownState::update(Game& game, std::chrono::milliseconds) {
