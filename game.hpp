@@ -64,8 +64,6 @@ private:
 		void applyMoveDirection(Rectangle& rect, MoveDirection direction);
 	};
 
-	void setState(State::Ref newState) { state = newState; }
-
 	State::Ref state;
 
 	int player1Score = 0;

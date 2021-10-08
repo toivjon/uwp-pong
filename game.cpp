@@ -23,7 +23,7 @@ inline auto NewRandomDirection() -> Vec2f {
 }
 
 Game::Game(Audio::Ptr& audio) : mAudio(audio) {
-	setState(std::make_shared<Game::DialogState>(L"Press X key or button to start a game"));
+	state = std::make_shared<Game::DialogState>(L"Press X key or button to start a game");
 
 	mBall.extent = { .0115f, .015f };
 	mBall.position = {.5f, .5f};
@@ -167,7 +167,7 @@ void Game::resolveCollision(const Collision& collision) {
 		case ObjectID::LEFT_GOAL:
 			player2Score++;
 			if (player2Score >= 10) {
-				setState(std::make_shared<DialogState>(L"Right player wins! Press X for rematch."));
+				state = std::make_shared<DialogState>(L"Right player wins! Press X for rematch.");
 			} else {
 				mRightScore.text = std::to_wstring(player2Score);
 				mNewRound = true;
@@ -176,7 +176,7 @@ void Game::resolveCollision(const Collision& collision) {
 		case ObjectID::RIGHT_GOAL:
 			player1Score++;
 			if (player1Score >= 10) {
-				setState(std::make_shared<DialogState>(L"Left player wins! Press X for rematch."));
+				state = std::make_shared<DialogState>(L"Left player wins! Press X for rematch.");
 			} else {
 				mLeftScore.text = std::to_wstring(player1Score);
 				mNewRound = true;
@@ -262,7 +262,7 @@ void Game::DialogState::startGame(Game& game) {
 	game.player2Score = 0;
 	game.mRightScore.text = std::to_wstring(game.player2Score);
 	game.mLeftScore.text = std::to_wstring(game.player1Score);
-	game.setState(std::make_shared<CountdownState>(game));
+	game.state = std::make_shared<CountdownState>(game);
 }
 
 Game::CountdownState::CountdownState(Game& game) {
@@ -274,7 +274,7 @@ Game::CountdownState::CountdownState(Game& game) {
 
 void Game::CountdownState::update(Game& game, std::chrono::milliseconds) {
 	if (--countdown <= 0) {
-		game.setState(std::make_shared<PlayState>());
+		game.state = std::make_shared<PlayState>();
 	}
 }
 
@@ -320,7 +320,7 @@ void Game::PlayState::update(Game& game, std::chrono::milliseconds delta) {
 	} while (!game.mNewRound && game.player1Score < 10 && game.player2Score < 10);
 
 	if (game.mNewRound) {
-		game.setState(std::make_shared<CountdownState>(game));
+		game.state = std::make_shared<CountdownState>(game);
 		game.mNewRound = false;
 	}
 }
