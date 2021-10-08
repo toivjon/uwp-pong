@@ -44,10 +44,6 @@ public:
 	void clear();
 	void present();
 
-	winrt::com_ptr<ID2D1DeviceContext5> getD2DContext() const { return m2DDeviceCtx; }
-	winrt::Windows::Foundation::Size getWindowSize() const { return mWindowSize; }
-	winrt::Windows::Foundation::Size getWindowOffset() const { return mWindowOffset; }
-	winrt::com_ptr<IDWriteFactory3> getDWriteFactory() const { return mDWriteFactory; }
 	winrt::com_ptr<ID2D1Brush> getWhiteBrush() const { return mWhiteBrush; }
 	winrt::com_ptr<ID2D1Brush> getBlackBrush() const { return mBlackBrush; }
 
