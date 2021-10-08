@@ -61,7 +61,7 @@ private:
 		void onKeyDown(Game& game, const winrt::Windows::UI::Core::KeyEventArgs& args) override;
 		void onKeyUp(Game& game, const winrt::Windows::UI::Core::KeyEventArgs& args) override;
 		void onReadGamepad(Game& game, int player, const winrt::Windows::Gaming::Input::GamepadReading& reading) override;
-		void applyMoveDirection(Rectangle& rect, MoveDirection direction);
+		void applyMovement(Rectangle& rect, MoveDirection direction);
 	private:
 		MoveDirection player1Movement = MoveDirection::NONE;
 		MoveDirection player2Movement = MoveDirection::NONE;
