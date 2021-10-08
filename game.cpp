@@ -335,7 +335,7 @@ void Game::PlayState::render(Game& game, const Renderer::Ptr& renderer) {
 	renderer->draw(renderer->getWhiteBrush(), game.mRightPaddle);
 }
 
-void Game::PlayState::onKeyDown(Game& game, const winrt::Windows::UI::Core::KeyEventArgs& args) {
+void Game::PlayState::onKeyDown(Game&, const winrt::Windows::UI::Core::KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
 		player2MoveDirection = MoveDirection::UP;
@@ -352,7 +352,7 @@ void Game::PlayState::onKeyDown(Game& game, const winrt::Windows::UI::Core::KeyE
 	}
 }
 
-void Game::PlayState::onKeyUp(Game& game, const winrt::Windows::UI::Core::KeyEventArgs& args) {
+void Game::PlayState::onKeyUp(Game&, const winrt::Windows::UI::Core::KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
 		player2MoveDirection = (player2MoveDirection == MoveDirection::UP ? MoveDirection::NONE : player2MoveDirection);
@@ -369,7 +369,7 @@ void Game::PlayState::onKeyUp(Game& game, const winrt::Windows::UI::Core::KeyEve
 	}
 }
 
-void Game::PlayState::onReadGamepad(Game& game, int player, const winrt::Windows::Gaming::Input::GamepadReading& reading) {
+void Game::PlayState::onReadGamepad(Game&, int player, const winrt::Windows::Gaming::Input::GamepadReading& reading) {
 	constexpr auto DeadZone = .25f;
 	auto moveDirection = MoveDirection::NONE;
 	if (reading.LeftThumbstickY > DeadZone) {
