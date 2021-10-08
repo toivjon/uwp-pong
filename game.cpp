@@ -293,8 +293,8 @@ void Game::PlayState::update(Game& game, std::chrono::milliseconds delta) {
 	auto deltaMS = static_cast<float>(delta.count());
 
 	// Apply the keyboard and gamepad input to paddle velocities.
-	game.applyMoveDirection(game.mLeftPaddle, game.mP1MoveDirection);
-	game.applyMoveDirection(game.mRightPaddle, game.mP2MoveDirection);
+	applyMoveDirection(game.mLeftPaddle, game.mP1MoveDirection);
+	applyMoveDirection(game.mRightPaddle, game.mP2MoveDirection);
 
 	do {
 		// Perform collision detection to find out the first collision.
@@ -384,7 +384,7 @@ void Game::PlayState::onReadGamepad(Game& game, int player, const winrt::Windows
 	}
 }
 
-void Game::applyMoveDirection(Rectangle& rect, MoveDirection direction) {
+void Game::PlayState::applyMoveDirection(Rectangle& rect, MoveDirection direction) {
 	constexpr auto PaddleVelocity = .001f;
 	switch (direction) {
 	case MoveDirection::NONE:

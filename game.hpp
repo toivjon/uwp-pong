@@ -14,6 +14,8 @@ public:
 	void onKeyUp(const winrt::Windows::UI::Core::KeyEventArgs& args) { state->onKeyUp(*this, args); }
 	void onReadGamepad(int player, const winrt::Windows::Gaming::Input::GamepadReading& reading) { state->onReadGamepad(*this, player, reading); }
 private:
+	enum class MoveDirection { NONE, UP, DOWN };
+
 	class State {
 	public:
 		using Ref = std::shared_ptr<State>;
@@ -59,14 +61,12 @@ private:
 		void onKeyDown(Game& game, const winrt::Windows::UI::Core::KeyEventArgs& args) override;
 		void onKeyUp(Game& game, const winrt::Windows::UI::Core::KeyEventArgs& args) override;
 		void onReadGamepad(Game& game, int player, const winrt::Windows::Gaming::Input::GamepadReading& reading) override;
-	private:
+		void applyMoveDirection(Rectangle& rect, MoveDirection direction);
 	};
 
 	void setState(State::Ref newState) { state = newState; }
 
 	State::Ref state;
-
-	enum class MoveDirection { NONE, UP, DOWN };
 
 	struct Collision {
 		ObjectID lhs = ObjectID::NONE;
@@ -74,7 +74,6 @@ private:
 		float	 time = FLT_MAX;
 	};
 
-	void applyMoveDirection(Rectangle& rect, MoveDirection direction);
 
 	auto detectCollision(float deltaMS) const->Collision;
 	void detectCollision(float deltaMS, const Rectangle& r1, const Rectangle& r2, Collision& result) const;
