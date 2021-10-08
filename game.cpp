@@ -8,17 +8,9 @@ using namespace winrt::Windows::Gaming::Input;
 using namespace winrt::Windows::UI::Core;
 using namespace winrt::Windows::System;
 
-// The initial velocity of the ball.
-static const auto BallInitialVelocity = .0004f;
-
-// The amount of velocity to multiply during each ball-paddle collision.
-static const auto BallVelocityMultiplier = 1.1f;
-
-// The amount of additional nudge to add to collision response to separate collded objects.
-static const auto Nudge = .001f;
-
 // Build a randomly selected direction vector from 45, 135, 225 and 315 degrees.
 inline auto NewRandomDirection() -> Vec2f {
+	constexpr auto BallInitialVelocity = .0004f;
 	static std::default_random_engine rng;
 	static std::uniform_int_distribution<std::mt19937::result_type> dist(0, 3);
 	static const std::array<Vec2f, 4> dirs = {
@@ -157,6 +149,8 @@ auto Game::detectCollision(float deltaMS, const Rectangle& a, const Rectangle& b
 }
 
 void Game::resolveCollision(const Collision& collision) {
+	constexpr auto BallVelocityMultiplier = 1.1f;
+	constexpr auto Nudge = .001f;
 	switch (collision.lhs) {
 	case ObjectID::BALL:
 		switch (collision.rhs) {
