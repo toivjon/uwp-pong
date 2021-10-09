@@ -17,8 +17,6 @@ constexpr D3D_FEATURE_LEVEL FeatureLevels[] = {
 };
 
 Renderer::Renderer() {
-	OutputDebugStringA("GraphicsContext::GraphicsContext\n");
-
 	// Specify the desired additional behavior how the Direct2D factory will be created.
 	D2D1_FACTORY_OPTIONS options{};
 	#if defined(_DEBUG)
@@ -47,8 +45,6 @@ Renderer::Renderer() {
 }
 
 void Renderer::initDeviceResources() {
-	OutputDebugStringA("GraphicsContext::initDeviceResources\n");
-
 	// clear all possible old definitions.
 	swapChain = nullptr;
 	d2dDeviceCtx = nullptr;
@@ -90,7 +86,6 @@ void Renderer::initDeviceResources() {
 }
 
 void Renderer::initWindowResources() {
-	OutputDebugStringA("GraphicsContext::initWindowResources\n");
 	d2dDeviceCtx->SetTarget(nullptr);
 	d3dDeviceCtx->Flush();
 
@@ -203,7 +198,6 @@ void Renderer::initWindowResources() {
 }
 
 void Renderer::setWindow(const ApplicationWindow& window) {
-	OutputDebugStringA("GraphicsContext::setWindow\n");
 	this->window = window;
 	windowSize = Size(window.Bounds().Width, window.Bounds().Height);
 	dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
@@ -212,7 +206,6 @@ void Renderer::setWindow(const ApplicationWindow& window) {
 }
 
 void Renderer::setWindowSize(const Size& size) {
-	OutputDebugStringA("GraphicsContext::setWindowSize\n");
 	if (windowSize != size) {
 		windowSize = size;
 		initWindowResources();
@@ -220,7 +213,6 @@ void Renderer::setWindowSize(const Size& size) {
 }
 
 void Renderer::setDpi(float dpi) {
-	OutputDebugStringA("GraphicsContext::setDpi\n");
 	if (dpi != dpi) {
 		dpi = dpi;
 		windowSize = Size(window.get().Bounds().Width, window.get().Bounds().Height);

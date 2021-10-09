@@ -25,7 +25,6 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 	}
 
 	void Initialize(const CoreApplicationView& view) {
-		OutputDebugStringA("App::Initialize\n");
 		view.Activated({ this, &App::OnActivated });
 		CoreApplication::EnteredBackground({ this, &App::OnEnteredBackground });
 		CoreApplication::LeavingBackground({ this, &App::OnLeavingBackground });
@@ -37,19 +36,16 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 	}
 
 	void OnActivated(const CoreApplicationView&, const IActivatedEventArgs&) {
-		OutputDebugStringA("App::OnActivated\n");
 		auto window = CoreWindow::GetForCurrentThread();
 		window.Activate();
 		renderer->setWindow(window);
 	}
 
 	void OnEnteredBackground(const IInspectable&, const EnteredBackgroundEventArgs&) {
-		OutputDebugStringA("App::OnEnteredBackground\n");
 		foreground = false;
 	}
 
 	void OnLeavingBackground(const IInspectable&, const LeavingBackgroundEventArgs&) {
-		OutputDebugStringA("App::OnLeavingBackground\n");
 		foreground = true;
 	}
 
@@ -93,7 +89,6 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 	}
 
 	void SetWindow(const CoreWindow& window) {
-		OutputDebugStringA("App::SetWindow\n");
 		window.SizeChanged({ this, &App::OnWindowSizeChanged });
 		window.KeyDown({ this, &App::OnKeyDown });
 		window.KeyUp({ this, &App::OnKeyUp });
@@ -104,33 +99,27 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 	}
 
 	void OnWindowSizeChanged(const CoreWindow& window, const WindowSizeChangedEventArgs&) {
-		OutputDebugStringA("App::OnWindowSizeChanged\n");
 		renderer->setWindowSize(Size(window.Bounds().Width, window.Bounds().Height));
 	}
 
 	void OnDisplayContentsInvalidated(const DisplayInformation&, const IInspectable&) {
-		OutputDebugStringA("App::OnDisplayContentsInvalidated\n");
 		renderer->initDeviceResources();
 		renderer->initWindowResources();
 	}
 
 	void OnDPIChanged(const DisplayInformation& info, const IInspectable&) {
-		OutputDebugStringA("App::OnDPIChanged\n");
 		renderer->setDpi(info.LogicalDpi());
 	}
 
 	void OnKeyDown(const CoreWindow&, const KeyEventArgs& args) {
-		OutputDebugStringA("App::OnKeyDown\n");
 		game->onKeyDown(args);
 	}
 
 	void OnKeyUp(const CoreWindow&, const KeyEventArgs& args) {
-		OutputDebugStringA("App::OnKeyUp\n");
 		game->onKeyUp(args);
 	}
 
 	void OnGamepadAdded(const IInspectable&, const Gamepad& gamepad) {
-		OutputDebugStringA("App::OnGamepadAdded\n");
 		static const auto MaxPlayers = 2;
 		critical_section::scoped_lock lock{ gamepadLock };
 		if (gamepads.size() < MaxPlayers) {
@@ -142,7 +131,6 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 	}
 
 	void OnGamepadRemoved(const IInspectable&, const Gamepad& gamepad) {
-		OutputDebugStringA("App::OnGamepadRemoved\n");
 		critical_section::scoped_lock lock{ gamepadLock };
 		auto finder = std::find(begin(gamepads), end(gamepads), gamepad);
 		if (finder != end(gamepads)) {
