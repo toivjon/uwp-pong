@@ -66,7 +66,6 @@ Game::Game(Audio::Ptr& audio) : audio(audio) {
 	mBeepSound = audio->createSound(L"Assets/beep.wav");
 }
 
-
 auto Game::detectCollision(float deltaMS) const -> Collision {
 	auto result = Collision{};
 	detectCollision(deltaMS, mBall, mLeftPaddle, result);
