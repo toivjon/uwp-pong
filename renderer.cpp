@@ -256,8 +256,8 @@ void Renderer::draw(com_ptr<ID2D1Brush> brush, Rectangle::Ref rect) {
 		}, brush.get());
 }
 
-void Renderer::draw(com_ptr<ID2D1Brush> brush, const Text& text) {
-	auto size = text.fontSize * (mWindowSize.Height - mWindowOffset.Height * 2.f);
+void Renderer::draw(com_ptr<ID2D1Brush> brush, Text::Ref text) {
+	auto size = text->fontSize * (mWindowSize.Height - mWindowOffset.Height * 2.f);
 	com_ptr<IDWriteTextFormat> format;
 	mDWriteFactory->CreateTextFormat(
 		L"Calibri",
@@ -270,13 +270,13 @@ void Renderer::draw(com_ptr<ID2D1Brush> brush, const Text& text) {
 		format.put()
 	);
 	format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
-	auto x = mWindowOffset.Width + text.position.x * (mWindowSize.Width - mWindowOffset.Width * 2);
-	auto y = mWindowOffset.Height + text.position.y * (mWindowSize.Height - mWindowOffset.Height * 2);
+	auto x = mWindowOffset.Width + text->position.x * (mWindowSize.Width - mWindowOffset.Width * 2);
+	auto y = mWindowOffset.Height + text->position.y * (mWindowSize.Height - mWindowOffset.Height * 2);
 	m2DDeviceCtx->DrawText(
-		text.text.c_str(),
-		UINT32(text.text.size()),
+		text->text.c_str(),
+		UINT32(text->text.size()),
 		format.get(),
-		{ x - text.text.length() * size * .5f,y,x + text.text.length() * size * .5f,y },
+		{ x - text->text.length() * size * .5f,y,x + text->text.length() * size * .5f,y },
 		brush.get()
 	);
 }

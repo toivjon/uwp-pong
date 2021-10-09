@@ -32,13 +32,15 @@ Game::Game(Audio::Ptr& audio) {
 	mRightPaddle->position = { .95f, .5f };
 	mRightPaddle->velocity = { 0.f, 0.f };
 
-	mLeftScore.text = std::to_wstring(player1Score);
-	mLeftScore.position = { .35f, .025f };
-	mLeftScore.fontSize = .27f;
+	mLeftScore = std::make_shared<Text>();
+	mLeftScore->text = std::to_wstring(player1Score);
+	mLeftScore->position = { .35f, .025f };
+	mLeftScore->fontSize = .27f;
 
-	mRightScore.text = std::to_wstring(player2Score);
-	mRightScore.position = { .65f, .025f };
-	mRightScore.fontSize = .27f;
+	mRightScore = std::make_shared<Text>();
+	mRightScore->text = std::to_wstring(player2Score);
+	mRightScore->position = { .65f, .025f };
+	mRightScore->fontSize = .27f;
 
 	mLeftGoal = std::make_shared<Rectangle>();
 	mLeftGoal->extent = { .5f, .5f };
@@ -149,7 +151,7 @@ void Game::resolveCollision(const Collision& collision) {
 			if (player2Score >= 10) {
 				state = std::make_shared<DialogState>(L"Right player wins! Press X for rematch.");
 			} else {
-				mRightScore.text = std::to_wstring(player2Score);
+				mRightScore->text = std::to_wstring(player2Score);
 				mNewRound = true;
 			}
 		} else if (collision.rhs == mRightGoal) {
@@ -157,7 +159,7 @@ void Game::resolveCollision(const Collision& collision) {
 			if (player1Score >= 10) {
 				state = std::make_shared<DialogState>(L"Left player wins! Press X for rematch.");
 			} else {
-				mLeftScore.text = std::to_wstring(player1Score);
+				mLeftScore->text = std::to_wstring(player1Score);
 				mNewRound = true;
 			}
 		} else if (collision.rhs == mLeftPaddle) {
@@ -197,13 +199,15 @@ Game::DialogState::DialogState(const std::wstring& descriptionText) {
 	foreground->extent = { 0.35f, 0.375f };
 	foreground->position = { .5f, .5f };
 
-	topic.text = L"UWP Pong";
-	topic.position = { .5f, .3f };
-	topic.fontSize = .1f;
+	topic = std::make_shared<Text>();
+	topic->text = L"UWP Pong";
+	topic->position = { .5f, .3f };
+	topic->fontSize = .1f;
 
-	description.text = descriptionText;
-	description.position = { .5f, .6f };
-	description.fontSize = .05f;
+	description = std::make_shared<Text>();
+	description->text = descriptionText;
+	description->position = { .5f, .6f };
+	description->fontSize = .05f;
 }
 
 void Game::DialogState::render(Game&, const Renderer::Ptr& renderer) {
@@ -228,8 +232,8 @@ void Game::DialogState::onReadGamepad(Game& game, int, const winrt::Windows::Gam
 void Game::DialogState::startGame(Game& game) {
 	game.player1Score = 0;
 	game.player2Score = 0;
-	game.mRightScore.text = std::to_wstring(game.player2Score);
-	game.mLeftScore.text = std::to_wstring(game.player1Score);
+	game.mRightScore->text = std::to_wstring(game.player2Score);
+	game.mLeftScore->text = std::to_wstring(game.player1Score);
 	game.state = std::make_shared<CountdownState>(game);
 }
 

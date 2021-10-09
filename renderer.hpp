@@ -33,6 +33,7 @@ struct Rectangle {
 };
 
 struct Text {
+	using Ref = std::shared_ptr<Text>;
 	Vec2f		 position = { 0.f,0.f };
 	std::wstring text;
 	float		 fontSize = 0.f;
@@ -58,7 +59,7 @@ public:
 	winrt::com_ptr<ID2D1Brush> getBlackBrush() const { return mBlackBrush; }
 
 	void draw(winrt::com_ptr<ID2D1Brush> brush, Rectangle::Ref rect);
-	void draw(winrt::com_ptr<ID2D1Brush> brush, const Text& text);
+	void draw(winrt::com_ptr<ID2D1Brush> brush, Text::Ref text);
 
 private:
 	winrt::agile_ref<ApplicationWindow>  mWindow;

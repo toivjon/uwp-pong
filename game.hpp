@@ -38,8 +38,8 @@ private:
 	private:
 		Rectangle::Ref background;
 		Rectangle::Ref foreground;
-		Text        topic;
-		Text        description;
+		Text::Ref      topic;
+		Text::Ref      description;
 	};
 
 	class CountdownState final : public State {
@@ -92,8 +92,8 @@ private:
 	Rectangle::Ref mRightPaddle;
 	Rectangle::Ref mLeftGoal;
 	Rectangle::Ref mRightGoal;
-	Text		mLeftScore;
-	Text		mRightScore;
+	Text::Ref      mLeftScore;
+	Text::Ref      mRightScore;
 
 	bool mNewRound = false;
 
