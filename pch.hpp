@@ -1,6 +1,5 @@
 ﻿#pragma once
 #define NOMINMAX
-#include <array>
 #include <concrt.h>
 #include <d2d1.h>
 #include <d2d1_3.h>

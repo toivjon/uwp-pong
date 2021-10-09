@@ -1,7 +1,6 @@
 #include "pch.hpp"
 #include "game.hpp"
 
-#include <array>
 #include <random>
 
 using namespace winrt::Windows::Gaming::Input;
@@ -277,13 +276,12 @@ auto Game::CountdownState::newRandomDirection() -> Vec2f {
 	constexpr auto BallInitialVelocity = .0004f;
 	static std::default_random_engine rng;
 	static std::uniform_int_distribution<std::mt19937::result_type> dist(0, 3);
-	static const std::array<Vec2f, 4> dirs = {
-		Vec2f{BallInitialVelocity, BallInitialVelocity},
-		Vec2f{BallInitialVelocity, -BallInitialVelocity},
-		Vec2f{-BallInitialVelocity, BallInitialVelocity},
-		Vec2f{-BallInitialVelocity, -BallInitialVelocity}
-	};
-	return dirs[dist(rng)];
+	switch (dist(rng)) {
+	case 0: return Vec2f{ BallInitialVelocity, BallInitialVelocity };
+	case 1: return Vec2f{ BallInitialVelocity, -BallInitialVelocity };
+	case 2: return Vec2f{ -BallInitialVelocity, BallInitialVelocity };
+	}
+	return Vec2f{ -BallInitialVelocity, -BallInitialVelocity };
 }
 
 void Game::PlayState::update(Game& game, std::chrono::milliseconds delta) {
