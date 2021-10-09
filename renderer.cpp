@@ -22,12 +22,6 @@ inline void CheckTrue(bool value) {
 	}
 }
 
-inline void CheckOK(HRESULT hr) {
-	if FAILED(hr) {
-		throw std::exception("ERROR: HRESULT failed!\n");
-	}
-}
-
 Renderer::Renderer() {
 	OutputDebugStringA("GraphicsContext::GraphicsContext\n");
 
@@ -38,14 +32,14 @@ Renderer::Renderer() {
 	#endif
 
 	// Construct a new Direct2D factory to build Direct2D resources.
-	CheckOK(D2D1CreateFactory(
+	check_hresult(D2D1CreateFactory(
 		D2D1_FACTORY_TYPE_SINGLE_THREADED,
 		options,
 		m2DFactory.put()
 	));
 
 	// Construct a new DirectDraw factory to build DirectDraw resources.
-	CheckOK(DWriteCreateFactory(
+	check_hresult(DWriteCreateFactory(
 		DWRITE_FACTORY_TYPE_SHARED,
 		__uuidof(IDWriteFactory3),
 		reinterpret_cast<::IUnknown**>(mDWriteFactory.put())
@@ -54,8 +48,8 @@ Renderer::Renderer() {
 	initDeviceResources();
 
 	// Build the white and black brush, which are the only brushes we need.
-	CheckOK(m2DDeviceCtx->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), mWhiteBrush.put()));
-	CheckOK(m2DDeviceCtx->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), mBlackBrush.put()));
+	check_hresult(m2DDeviceCtx->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), mWhiteBrush.put()));
+	check_hresult(m2DDeviceCtx->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), mBlackBrush.put()));
 }
 
 void Renderer::initDeviceResources() {
@@ -76,7 +70,7 @@ void Renderer::initDeviceResources() {
 	#endif
 
 	// Construct a new Direct3D device and device context.
-	CheckOK(D3D11CreateDevice(
+	check_hresult(D3D11CreateDevice(
 		nullptr,
 		D3D_DRIVER_TYPE_HARDWARE,
 		0,
@@ -92,10 +86,10 @@ void Renderer::initDeviceResources() {
 	// Query and use the underlying DXGI device to create a Direct2D device.
 	winrt::com_ptr<IDXGIDevice3> dxgiDevice;
 	CheckTrue(m3DDevice.try_as(dxgiDevice));
-	CheckOK(m2DFactory->CreateDevice(dxgiDevice.get(), m2DDevice.put()));
+	check_hresult(m2DFactory->CreateDevice(dxgiDevice.get(), m2DDevice.put()));
 
 	// Construct a new Direct2D device context.
-	CheckOK(m2DDevice->CreateDeviceContext(
+	check_hresult(m2DDevice->CreateDeviceContext(
 		D2D1_DEVICE_CONTEXT_OPTIONS_NONE,
 		m2DDeviceCtx.put()
 	));
@@ -121,7 +115,7 @@ void Renderer::initWindowResources() {
 
 	if (mSwapChain != nullptr) {
 		// Resize swap chain buffers.
-		CheckOK(mSwapChain->ResizeBuffers(
+		check_hresult(mSwapChain->ResizeBuffers(
 			2,
 			lround(mWindowSize.Width),
 			lround(mWindowSize.Height),
@@ -140,11 +134,11 @@ void Renderer::initWindowResources() {
 
 		// Query the DXGI version of the back buffer surface.
 		winrt::com_ptr<IDXGISurface> dxgiBackBuffer;
-		CheckOK(mSwapChain->GetBuffer(0, IID_PPV_ARGS(&dxgiBackBuffer)));
+		check_hresult(mSwapChain->GetBuffer(0, IID_PPV_ARGS(&dxgiBackBuffer)));
 
 		// Create a new bitmap that's going to be used by the Direct2D.
 		winrt::com_ptr<ID2D1Bitmap1> bitmap;
-		CheckOK(m2DDeviceCtx->CreateBitmapFromDxgiSurface(
+		check_hresult(m2DDeviceCtx->CreateBitmapFromDxgiSurface(
 			dxgiBackBuffer.get(),
 			&properties,
 			bitmap.put()
@@ -159,11 +153,11 @@ void Renderer::initWindowResources() {
 
 		// Query the underlying adapter (GPU/CPU) from the device.
 		winrt::com_ptr<IDXGIAdapter> dxgiAdapter;
-		CheckOK(dxgiDevice->GetAdapter(dxgiAdapter.put()));
+		check_hresult(dxgiDevice->GetAdapter(dxgiAdapter.put()));
 
 		// Query the factory object that created the DXGI device.
 		winrt::com_ptr<IDXGIFactory2> dxgiFactory;
-		CheckOK(dxgiAdapter->GetParent(IID_PPV_ARGS(&dxgiFactory)));
+		check_hresult(dxgiAdapter->GetParent(IID_PPV_ARGS(&dxgiFactory)));
 
 		// Create and define a swap chain descriptor.
 		DXGI_SWAP_CHAIN_DESC1 descriptor{};
@@ -180,7 +174,7 @@ void Renderer::initWindowResources() {
 		descriptor.Flags = 0;
 
 		// Create a swap chain for the window.
-		CheckOK(dxgiFactory->CreateSwapChainForCoreWindow(
+		check_hresult(dxgiFactory->CreateSwapChainForCoreWindow(
 			m3DDevice.get(),
 			winrt::get_unknown(mWindow.get()),
 			&descriptor,
@@ -199,11 +193,11 @@ void Renderer::initWindowResources() {
 
 		// Query the DXGI version of the back buffer surface.
 		winrt::com_ptr<IDXGISurface> dxgiBackBuffer;
-		CheckOK(mSwapChain->GetBuffer(0, IID_PPV_ARGS(&dxgiBackBuffer)));
+		check_hresult(mSwapChain->GetBuffer(0, IID_PPV_ARGS(&dxgiBackBuffer)));
 
 		// Create a new bitmap that's going to be used by the Direct2D.
 		winrt::com_ptr<ID2D1Bitmap1> bitmap;
-		CheckOK(m2DDeviceCtx->CreateBitmapFromDxgiSurface(
+		check_hresult(m2DDeviceCtx->CreateBitmapFromDxgiSurface(
 			dxgiBackBuffer.get(),
 			&properties,
 			bitmap.put()
@@ -247,7 +241,7 @@ void Renderer::clear() {
 }
 
 void Renderer::present() {
-	CheckOK(m2DDeviceCtx->EndDraw());
+	check_hresult(m2DDeviceCtx->EndDraw());
 	auto presentResult = mSwapChain->Present(1, 0);
 
 	// Recreate our resources whether the GPU was disconnected or went to a errorneous state.
@@ -255,7 +249,7 @@ void Renderer::present() {
 		initDeviceResources();
 		initWindowResources();
 	} else {
-		CheckOK(presentResult);
+		check_hresult(presentResult);
 	}
 }
 
