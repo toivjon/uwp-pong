@@ -12,8 +12,6 @@ public:
 	void onKeyUp(const winrt::Windows::UI::Core::KeyEventArgs& args) { state->onKeyUp(*this, args); }
 	void onReadGamepad(int player, const winrt::Windows::Gaming::Input::GamepadReading& reading) { state->onReadGamepad(*this, player, reading); }
 private:
-	enum class MoveDirection { NONE, UP, DOWN };
-
 	class State {
 	public:
 		using Ref = std::shared_ptr<State>;
@@ -55,6 +53,7 @@ private:
 
 	class PlayState final : public State {
 	public:
+		enum class MoveDirection { NONE, UP, DOWN };
 		void update(Game& game, std::chrono::milliseconds delta) override;
 		void render(Game& game, const Renderer::Ptr& renderer) override;
 		void onKeyDown(Game& game, const winrt::Windows::UI::Core::KeyEventArgs& args) override;
