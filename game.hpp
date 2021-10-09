@@ -14,7 +14,6 @@ public:
 private:
 	class State {
 	public:
-		using Ref = std::shared_ptr<State>;
 		virtual void update(Game& game, std::chrono::milliseconds delta) = 0;
 		virtual void render(Game& game, const Renderer& renderer) = 0;
 		virtual void onKeyDown(Game& game, const winrt::Windows::UI::Core::KeyEventArgs& args) = 0;
@@ -64,7 +63,7 @@ private:
 		MoveDirection player2Movement = MoveDirection::NONE;
 	};
 
-	State::Ref state;
+	std::shared_ptr<State> state;
 
 	int player1Score = 0;
 	int player2Score = 0;
