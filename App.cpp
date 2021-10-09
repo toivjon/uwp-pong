@@ -147,9 +147,9 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 	}
 
 private:
+	bool                      foreground = false;
 	std::unique_ptr<Renderer> renderer;
 	std::unique_ptr<Audio>    audio;
-	bool                      foreground = false;
 	std::unique_ptr<Game>     game;
 	critical_section          gamepadLock;
 	std::vector<Gamepad>      gamepads;
