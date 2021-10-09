@@ -356,15 +356,13 @@ void Game::PlayState::onKeyUp(const KeyEventArgs& args) {
 
 void Game::PlayState::onReadGamepad(int player, const GamepadReading& reading) {
 	constexpr auto DeadZone = .25f;
-	auto moveDirection = MoveDirection::NONE;
-	if (reading.LeftThumbstickY > DeadZone) {
-		moveDirection = MoveDirection::UP;
-	} else if (reading.LeftThumbstickY < -DeadZone) {
-		moveDirection = MoveDirection::DOWN;
-	}
-	if (player == 0) {
-		player1Movement = moveDirection;
-	} else {
-		player2Movement = moveDirection;
+	auto y = reading.LeftThumbstickY;
+	switch (player) {
+	case 0:
+		player1Movement = (y > DeadZone ? MoveDirection::UP : y < -DeadZone ? MoveDirection::DOWN : MoveDirection::NONE);
+		break;
+	case 1:
+		player2Movement = (y > DeadZone ? MoveDirection::UP : y < -DeadZone ? MoveDirection::DOWN : MoveDirection::NONE);
+		break;
 	}
 }
