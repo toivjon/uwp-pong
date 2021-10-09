@@ -340,16 +340,16 @@ void Game::PlayState::onKeyDown(const winrt::Windows::UI::Core::KeyEventArgs& ar
 void Game::PlayState::onKeyUp(const winrt::Windows::UI::Core::KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
-		player2Movement = (player2Movement == MoveDirection::UP ? MoveDirection::NONE : player2Movement);
+		player2Movement = std::max(MoveDirection::NONE, player2Movement);
 		break;
 	case VirtualKey::Down:
-		player2Movement = (player2Movement == MoveDirection::DOWN ? MoveDirection::NONE : player2Movement);
+		player2Movement = std::min(MoveDirection::NONE, player2Movement);
 		break;
 	case VirtualKey::W:
-		player1Movement = (player1Movement == MoveDirection::UP ? MoveDirection::NONE : player1Movement);
+		player1Movement = std::max(MoveDirection::NONE, player1Movement);
 		break;
 	case VirtualKey::S:
-		player1Movement = (player1Movement == MoveDirection::DOWN ? MoveDirection::NONE : player1Movement);
+		player1Movement = std::min(MoveDirection::NONE, player1Movement);
 		break;
 	}
 }
