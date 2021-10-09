@@ -55,25 +55,25 @@ public:
 	void clear();
 	void present();
 
-	winrt::com_ptr<ID2D1Brush> getWhiteBrush() const { return mWhiteBrush; }
-	winrt::com_ptr<ID2D1Brush> getBlackBrush() const { return mBlackBrush; }
+	winrt::com_ptr<ID2D1Brush> getWhiteBrush() const { return whiteBrush; }
+	winrt::com_ptr<ID2D1Brush> getBlackBrush() const { return blackBrush; }
 
 	void draw(winrt::com_ptr<ID2D1Brush> brush, Rectangle::Ref rect);
 	void draw(winrt::com_ptr<ID2D1Brush> brush, Text::Ref text);
 
 private:
-	winrt::agile_ref<ApplicationWindow>  mWindow;
-	winrt::Windows::Foundation::Size	 mWindowSize;
-	winrt::Windows::Foundation::Size	 mWindowOffset = { 0,0 };
-	float								 mDpi = 0.f;
+	winrt::agile_ref<ApplicationWindow>  window;
+	winrt::Windows::Foundation::Size	 windowSize;
+	winrt::Windows::Foundation::Size	 windowOffset = { 0,0 };
+	float								 dpi = 0.f;
 
-	winrt::com_ptr<ID3D11Device>		 m3DDevice;
-	winrt::com_ptr<ID3D11DeviceContext>  m3DDeviceCtx;
-	winrt::com_ptr<ID2D1Factory6>		 m2DFactory;
-	winrt::com_ptr<ID2D1Device5>		 m2DDevice;
-	winrt::com_ptr<ID2D1DeviceContext5>  m2DDeviceCtx;
-	winrt::com_ptr<IDXGISwapChain1>		 mSwapChain;
-	winrt::com_ptr<IDWriteFactory3>		 mDWriteFactory;
-	winrt::com_ptr<ID2D1SolidColorBrush> mWhiteBrush;
-	winrt::com_ptr<ID2D1SolidColorBrush> mBlackBrush;
+	winrt::com_ptr<ID3D11Device>		 d3dDevice;
+	winrt::com_ptr<ID3D11DeviceContext>  d3dDeviceCtx;
+	winrt::com_ptr<ID2D1Factory6>		 d2dFactory;
+	winrt::com_ptr<ID2D1Device5>		 d2dDevice;
+	winrt::com_ptr<ID2D1DeviceContext5>  d2dDeviceCtx;
+	winrt::com_ptr<IDXGISwapChain1>		 swapChain;
+	winrt::com_ptr<IDWriteFactory3>		 dWriteFactory;
+	winrt::com_ptr<ID2D1SolidColorBrush> whiteBrush;
+	winrt::com_ptr<ID2D1SolidColorBrush> blackBrush;
 };

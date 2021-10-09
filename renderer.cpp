@@ -29,32 +29,32 @@ Renderer::Renderer() {
 	check_hresult(D2D1CreateFactory(
 		D2D1_FACTORY_TYPE_SINGLE_THREADED,
 		options,
-		m2DFactory.put()
+		d2dFactory.put()
 	));
 
 	// Construct a new DirectDraw factory to build DirectDraw resources.
 	check_hresult(DWriteCreateFactory(
 		DWRITE_FACTORY_TYPE_SHARED,
 		__uuidof(IDWriteFactory3),
-		reinterpret_cast<::IUnknown**>(mDWriteFactory.put())
+		reinterpret_cast<::IUnknown**>(dWriteFactory.put())
 	));
 
 	initDeviceResources();
 
 	// Build the white and black brush, which are the only brushes we need.
-	check_hresult(m2DDeviceCtx->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), mWhiteBrush.put()));
-	check_hresult(m2DDeviceCtx->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), mBlackBrush.put()));
+	check_hresult(d2dDeviceCtx->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), whiteBrush.put()));
+	check_hresult(d2dDeviceCtx->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), blackBrush.put()));
 }
 
 void Renderer::initDeviceResources() {
 	OutputDebugStringA("GraphicsContext::initDeviceResources\n");
 
 	// clear all possible old definitions.
-	mSwapChain = nullptr;
-	m2DDeviceCtx = nullptr;
-	m2DDevice = nullptr;
-	m3DDeviceCtx = nullptr;
-	m3DDevice = nullptr;
+	swapChain = nullptr;
+	d2dDeviceCtx = nullptr;
+	d2dDevice = nullptr;
+	d3dDeviceCtx = nullptr;
+	d3dDevice = nullptr;
 
 	// Specify the desired additional behaviour how the device will be created.
 	UINT flags = 0;
@@ -72,47 +72,47 @@ void Renderer::initDeviceResources() {
 		FeatureLevels,
 		ARRAYSIZE(FeatureLevels),
 		D3D11_SDK_VERSION,
-		m3DDevice.put(),
+		d3dDevice.put(),
 		nullptr,
-		m3DDeviceCtx.put()
+		d3dDeviceCtx.put()
 	));
 
 	// Query and use the underlying DXGI device to create a Direct2D device.
 	com_ptr<IDXGIDevice3> dxgiDevice;
-	check_bool(m3DDevice.try_as(dxgiDevice));
-	check_hresult(m2DFactory->CreateDevice(dxgiDevice.get(), m2DDevice.put()));
+	check_bool(d3dDevice.try_as(dxgiDevice));
+	check_hresult(d2dFactory->CreateDevice(dxgiDevice.get(), d2dDevice.put()));
 
 	// Construct a new Direct2D device context.
-	check_hresult(m2DDevice->CreateDeviceContext(
+	check_hresult(d2dDevice->CreateDeviceContext(
 		D2D1_DEVICE_CONTEXT_OPTIONS_NONE,
-		m2DDeviceCtx.put()
+		d2dDeviceCtx.put()
 	));
 }
 
 void Renderer::initWindowResources() {
 	OutputDebugStringA("GraphicsContext::initWindowResources\n");
-	m2DDeviceCtx->SetTarget(nullptr);
-	m3DDeviceCtx->Flush();
+	d2dDeviceCtx->SetTarget(nullptr);
+	d3dDeviceCtx->Flush();
 
 	// TODO perhaps we could adjust this in some other way?
 	// calculate window entity offset to maintain aspect ratio.
-	mWindowOffset = { 0,0 };
-	auto aspect = mWindowSize.Width / mWindowSize.Height;
+	windowOffset = { 0,0 };
+	auto aspect = windowSize.Width / windowSize.Height;
 	const auto desiredAspect = 1.3f;
 	if (abs(aspect - desiredAspect) > 0) {
 		if (aspect > desiredAspect) {
-			mWindowOffset.Width = (mWindowSize.Width - desiredAspect * mWindowSize.Height) / 2.f;
+			windowOffset.Width = (windowSize.Width - desiredAspect * windowSize.Height) / 2.f;
 		} else {
-			mWindowOffset.Height = (mWindowSize.Height - mWindowSize.Width / desiredAspect) / 2.f;
+			windowOffset.Height = (windowSize.Height - windowSize.Width / desiredAspect) / 2.f;
 		}
 	}
 
-	if (mSwapChain != nullptr) {
+	if (swapChain != nullptr) {
 		// Resize swap chain buffers.
-		check_hresult(mSwapChain->ResizeBuffers(
+		check_hresult(swapChain->ResizeBuffers(
 			2,
-			lround(mWindowSize.Width),
-			lround(mWindowSize.Height),
+			lround(windowSize.Width),
+			lround(windowSize.Height),
 			DXGI_FORMAT_B8G8R8A8_UNORM,
 			0)
 		);
@@ -128,22 +128,22 @@ void Renderer::initWindowResources() {
 
 		// Query the DXGI version of the back buffer surface.
 		com_ptr<IDXGISurface> dxgiBackBuffer;
-		check_hresult(mSwapChain->GetBuffer(0, IID_PPV_ARGS(&dxgiBackBuffer)));
+		check_hresult(swapChain->GetBuffer(0, IID_PPV_ARGS(&dxgiBackBuffer)));
 
 		// Create a new bitmap that's going to be used by the Direct2D.
 		com_ptr<ID2D1Bitmap1> bitmap;
-		check_hresult(m2DDeviceCtx->CreateBitmapFromDxgiSurface(
+		check_hresult(d2dDeviceCtx->CreateBitmapFromDxgiSurface(
 			dxgiBackBuffer.get(),
 			&properties,
 			bitmap.put()
 		));
 
 		// Assign the created bitmap as Direct2D render target.
-		m2DDeviceCtx->SetTarget(bitmap.get());
+		d2dDeviceCtx->SetTarget(bitmap.get());
 	} else {
 		// Query the underlying DXGI device from the Direct3D device.
 		com_ptr<IDXGIDevice> dxgiDevice;
-		check_bool(m3DDevice.try_as(dxgiDevice));
+		check_bool(d3dDevice.try_as(dxgiDevice));
 
 		// Query the underlying adapter (GPU/CPU) from the device.
 		com_ptr<IDXGIAdapter> dxgiAdapter;
@@ -169,11 +169,11 @@ void Renderer::initWindowResources() {
 
 		// Create a swap chain for the window.
 		check_hresult(dxgiFactory->CreateSwapChainForCoreWindow(
-			m3DDevice.get(),
-			get_unknown(mWindow.get()),
+			d3dDevice.get(),
+			get_unknown(window.get()),
 			&descriptor,
 			nullptr, // allow on all displays
-			mSwapChain.put()
+			swapChain.put()
 		));
 
 		// Construct a bitmap descriptor that is used with Direct2D rendering.
@@ -182,61 +182,61 @@ void Renderer::initWindowResources() {
 		properties.bitmapOptions |= D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
 		properties.pixelFormat.format = descriptor.Format;
 		properties.pixelFormat.alphaMode = D2D1_ALPHA_MODE_IGNORE;
-		properties.dpiX = mDpi;
-		properties.dpiY = mDpi;
+		properties.dpiX = dpi;
+		properties.dpiY = dpi;
 
 		// Query the DXGI version of the back buffer surface.
 		com_ptr<IDXGISurface> dxgiBackBuffer;
-		check_hresult(mSwapChain->GetBuffer(0, IID_PPV_ARGS(&dxgiBackBuffer)));
+		check_hresult(swapChain->GetBuffer(0, IID_PPV_ARGS(&dxgiBackBuffer)));
 
 		// Create a new bitmap that's going to be used by the Direct2D.
 		com_ptr<ID2D1Bitmap1> bitmap;
-		check_hresult(m2DDeviceCtx->CreateBitmapFromDxgiSurface(
+		check_hresult(d2dDeviceCtx->CreateBitmapFromDxgiSurface(
 			dxgiBackBuffer.get(),
 			&properties,
 			bitmap.put()
 		));
 
 		// Assign the created bitmap as Direct2D render target.
-		m2DDeviceCtx->SetTarget(bitmap.get());
+		d2dDeviceCtx->SetTarget(bitmap.get());
 	}
 }
 
 void Renderer::setWindow(const ApplicationWindow& window) {
 	OutputDebugStringA("GraphicsContext::setWindow\n");
-	mWindow = window;
-	mWindowSize = Size(window.Bounds().Width, window.Bounds().Height);
-	mDpi = DisplayInformation::GetForCurrentView().LogicalDpi();
-	m2DDeviceCtx->SetDpi(mDpi, mDpi);
+	this->window = window;
+	windowSize = Size(window.Bounds().Width, window.Bounds().Height);
+	dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
+	d2dDeviceCtx->SetDpi(dpi, dpi);
 	initWindowResources();
 }
 
 void Renderer::setWindowSize(const Size& size) {
 	OutputDebugStringA("GraphicsContext::setWindowSize\n");
-	if (mWindowSize != size) {
-		mWindowSize = size;
+	if (windowSize != size) {
+		windowSize = size;
 		initWindowResources();
 	}
 }
 
 void Renderer::setDpi(float dpi) {
 	OutputDebugStringA("GraphicsContext::setDpi\n");
-	if (mDpi != dpi) {
-		mDpi = dpi;
-		mWindowSize = Size(mWindow.get().Bounds().Width, mWindow.get().Bounds().Height);
-		m2DDeviceCtx->SetDpi(mDpi, mDpi);
+	if (dpi != dpi) {
+		dpi = dpi;
+		windowSize = Size(window.get().Bounds().Width, window.get().Bounds().Height);
+		d2dDeviceCtx->SetDpi(dpi, dpi);
 		initWindowResources();
 	}
 }
 
 void Renderer::clear() {
-	m2DDeviceCtx->BeginDraw();
-	m2DDeviceCtx->Clear(D2D1::ColorF(D2D1::ColorF::Black));
+	d2dDeviceCtx->BeginDraw();
+	d2dDeviceCtx->Clear(D2D1::ColorF(D2D1::ColorF::Black));
 }
 
 void Renderer::present() {
-	check_hresult(m2DDeviceCtx->EndDraw());
-	auto presentResult = mSwapChain->Present(1, 0);
+	check_hresult(d2dDeviceCtx->EndDraw());
+	auto presentResult = swapChain->Present(1, 0);
 
 	// Recreate our resources whether the GPU was disconnected or went to a errorneous state.
 	if (presentResult == DXGI_ERROR_DEVICE_REMOVED || presentResult == DXGI_ERROR_DEVICE_RESET) {
@@ -248,18 +248,18 @@ void Renderer::present() {
 }
 
 void Renderer::draw(com_ptr<ID2D1Brush> brush, Rectangle::Ref rect) {
-	m2DDeviceCtx->FillRectangle({
-	mWindowOffset.Width + (-rect->extent.x + rect->position.x) * (mWindowSize.Width - mWindowOffset.Width * 2),
-	mWindowOffset.Height + (-rect->extent.y + rect->position.y) * (mWindowSize.Height - mWindowOffset.Height * 2),
-	mWindowOffset.Width + (rect->extent.x + rect->position.x) * (mWindowSize.Width - mWindowOffset.Width * 2),
-	mWindowOffset.Height + (rect->extent.y + rect->position.y) * (mWindowSize.Height - mWindowOffset.Height * 2),
+	d2dDeviceCtx->FillRectangle({
+	windowOffset.Width + (-rect->extent.x + rect->position.x) * (windowSize.Width - windowOffset.Width * 2),
+	windowOffset.Height + (-rect->extent.y + rect->position.y) * (windowSize.Height - windowOffset.Height * 2),
+	windowOffset.Width + (rect->extent.x + rect->position.x) * (windowSize.Width - windowOffset.Width * 2),
+	windowOffset.Height + (rect->extent.y + rect->position.y) * (windowSize.Height - windowOffset.Height * 2),
 		}, brush.get());
 }
 
 void Renderer::draw(com_ptr<ID2D1Brush> brush, Text::Ref text) {
-	auto size = text->fontSize * (mWindowSize.Height - mWindowOffset.Height * 2.f);
+	auto size = text->fontSize * (windowSize.Height - windowOffset.Height * 2.f);
 	com_ptr<IDWriteTextFormat> format;
-	mDWriteFactory->CreateTextFormat(
+	dWriteFactory->CreateTextFormat(
 		L"Calibri",
 		nullptr,
 		DWRITE_FONT_WEIGHT_REGULAR,
@@ -270,9 +270,9 @@ void Renderer::draw(com_ptr<ID2D1Brush> brush, Text::Ref text) {
 		format.put()
 	);
 	format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
-	auto x = mWindowOffset.Width + text->position.x * (mWindowSize.Width - mWindowOffset.Width * 2);
-	auto y = mWindowOffset.Height + text->position.y * (mWindowSize.Height - mWindowOffset.Height * 2);
-	m2DDeviceCtx->DrawText(
+	auto x = windowOffset.Width + text->position.x * (windowSize.Width - windowOffset.Width * 2);
+	auto y = windowOffset.Height + text->position.y * (windowSize.Height - windowOffset.Height * 2);
+	d2dDeviceCtx->DrawText(
 		text->text.c_str(),
 		UINT32(text->text.size()),
 		format.get(),
