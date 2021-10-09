@@ -31,26 +31,26 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 		CoreApplication::LeavingBackground({ this, &App::OnLeavingBackground });
 		Gamepad::GamepadAdded({ this, &App::OnGamepadAdded });
 		Gamepad::GamepadRemoved({ this, &App::OnGamepadRemoved });
-		mRenderer = std::make_unique<Renderer>();
-		mAudio = std::make_unique<Audio>();
-		mGame = std::make_unique<Game>(mAudio);
+		renderer = std::make_unique<Renderer>();
+		audio = std::make_unique<Audio>();
+		game = std::make_unique<Game>(audio);
 	}
 
 	void OnActivated(const CoreApplicationView&, const IActivatedEventArgs&) {
 		OutputDebugStringA("App::OnActivated\n");
 		auto window = CoreWindow::GetForCurrentThread();
 		window.Activate();
-		mRenderer->setWindow(window);
+		renderer->setWindow(window);
 	}
 
 	void OnEnteredBackground(const IInspectable&, const EnteredBackgroundEventArgs&) {
 		OutputDebugStringA("App::OnEnteredBackground\n");
-		mForeground = false;
+		foreground = false;
 	}
 
 	void OnLeavingBackground(const IInspectable&, const LeavingBackgroundEventArgs&) {
 		OutputDebugStringA("App::OnLeavingBackground\n");
-		mForeground = true;
+		foreground = true;
 	}
 
 	void Load(const hstring&) {
@@ -66,7 +66,7 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 		while (true) {
 			auto window = CoreWindow::GetForCurrentThread();
 			auto dispatcher = window.Dispatcher();
-			if (mForeground) {
+			if (foreground) {
 				dispatcher.ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
 
 				// Read gamepad readings.
@@ -82,10 +82,10 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 				previousTime = currentTime;
 
 				// Update game world by the amount of time passed and render the game scene.
-				mGame->update(duration_cast<milliseconds>(frameTime));
-				mRenderer->clear();
-				mGame->render(mRenderer);
-				mRenderer->present();
+				game->update(duration_cast<milliseconds>(frameTime));
+				renderer->clear();
+				game->render(renderer);
+				renderer->present();
 			} else {
 				dispatcher.ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
 			}
@@ -100,71 +100,71 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 		DisplayInformation::DisplayContentsInvalidated({ this, &App::OnDisplayContentsInvalidated });
 		auto displayInfo = DisplayInformation::GetForCurrentView();
 		displayInfo.DpiChanged({ this, &App::OnDPIChanged });
-		mRenderer->setWindow(window);
+		renderer->setWindow(window);
 	}
 
 	void OnWindowSizeChanged(const CoreWindow& window, const WindowSizeChangedEventArgs&) {
 		OutputDebugStringA("App::OnWindowSizeChanged\n");
-		mRenderer->setWindowSize(Size(window.Bounds().Width, window.Bounds().Height));
+		renderer->setWindowSize(Size(window.Bounds().Width, window.Bounds().Height));
 	}
 
 	void OnDisplayContentsInvalidated(const DisplayInformation&, const IInspectable&) {
 		OutputDebugStringA("App::OnDisplayContentsInvalidated\n");
-		mRenderer->initDeviceResources();
-		mRenderer->initWindowResources();
+		renderer->initDeviceResources();
+		renderer->initWindowResources();
 	}
 
 	void OnDPIChanged(const DisplayInformation& info, const IInspectable&) {
 		OutputDebugStringA("App::OnDPIChanged\n");
-		mRenderer->setDpi(info.LogicalDpi());
+		renderer->setDpi(info.LogicalDpi());
 	}
 
 	void OnKeyDown(const CoreWindow&, const KeyEventArgs& args) {
 		OutputDebugStringA("App::OnKeyDown\n");
-		mGame->onKeyDown(args);
+		game->onKeyDown(args);
 	}
 
 	void OnKeyUp(const CoreWindow&, const KeyEventArgs& args) {
 		OutputDebugStringA("App::OnKeyUp\n");
-		mGame->onKeyUp(args);
+		game->onKeyUp(args);
 	}
 
 	void OnGamepadAdded(const IInspectable&, const Gamepad& gamepad) {
 		OutputDebugStringA("App::OnGamepadAdded\n");
 		static const auto MaxPlayers = 2;
-		critical_section::scoped_lock lock{ mGamepadLock };
-		if (mGamepads.size() < MaxPlayers) {
-			auto finder = std::find(begin(mGamepads), end(mGamepads), gamepad);
-			if (finder == end(mGamepads)) {
-				mGamepads.push_back(gamepad);
+		critical_section::scoped_lock lock{ gamepadLock };
+		if (gamepads.size() < MaxPlayers) {
+			auto finder = std::find(begin(gamepads), end(gamepads), gamepad);
+			if (finder == end(gamepads)) {
+				gamepads.push_back(gamepad);
 			}
 		}
 	}
 
 	void OnGamepadRemoved(const IInspectable&, const Gamepad& gamepad) {
 		OutputDebugStringA("App::OnGamepadRemoved\n");
-		critical_section::scoped_lock lock{ mGamepadLock };
-		auto finder = std::find(begin(mGamepads), end(mGamepads), gamepad);
-		if (finder != end(mGamepads)) {
-			mGamepads.erase(finder);
+		critical_section::scoped_lock lock{ gamepadLock };
+		auto finder = std::find(begin(gamepads), end(gamepads), gamepad);
+		if (finder != end(gamepads)) {
+			gamepads.erase(finder);
 		}
 	}
 
 	void ReadGamepads() {
-		critical_section::scoped_lock lock{ mGamepadLock };
-		for (auto i = 0; i < mGamepads.size(); i++) {
-			auto reading = mGamepads[i].GetCurrentReading();
-			mGame->onReadGamepad(i, reading);
+		critical_section::scoped_lock lock{ gamepadLock };
+		for (auto i = 0; i < gamepads.size(); i++) {
+			auto reading = gamepads[i].GetCurrentReading();
+			game->onReadGamepad(i, reading);
 		}
 	}
 
 private:
-	Renderer::Ptr        mRenderer;
-	Audio::Ptr           mAudio;
-	bool                 mForeground = false;
-	Game::Ptr            mGame;
-	critical_section     mGamepadLock;
-	std::vector<Gamepad> mGamepads;
+	Renderer::Ptr        renderer;
+	Audio::Ptr           audio;
+	bool                 foreground = false;
+	Game::Ptr            game;
+	critical_section     gamepadLock;
+	std::vector<Gamepad> gamepads;
 };
 
 int __stdcall wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
