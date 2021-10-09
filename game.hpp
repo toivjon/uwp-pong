@@ -82,7 +82,7 @@ private:
 	void detectCollision(float deltaMS, Rectangle::Ref r1, Rectangle::Ref r2, Collision& result) const;
 	auto detectCollision(float deltaMS, Rectangle::Ref r1, Rectangle::Ref r2) const->Collision;
 
-	void resolveCollision(const Collision& collision);
+	auto resolveCollision(const Collision& collision) -> bool;
 
 	Rectangle::Ref ball;
 	Rectangle::Ref topWall;
@@ -93,8 +93,6 @@ private:
 	Rectangle::Ref rightGoal;
 	Text::Ref      leftScore;
 	Text::Ref      rightScore;
-
-	bool newRound = false;
 
 	Audio::Sound beepSound;
 };

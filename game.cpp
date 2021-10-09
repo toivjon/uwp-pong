@@ -134,7 +134,7 @@ auto Game::detectCollision(float deltaMS, Rectangle::Ref a, Rectangle::Ref b) co
 	return collision;
 }
 
-void Game::resolveCollision(const Collision& collision) {
+auto Game::resolveCollision(const Collision& collision) -> bool {
 	constexpr auto BallVelocityMultiplier = 1.1f;
 	constexpr auto Nudge = .001f;
 	if (collision.lhs == ball) {
@@ -152,16 +152,18 @@ void Game::resolveCollision(const Collision& collision) {
 				state = std::make_shared<DialogState>(*this, L"Right player wins! Press X for rematch.");
 			} else {
 				rightScore->text = std::to_wstring(player2Score);
-				newRound = true;
+				state = std::make_shared<CountdownState>(*this);
 			}
+			return true;
 		} else if (collision.rhs == rightGoal) {
 			player1Score++;
 			if (player1Score >= 10) {
 				state = std::make_shared<DialogState>(*this, L"Left player wins! Press X for rematch.");
 			} else {
 				leftScore->text = std::to_wstring(player1Score);
-				newRound = true;
+				state = std::make_shared<CountdownState>(*this);
 			}
+			return true;
 		} else if (collision.rhs == leftPaddle) {
 			ball->position.x = leftPaddle->position.x + leftPaddle->extent.x + ball->extent.x + Nudge;
 			ball->velocity.x = -ball->velocity.x;
@@ -188,6 +190,7 @@ void Game::resolveCollision(const Collision& collision) {
 		}
 		rightPaddle->velocity.y = 0.f;
 	}
+	return false;
 }
 
 Game::DialogState::DialogState(Game& game, const std::wstring& descriptionText) : State(game) {
@@ -281,6 +284,7 @@ void Game::PlayState::update(std::chrono::milliseconds delta) {
 	game.leftPaddle->velocity.y = static_cast<float>(player1Movement) * PaddleVelocity;
 	game.rightPaddle->velocity.y = static_cast<float>(player2Movement) * PaddleVelocity;
 
+	auto endRound = false;
 	do {
 		// Perform collision detection to find out the first collision.
 		const auto collision = game.detectCollision(deltaMS);
@@ -301,13 +305,8 @@ void Game::PlayState::update(std::chrono::milliseconds delta) {
 		game.rightPaddle->position += game.rightPaddle->velocity * collisionMS;
 
 		// Perform collision resolvement.
-		game.resolveCollision(collision);
-	} while (!game.newRound && game.player1Score < 10 && game.player2Score < 10);
-
-	if (game.newRound) {
-		game.newRound = false;
-		game.state = std::make_shared<CountdownState>(game);
-	}
+		endRound = game.resolveCollision(collision);
+	} while (!endRound);
 }
 
 void Game::PlayState::render(const Renderer& renderer) {
