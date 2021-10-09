@@ -305,8 +305,8 @@ void Game::PlayState::update(std::chrono::milliseconds delta) {
 	} while (!game.newRound && game.player1Score < 10 && game.player2Score < 10);
 
 	if (game.newRound) {
-		game.state = std::make_shared<CountdownState>(game);
 		game.newRound = false;
+		game.state = std::make_shared<CountdownState>(game);
 	}
 }
 
