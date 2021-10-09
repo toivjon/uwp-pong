@@ -217,13 +217,13 @@ void Game::DialogState::render(const Renderer& renderer) {
 	renderer.draw(renderer.getWhiteBrush(), description);
 }
 
-void Game::DialogState::onKeyDown(const winrt::Windows::UI::Core::KeyEventArgs& args) {
+void Game::DialogState::onKeyDown(const KeyEventArgs& args) {
 	if (args.VirtualKey() == VirtualKey::X) {
 		startGame();
 	}
 }
 
-void Game::DialogState::onReadGamepad(int, const winrt::Windows::Gaming::Input::GamepadReading& reading) {
+void Game::DialogState::onReadGamepad(int, const GamepadReading& reading) {
 	if (GamepadButtons::X == (reading.Buttons & GamepadButtons::X)) {
 		startGame();
 	}
@@ -320,7 +320,7 @@ void Game::PlayState::render(const Renderer& renderer) {
 	renderer.draw(renderer.getWhiteBrush(), game.rightPaddle);
 }
 
-void Game::PlayState::onKeyDown(const winrt::Windows::UI::Core::KeyEventArgs& args) {
+void Game::PlayState::onKeyDown(const KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
 		player2Movement = MoveDirection::UP;
@@ -337,7 +337,7 @@ void Game::PlayState::onKeyDown(const winrt::Windows::UI::Core::KeyEventArgs& ar
 	}
 }
 
-void Game::PlayState::onKeyUp(const winrt::Windows::UI::Core::KeyEventArgs& args) {
+void Game::PlayState::onKeyUp(const KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
 		player2Movement = std::max(MoveDirection::NONE, player2Movement);
@@ -354,7 +354,7 @@ void Game::PlayState::onKeyUp(const winrt::Windows::UI::Core::KeyEventArgs& args
 	}
 }
 
-void Game::PlayState::onReadGamepad(int player, const winrt::Windows::Gaming::Input::GamepadReading& reading) {
+void Game::PlayState::onReadGamepad(int player, const GamepadReading& reading) {
 	constexpr auto DeadZone = .25f;
 	auto moveDirection = MoveDirection::NONE;
 	if (reading.LeftThumbstickY > DeadZone) {
