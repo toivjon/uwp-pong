@@ -75,11 +75,3 @@ auto Audio::createSound(const std::wstring& filename) -> Sound {
 	check_hresult(mEngine->CreateSourceVoice(&sound.ptr, waveFormat));
 	return sound;
 }
-
-void Audio::playSound(const Sound& sound) {
-	XAUDIO2_BUFFER waveBuffer = {};
-	waveBuffer.AudioBytes = static_cast<UINT32>(sound.bytes.size());
-	waveBuffer.pAudioData = &sound.bytes[0];
-	check_hresult(sound.ptr->SubmitSourceBuffer(&waveBuffer));
-	sound.ptr->Start();
-}
