@@ -8,7 +8,7 @@ using namespace winrt::Windows::UI::Core;
 using namespace winrt::Windows::System;
 
 Game::Game(const Audio& audio) {
-	state = std::make_shared<Game::DialogState>(L"Press X key or button to start a game");
+	state = std::make_shared<Game::DialogState>(*this, L"Press X key or button to start a game");
 
 	ball = std::make_shared<Rectangle>();
 	ball->extent = { .0115f, .015f };
@@ -149,7 +149,7 @@ void Game::resolveCollision(const Collision& collision) {
 		} else if (collision.rhs == leftGoal) {
 			player2Score++;
 			if (player2Score >= 10) {
-				state = std::make_shared<DialogState>(L"Right player wins! Press X for rematch.");
+				state = std::make_shared<DialogState>(*this, L"Right player wins! Press X for rematch.");
 			} else {
 				rightScore->text = std::to_wstring(player2Score);
 				newRound = true;
@@ -157,7 +157,7 @@ void Game::resolveCollision(const Collision& collision) {
 		} else if (collision.rhs == rightGoal) {
 			player1Score++;
 			if (player1Score >= 10) {
-				state = std::make_shared<DialogState>(L"Left player wins! Press X for rematch.");
+				state = std::make_shared<DialogState>(*this, L"Left player wins! Press X for rematch.");
 			} else {
 				leftScore->text = std::to_wstring(player1Score);
 				newRound = true;
@@ -190,7 +190,7 @@ void Game::resolveCollision(const Collision& collision) {
 	}
 }
 
-Game::DialogState::DialogState(const std::wstring& descriptionText) {
+Game::DialogState::DialogState(Game& game, const std::wstring& descriptionText) : State(game) {
 	background = std::make_shared<Rectangle>();
 	background->extent = { 0.375f, 0.40f };
 	background->position = { .5f, .5f };
@@ -210,26 +210,26 @@ Game::DialogState::DialogState(const std::wstring& descriptionText) {
 	description->fontSize = .05f;
 }
 
-void Game::DialogState::render(Game&, const Renderer& renderer) {
+void Game::DialogState::render(const Renderer& renderer) {
 	renderer.draw(renderer.getWhiteBrush(), background);
 	renderer.draw(renderer.getBlackBrush(), foreground);
 	renderer.draw(renderer.getWhiteBrush(), topic);
 	renderer.draw(renderer.getWhiteBrush(), description);
 }
 
-void Game::DialogState::onKeyDown(Game& game, const winrt::Windows::UI::Core::KeyEventArgs& args) {
+void Game::DialogState::onKeyDown(const winrt::Windows::UI::Core::KeyEventArgs& args) {
 	if (args.VirtualKey() == VirtualKey::X) {
-		startGame(game);
+		startGame();
 	}
 }
 
-void Game::DialogState::onReadGamepad(Game& game, int, const winrt::Windows::Gaming::Input::GamepadReading& reading) {
+void Game::DialogState::onReadGamepad(int, const winrt::Windows::Gaming::Input::GamepadReading& reading) {
 	if (GamepadButtons::X == (reading.Buttons & GamepadButtons::X)) {
-		startGame(game);
+		startGame();
 	}
 }
 
-void Game::DialogState::startGame(Game& game) {
+void Game::DialogState::startGame() {
 	game.player1Score = 0;
 	game.player2Score = 0;
 	game.rightScore->text = std::to_wstring(game.player2Score);
@@ -237,20 +237,20 @@ void Game::DialogState::startGame(Game& game) {
 	game.state = std::make_shared<CountdownState>(game);
 }
 
-Game::CountdownState::CountdownState(Game& game) {
+Game::CountdownState::CountdownState(Game& game) : State(game) {
 	game.ball->position = { .5f, .5f };
 	game.ball->velocity = newRandomDirection();
 	game.leftPaddle->position.y = .5f;
 	game.rightPaddle->position.y = .5f;
 }
 
-void Game::CountdownState::update(Game& game, std::chrono::milliseconds) {
+void Game::CountdownState::update(std::chrono::milliseconds) {
 	if (--countdown <= 0) {
-		game.state = std::make_shared<PlayState>();
+		game.state = std::make_shared<PlayState>(game);
 	}
 }
 
-void Game::CountdownState::render(Game& game, const Renderer& renderer) {
+void Game::CountdownState::render(const Renderer& renderer) {
 	renderer.draw(renderer.getWhiteBrush(), game.leftScore);
 	renderer.draw(renderer.getWhiteBrush(), game.rightScore);
 	renderer.draw(renderer.getWhiteBrush(), game.ball);
@@ -272,7 +272,7 @@ auto Game::CountdownState::newRandomDirection() -> Vec2f {
 	return Vec2f{ -BallInitialVelocity, -BallInitialVelocity };
 }
 
-void Game::PlayState::update(Game& game, std::chrono::milliseconds delta) {
+void Game::PlayState::update(std::chrono::milliseconds delta) {
 	// Get the time (in milliseconds) we must consume during this simulation step.
 	auto deltaMS = static_cast<float>(delta.count());
 
@@ -310,7 +310,7 @@ void Game::PlayState::update(Game& game, std::chrono::milliseconds delta) {
 	}
 }
 
-void Game::PlayState::render(Game& game, const Renderer& renderer) {
+void Game::PlayState::render(const Renderer& renderer) {
 	renderer.draw(renderer.getWhiteBrush(), game.leftScore);
 	renderer.draw(renderer.getWhiteBrush(), game.rightScore);
 	renderer.draw(renderer.getWhiteBrush(), game.ball);
@@ -320,7 +320,7 @@ void Game::PlayState::render(Game& game, const Renderer& renderer) {
 	renderer.draw(renderer.getWhiteBrush(), game.rightPaddle);
 }
 
-void Game::PlayState::onKeyDown(Game&, const winrt::Windows::UI::Core::KeyEventArgs& args) {
+void Game::PlayState::onKeyDown(const winrt::Windows::UI::Core::KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
 		player2Movement = MoveDirection::UP;
@@ -337,7 +337,7 @@ void Game::PlayState::onKeyDown(Game&, const winrt::Windows::UI::Core::KeyEventA
 	}
 }
 
-void Game::PlayState::onKeyUp(Game&, const winrt::Windows::UI::Core::KeyEventArgs& args) {
+void Game::PlayState::onKeyUp(const winrt::Windows::UI::Core::KeyEventArgs& args) {
 	switch (args.VirtualKey()) {
 	case VirtualKey::Up:
 		player2Movement = (player2Movement == MoveDirection::UP ? MoveDirection::NONE : player2Movement);
@@ -354,7 +354,7 @@ void Game::PlayState::onKeyUp(Game&, const winrt::Windows::UI::Core::KeyEventArg
 	}
 }
 
-void Game::PlayState::onReadGamepad(Game&, int player, const winrt::Windows::Gaming::Input::GamepadReading& reading) {
+void Game::PlayState::onReadGamepad(int player, const winrt::Windows::Gaming::Input::GamepadReading& reading) {
 	constexpr auto DeadZone = .25f;
 	auto moveDirection = MoveDirection::NONE;
 	if (reading.LeftThumbstickY > DeadZone) {
