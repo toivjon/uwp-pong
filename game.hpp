@@ -5,7 +5,7 @@
 
 class Game {
 public:
-	Game(Audio::Ptr& audio);
+	Game(const Audio& audio);
 	void update(std::chrono::milliseconds delta) { state->update(*this, delta); }
 	void render(const Renderer& renderer) { state->render(*this, renderer); }
 	void onKeyDown(const winrt::Windows::UI::Core::KeyEventArgs& args) { state->onKeyDown(*this, args); }

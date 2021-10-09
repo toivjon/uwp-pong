@@ -32,7 +32,7 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 		Gamepad::GamepadRemoved({ this, &App::OnGamepadRemoved });
 		renderer = std::make_unique<Renderer>();
 		audio = std::make_unique<Audio>();
-		game = std::make_unique<Game>(audio);
+		game = std::make_unique<Game>(*audio);
 	}
 
 	void OnActivated(const CoreApplicationView&, const IActivatedEventArgs&) {
@@ -148,7 +148,7 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 
 private:
 	std::unique_ptr<Renderer> renderer;
-	Audio::Ptr                audio;
+	std::unique_ptr<Audio>    audio;
 	bool                      foreground = false;
 	std::unique_ptr<Game>     game;
 	critical_section          gamepadLock;

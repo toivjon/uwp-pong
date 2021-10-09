@@ -9,8 +9,6 @@
 
 class Audio final {
 public:
-	using Ptr = std::unique_ptr<Audio>;
-
 	struct Sound {
 		IXAudio2SourceVoice* ptr = nullptr;
 		std::vector<BYTE>    bytes;
@@ -27,7 +25,7 @@ public:
 	Audio();
 	~Audio();
 
-	auto createSound(const std::wstring& filename) -> Sound;
+	auto createSound(const std::wstring& filename) const -> Sound;
 private:
 	winrt::com_ptr<IXAudio2> engine;
 	IXAudio2MasteringVoice*  masteringVoice;

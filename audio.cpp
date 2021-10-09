@@ -17,7 +17,7 @@ Audio::~Audio() {
 	MFShutdown();
 }
 
-auto Audio::createSound(const std::wstring& filename) -> Sound {
+auto Audio::createSound(const std::wstring& filename) const -> Sound {
 	auto const streamIndex = static_cast<DWORD>(MF_SOURCE_READER_FIRST_AUDIO_STREAM);
 
 	// Build a media source reader instance.

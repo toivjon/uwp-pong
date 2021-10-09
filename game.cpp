@@ -7,7 +7,7 @@ using namespace winrt::Windows::Gaming::Input;
 using namespace winrt::Windows::UI::Core;
 using namespace winrt::Windows::System;
 
-Game::Game(Audio::Ptr& audio) {
+Game::Game(const Audio& audio) {
 	state = std::make_shared<Game::DialogState>(L"Press X key or button to start a game");
 
 	ball = std::make_shared<Rectangle>();
@@ -50,7 +50,7 @@ Game::Game(Audio::Ptr& audio) {
 	rightGoal->extent = leftGoal->extent;
 	rightGoal->position = { 1.5f + ball->extent.x * 4.f, .5f };
 
-	beepSound = audio->createSound(L"Assets/beep.wav");
+	beepSound = audio.createSound(L"Assets/beep.wav");
 }
 
 auto Game::detectCollision(float deltaMS) const -> Collision {
