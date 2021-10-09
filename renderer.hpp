@@ -41,8 +41,6 @@ struct Text {
 
 class Renderer {
 public:
-	using Ptr = std::unique_ptr<Renderer>;
-
 	Renderer();
 
 	void initDeviceResources();
@@ -58,8 +56,8 @@ public:
 	winrt::com_ptr<ID2D1Brush> getWhiteBrush() const { return whiteBrush; }
 	winrt::com_ptr<ID2D1Brush> getBlackBrush() const { return blackBrush; }
 
-	void draw(winrt::com_ptr<ID2D1Brush> brush, Rectangle::Ref rect);
-	void draw(winrt::com_ptr<ID2D1Brush> brush, Text::Ref text);
+	void draw(winrt::com_ptr<ID2D1Brush> brush, Rectangle::Ref rect) const;
+	void draw(winrt::com_ptr<ID2D1Brush> brush, Text::Ref text) const;
 
 private:
 	winrt::agile_ref<ApplicationWindow>  window;

@@ -210,11 +210,11 @@ Game::DialogState::DialogState(const std::wstring& descriptionText) {
 	description->fontSize = .05f;
 }
 
-void Game::DialogState::render(Game&, const Renderer::Ptr& renderer) {
-	renderer->draw(renderer->getWhiteBrush(), background);
-	renderer->draw(renderer->getBlackBrush(), foreground);
-	renderer->draw(renderer->getWhiteBrush(), topic);
-	renderer->draw(renderer->getWhiteBrush(), description);
+void Game::DialogState::render(Game&, const Renderer& renderer) {
+	renderer.draw(renderer.getWhiteBrush(), background);
+	renderer.draw(renderer.getBlackBrush(), foreground);
+	renderer.draw(renderer.getWhiteBrush(), topic);
+	renderer.draw(renderer.getWhiteBrush(), description);
 }
 
 void Game::DialogState::onKeyDown(Game& game, const winrt::Windows::UI::Core::KeyEventArgs& args) {
@@ -250,14 +250,14 @@ void Game::CountdownState::update(Game& game, std::chrono::milliseconds) {
 	}
 }
 
-void Game::CountdownState::render(Game& game, const Renderer::Ptr& renderer) {
-	renderer->draw(renderer->getWhiteBrush(), game.leftScore);
-	renderer->draw(renderer->getWhiteBrush(), game.rightScore);
-	renderer->draw(renderer->getWhiteBrush(), game.ball);
-	renderer->draw(renderer->getWhiteBrush(), game.topWall);
-	renderer->draw(renderer->getWhiteBrush(), game.bottomWall);
-	renderer->draw(renderer->getWhiteBrush(), game.leftPaddle);
-	renderer->draw(renderer->getWhiteBrush(), game.rightPaddle);
+void Game::CountdownState::render(Game& game, const Renderer& renderer) {
+	renderer.draw(renderer.getWhiteBrush(), game.leftScore);
+	renderer.draw(renderer.getWhiteBrush(), game.rightScore);
+	renderer.draw(renderer.getWhiteBrush(), game.ball);
+	renderer.draw(renderer.getWhiteBrush(), game.topWall);
+	renderer.draw(renderer.getWhiteBrush(), game.bottomWall);
+	renderer.draw(renderer.getWhiteBrush(), game.leftPaddle);
+	renderer.draw(renderer.getWhiteBrush(), game.rightPaddle);
 }
 
 auto Game::CountdownState::newRandomDirection() -> Vec2f {
@@ -310,14 +310,14 @@ void Game::PlayState::update(Game& game, std::chrono::milliseconds delta) {
 	}
 }
 
-void Game::PlayState::render(Game& game, const Renderer::Ptr& renderer) {
-	renderer->draw(renderer->getWhiteBrush(), game.leftScore);
-	renderer->draw(renderer->getWhiteBrush(), game.rightScore);
-	renderer->draw(renderer->getWhiteBrush(), game.ball);
-	renderer->draw(renderer->getWhiteBrush(), game.topWall);
-	renderer->draw(renderer->getWhiteBrush(), game.bottomWall);
-	renderer->draw(renderer->getWhiteBrush(), game.leftPaddle);
-	renderer->draw(renderer->getWhiteBrush(), game.rightPaddle);
+void Game::PlayState::render(Game& game, const Renderer& renderer) {
+	renderer.draw(renderer.getWhiteBrush(), game.leftScore);
+	renderer.draw(renderer.getWhiteBrush(), game.rightScore);
+	renderer.draw(renderer.getWhiteBrush(), game.ball);
+	renderer.draw(renderer.getWhiteBrush(), game.topWall);
+	renderer.draw(renderer.getWhiteBrush(), game.bottomWall);
+	renderer.draw(renderer.getWhiteBrush(), game.leftPaddle);
+	renderer.draw(renderer.getWhiteBrush(), game.rightPaddle);
 }
 
 void Game::PlayState::onKeyDown(Game&, const winrt::Windows::UI::Core::KeyEventArgs& args) {

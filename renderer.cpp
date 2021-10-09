@@ -239,7 +239,7 @@ void Renderer::present() {
 	}
 }
 
-void Renderer::draw(com_ptr<ID2D1Brush> brush, Rectangle::Ref rect) {
+void Renderer::draw(com_ptr<ID2D1Brush> brush, Rectangle::Ref rect) const {
 	d2dDeviceCtx->FillRectangle({
 	windowOffset.Width + (-rect->extent.x + rect->position.x) * (windowSize.Width - windowOffset.Width * 2),
 	windowOffset.Height + (-rect->extent.y + rect->position.y) * (windowSize.Height - windowOffset.Height * 2),
@@ -248,7 +248,7 @@ void Renderer::draw(com_ptr<ID2D1Brush> brush, Rectangle::Ref rect) {
 		}, brush.get());
 }
 
-void Renderer::draw(com_ptr<ID2D1Brush> brush, Text::Ref text) {
+void Renderer::draw(com_ptr<ID2D1Brush> brush, Text::Ref text) const {
 	auto size = text->fontSize * (windowSize.Height - windowOffset.Height * 2.f);
 	com_ptr<IDWriteTextFormat> format;
 	dWriteFactory->CreateTextFormat(
