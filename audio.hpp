@@ -29,6 +29,6 @@ public:
 
 	auto createSound(const std::wstring& filename) -> Sound;
 private:
-	winrt::com_ptr<IXAudio2> mEngine;
-	IXAudio2MasteringVoice*  mMasteringVoice;
+	winrt::com_ptr<IXAudio2> engine;
+	IXAudio2MasteringVoice*  masteringVoice;
 };

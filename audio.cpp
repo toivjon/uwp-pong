@@ -8,8 +8,8 @@
 using namespace winrt;
 
 Audio::Audio() {
-	check_hresult(XAudio2Create(mEngine.put()));
-	check_hresult(mEngine->CreateMasteringVoice(&mMasteringVoice));
+	check_hresult(XAudio2Create(engine.put()));
+	check_hresult(engine->CreateMasteringVoice(&masteringVoice));
 	check_hresult(MFStartup(MF_VERSION));
 }
 
@@ -72,6 +72,6 @@ auto Audio::createSound(const std::wstring& filename) -> Sound {
 	}
 
 	// Create a new sound with a desired sound format.
-	check_hresult(mEngine->CreateSourceVoice(&sound.ptr, waveFormat));
+	check_hresult(engine->CreateSourceVoice(&sound.ptr, waveFormat));
 	return sound;
 }
