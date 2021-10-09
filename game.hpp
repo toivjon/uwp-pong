@@ -85,17 +85,17 @@ private:
 
 	void resolveCollision(const Collision& collision);
 
-	Rectangle::Ref mBall;
-	Rectangle::Ref mTopWall;
-	Rectangle::Ref mBottomWall;
-	Rectangle::Ref mLeftPaddle;
-	Rectangle::Ref mRightPaddle;
-	Rectangle::Ref mLeftGoal;
-	Rectangle::Ref mRightGoal;
-	Text::Ref      mLeftScore;
-	Text::Ref      mRightScore;
+	Rectangle::Ref ball;
+	Rectangle::Ref topWall;
+	Rectangle::Ref bottomWall;
+	Rectangle::Ref leftPaddle;
+	Rectangle::Ref rightPaddle;
+	Rectangle::Ref leftGoal;
+	Rectangle::Ref rightGoal;
+	Text::Ref      leftScore;
+	Text::Ref      rightScore;
 
-	bool mNewRound = false;
+	bool newRound = false;
 
-	Audio::Sound mBeepSound;
+	Audio::Sound beepSound;
 };

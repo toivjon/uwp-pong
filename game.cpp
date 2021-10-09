@@ -10,61 +10,61 @@ using namespace winrt::Windows::System;
 Game::Game(Audio::Ptr& audio) {
 	state = std::make_shared<Game::DialogState>(L"Press X key or button to start a game");
 
-	mBall = std::make_shared<Rectangle>();
-	mBall->extent = { .0115f, .015f };
-	mBall->position = { .5f, .5f };
+	ball = std::make_shared<Rectangle>();
+	ball->extent = { .0115f, .015f };
+	ball->position = { .5f, .5f };
 
-	mTopWall = std::make_shared<Rectangle>();
-	mTopWall->extent = { .5f, .015f };
-	mTopWall->position = { .5f, .015f };
+	topWall = std::make_shared<Rectangle>();
+	topWall->extent = { .5f, .015f };
+	topWall->position = { .5f, .015f };
 
-	mBottomWall = std::make_shared<Rectangle>();
-	mBottomWall->extent = mTopWall->extent;
-	mBottomWall->position = { .5f, .985f };
+	bottomWall = std::make_shared<Rectangle>();
+	bottomWall->extent = topWall->extent;
+	bottomWall->position = { .5f, .985f };
 
-	mLeftPaddle = std::make_shared<Rectangle>();
-	mLeftPaddle->extent = { .0125f, .075f };
-	mLeftPaddle->position = { .05f, .5f };
-	mLeftPaddle->velocity = { 0.f, 0.f };
+	leftPaddle = std::make_shared<Rectangle>();
+	leftPaddle->extent = { .0125f, .075f };
+	leftPaddle->position = { .05f, .5f };
+	leftPaddle->velocity = { 0.f, 0.f };
 
-	mRightPaddle = std::make_shared<Rectangle>();
-	mRightPaddle->extent = mLeftPaddle->extent;
-	mRightPaddle->position = { .95f, .5f };
-	mRightPaddle->velocity = { 0.f, 0.f };
+	rightPaddle = std::make_shared<Rectangle>();
+	rightPaddle->extent = leftPaddle->extent;
+	rightPaddle->position = { .95f, .5f };
+	rightPaddle->velocity = { 0.f, 0.f };
 
-	mLeftScore = std::make_shared<Text>();
-	mLeftScore->text = std::to_wstring(player1Score);
-	mLeftScore->position = { .35f, .025f };
-	mLeftScore->fontSize = .27f;
+	leftScore = std::make_shared<Text>();
+	leftScore->text = std::to_wstring(player1Score);
+	leftScore->position = { .35f, .025f };
+	leftScore->fontSize = .27f;
 
-	mRightScore = std::make_shared<Text>();
-	mRightScore->text = std::to_wstring(player2Score);
-	mRightScore->position = { .65f, .025f };
-	mRightScore->fontSize = .27f;
+	rightScore = std::make_shared<Text>();
+	rightScore->text = std::to_wstring(player2Score);
+	rightScore->position = { .65f, .025f };
+	rightScore->fontSize = .27f;
 
-	mLeftGoal = std::make_shared<Rectangle>();
-	mLeftGoal->extent = { .5f, .5f };
-	mLeftGoal->position = { -.5f - mBall->extent.x * 4.f, .5f };
+	leftGoal = std::make_shared<Rectangle>();
+	leftGoal->extent = { .5f, .5f };
+	leftGoal->position = { -.5f - ball->extent.x * 4.f, .5f };
 
-	mRightGoal = std::make_shared<Rectangle>();
-	mRightGoal->extent = mLeftGoal->extent;
-	mRightGoal->position = { 1.5f + mBall->extent.x * 4.f, .5f };
+	rightGoal = std::make_shared<Rectangle>();
+	rightGoal->extent = leftGoal->extent;
+	rightGoal->position = { 1.5f + ball->extent.x * 4.f, .5f };
 
-	mBeepSound = audio->createSound(L"Assets/beep.wav");
+	beepSound = audio->createSound(L"Assets/beep.wav");
 }
 
 auto Game::detectCollision(float deltaMS) const -> Collision {
 	auto result = Collision{};
-	detectCollision(deltaMS, mBall, mLeftPaddle, result);
-	detectCollision(deltaMS, mBall, mRightPaddle, result);
-	detectCollision(deltaMS, mBall, mTopWall, result);
-	detectCollision(deltaMS, mBall, mBottomWall, result);
-	detectCollision(deltaMS, mBall, mLeftGoal, result);
-	detectCollision(deltaMS, mBall, mRightGoal, result);
-	detectCollision(deltaMS, mLeftPaddle, mTopWall, result);
-	detectCollision(deltaMS, mLeftPaddle, mBottomWall, result);
-	detectCollision(deltaMS, mRightPaddle, mTopWall, result);
-	detectCollision(deltaMS, mRightPaddle, mBottomWall, result);
+	detectCollision(deltaMS, ball, leftPaddle, result);
+	detectCollision(deltaMS, ball, rightPaddle, result);
+	detectCollision(deltaMS, ball, topWall, result);
+	detectCollision(deltaMS, ball, bottomWall, result);
+	detectCollision(deltaMS, ball, leftGoal, result);
+	detectCollision(deltaMS, ball, rightGoal, result);
+	detectCollision(deltaMS, leftPaddle, topWall, result);
+	detectCollision(deltaMS, leftPaddle, bottomWall, result);
+	detectCollision(deltaMS, rightPaddle, topWall, result);
+	detectCollision(deltaMS, rightPaddle, bottomWall, result);
 	return result;
 }
 
@@ -137,56 +137,56 @@ auto Game::detectCollision(float deltaMS, Rectangle::Ref a, Rectangle::Ref b) co
 void Game::resolveCollision(const Collision& collision) {
 	constexpr auto BallVelocityMultiplier = 1.1f;
 	constexpr auto Nudge = .001f;
-	if (collision.lhs == mBall) {
-		if (collision.rhs == mBottomWall) {
-			mBall->position.y = mBottomWall->position.y - mBottomWall->extent.y - mBall->extent.y - Nudge;
-			mBall->velocity.y = -mBall->velocity.y;
-			mBeepSound.play();
-		} else if (collision.rhs == mTopWall) {
-			mBall->position.y = mTopWall->position.y + mTopWall->extent.y + mBall->extent.y + Nudge;
-			mBall->velocity.y = -mBall->velocity.y;
-			mBeepSound.play();
-		} else if (collision.rhs == mLeftGoal) {
+	if (collision.lhs == ball) {
+		if (collision.rhs == bottomWall) {
+			ball->position.y = bottomWall->position.y - bottomWall->extent.y - ball->extent.y - Nudge;
+			ball->velocity.y = -ball->velocity.y;
+			beepSound.play();
+		} else if (collision.rhs == topWall) {
+			ball->position.y = topWall->position.y + topWall->extent.y + ball->extent.y + Nudge;
+			ball->velocity.y = -ball->velocity.y;
+			beepSound.play();
+		} else if (collision.rhs == leftGoal) {
 			player2Score++;
 			if (player2Score >= 10) {
 				state = std::make_shared<DialogState>(L"Right player wins! Press X for rematch.");
 			} else {
-				mRightScore->text = std::to_wstring(player2Score);
-				mNewRound = true;
+				rightScore->text = std::to_wstring(player2Score);
+				newRound = true;
 			}
-		} else if (collision.rhs == mRightGoal) {
+		} else if (collision.rhs == rightGoal) {
 			player1Score++;
 			if (player1Score >= 10) {
 				state = std::make_shared<DialogState>(L"Left player wins! Press X for rematch.");
 			} else {
-				mLeftScore->text = std::to_wstring(player1Score);
-				mNewRound = true;
+				leftScore->text = std::to_wstring(player1Score);
+				newRound = true;
 			}
-		} else if (collision.rhs == mLeftPaddle) {
-			mBall->position.x = mLeftPaddle->position.x + mLeftPaddle->extent.x + mBall->extent.x + Nudge;
-			mBall->velocity.x = -mBall->velocity.x;
-			mBall->velocity = mBall->velocity * BallVelocityMultiplier;
-			mBeepSound.play();
-		} else if (collision.rhs == mRightPaddle) {
-			mBall->position.x = mRightPaddle->position.x - mRightPaddle->extent.x - mBall->extent.x - Nudge;
-			mBall->velocity.x = -mBall->velocity.x;
-			mBall->velocity = mBall->velocity * BallVelocityMultiplier;
-			mBeepSound.play();
+		} else if (collision.rhs == leftPaddle) {
+			ball->position.x = leftPaddle->position.x + leftPaddle->extent.x + ball->extent.x + Nudge;
+			ball->velocity.x = -ball->velocity.x;
+			ball->velocity = ball->velocity * BallVelocityMultiplier;
+			beepSound.play();
+		} else if (collision.rhs == rightPaddle) {
+			ball->position.x = rightPaddle->position.x - rightPaddle->extent.x - ball->extent.x - Nudge;
+			ball->velocity.x = -ball->velocity.x;
+			ball->velocity = ball->velocity * BallVelocityMultiplier;
+			beepSound.play();
 		}
-	} else if (collision.lhs == mLeftPaddle) {
-		if (collision.rhs == mBottomWall) {
-			mLeftPaddle->position.y = mBottomWall->position.y - mBottomWall->extent.y - mLeftPaddle->extent.y - Nudge;
-		} else if (collision.rhs == mTopWall) {
-			mLeftPaddle->position.y = mTopWall->position.y + mTopWall->extent.y + mLeftPaddle->extent.y + Nudge;
+	} else if (collision.lhs == leftPaddle) {
+		if (collision.rhs == bottomWall) {
+			leftPaddle->position.y = bottomWall->position.y - bottomWall->extent.y - leftPaddle->extent.y - Nudge;
+		} else if (collision.rhs == topWall) {
+			leftPaddle->position.y = topWall->position.y + topWall->extent.y + leftPaddle->extent.y + Nudge;
 		}
-		mLeftPaddle->velocity.y = 0.f;
-	} else if (collision.lhs == mRightPaddle) {
-		if (collision.rhs == mBottomWall) {
-			mRightPaddle->position.y = mBottomWall->position.y - mBottomWall->extent.y - mRightPaddle->extent.y - Nudge;
-		} else if (collision.rhs == mTopWall) {
-			mRightPaddle->position.y = mTopWall->position.y + mTopWall->extent.y + mRightPaddle->extent.y + Nudge;
+		leftPaddle->velocity.y = 0.f;
+	} else if (collision.lhs == rightPaddle) {
+		if (collision.rhs == bottomWall) {
+			rightPaddle->position.y = bottomWall->position.y - bottomWall->extent.y - rightPaddle->extent.y - Nudge;
+		} else if (collision.rhs == topWall) {
+			rightPaddle->position.y = topWall->position.y + topWall->extent.y + rightPaddle->extent.y + Nudge;
 		}
-		mRightPaddle->velocity.y = 0.f;
+		rightPaddle->velocity.y = 0.f;
 	}
 }
 
@@ -232,16 +232,16 @@ void Game::DialogState::onReadGamepad(Game& game, int, const winrt::Windows::Gam
 void Game::DialogState::startGame(Game& game) {
 	game.player1Score = 0;
 	game.player2Score = 0;
-	game.mRightScore->text = std::to_wstring(game.player2Score);
-	game.mLeftScore->text = std::to_wstring(game.player1Score);
+	game.rightScore->text = std::to_wstring(game.player2Score);
+	game.leftScore->text = std::to_wstring(game.player1Score);
 	game.state = std::make_shared<CountdownState>(game);
 }
 
 Game::CountdownState::CountdownState(Game& game) {
-	game.mBall->position = { .5f, .5f };
-	game.mBall->velocity = newRandomDirection();
-	game.mLeftPaddle->position.y = .5f;
-	game.mRightPaddle->position.y = .5f;
+	game.ball->position = { .5f, .5f };
+	game.ball->velocity = newRandomDirection();
+	game.leftPaddle->position.y = .5f;
+	game.rightPaddle->position.y = .5f;
 }
 
 void Game::CountdownState::update(Game& game, std::chrono::milliseconds) {
@@ -251,13 +251,13 @@ void Game::CountdownState::update(Game& game, std::chrono::milliseconds) {
 }
 
 void Game::CountdownState::render(Game& game, const Renderer::Ptr& renderer) {
-	renderer->draw(renderer->getWhiteBrush(), game.mLeftScore);
-	renderer->draw(renderer->getWhiteBrush(), game.mRightScore);
-	renderer->draw(renderer->getWhiteBrush(), game.mBall);
-	renderer->draw(renderer->getWhiteBrush(), game.mTopWall);
-	renderer->draw(renderer->getWhiteBrush(), game.mBottomWall);
-	renderer->draw(renderer->getWhiteBrush(), game.mLeftPaddle);
-	renderer->draw(renderer->getWhiteBrush(), game.mRightPaddle);
+	renderer->draw(renderer->getWhiteBrush(), game.leftScore);
+	renderer->draw(renderer->getWhiteBrush(), game.rightScore);
+	renderer->draw(renderer->getWhiteBrush(), game.ball);
+	renderer->draw(renderer->getWhiteBrush(), game.topWall);
+	renderer->draw(renderer->getWhiteBrush(), game.bottomWall);
+	renderer->draw(renderer->getWhiteBrush(), game.leftPaddle);
+	renderer->draw(renderer->getWhiteBrush(), game.rightPaddle);
 }
 
 auto Game::CountdownState::newRandomDirection() -> Vec2f {
@@ -277,16 +277,16 @@ void Game::PlayState::update(Game& game, std::chrono::milliseconds delta) {
 	auto deltaMS = static_cast<float>(delta.count());
 
 	// Apply the keyboard and gamepad input to paddle velocities.
-	applyMovement(game.mLeftPaddle, player1Movement);
-	applyMovement(game.mRightPaddle, player2Movement);
+	applyMovement(game.leftPaddle, player1Movement);
+	applyMovement(game.rightPaddle, player2Movement);
 
 	do {
 		// Perform collision detection to find out the first collision.
 		const auto collision = game.detectCollision(deltaMS);
 		if (!collision.lhs && !collision.rhs) {
-			game.mLeftPaddle->position += game.mLeftPaddle->velocity * deltaMS;
-			game.mRightPaddle->position += game.mRightPaddle->velocity * deltaMS;
-			game.mBall->position += game.mBall->velocity * deltaMS;
+			game.leftPaddle->position += game.leftPaddle->velocity * deltaMS;
+			game.rightPaddle->position += game.rightPaddle->velocity * deltaMS;
+			game.ball->position += game.ball->velocity * deltaMS;
 			break;
 		}
 
@@ -295,28 +295,28 @@ void Game::PlayState::update(Game& game, std::chrono::milliseconds delta) {
 		deltaMS -= collisionMS;
 
 		// Apply movement to dynamic entities.
-		game.mBall->position += game.mBall->velocity * collisionMS;
-		game.mLeftPaddle->position += game.mLeftPaddle->velocity * collisionMS;
-		game.mRightPaddle->position += game.mRightPaddle->velocity * collisionMS;
+		game.ball->position += game.ball->velocity * collisionMS;
+		game.leftPaddle->position += game.leftPaddle->velocity * collisionMS;
+		game.rightPaddle->position += game.rightPaddle->velocity * collisionMS;
 
 		// Perform collision resolvement.
 		game.resolveCollision(collision);
-	} while (!game.mNewRound && game.player1Score < 10 && game.player2Score < 10);
+	} while (!game.newRound && game.player1Score < 10 && game.player2Score < 10);
 
-	if (game.mNewRound) {
+	if (game.newRound) {
 		game.state = std::make_shared<CountdownState>(game);
-		game.mNewRound = false;
+		game.newRound = false;
 	}
 }
 
 void Game::PlayState::render(Game& game, const Renderer::Ptr& renderer) {
-	renderer->draw(renderer->getWhiteBrush(), game.mLeftScore);
-	renderer->draw(renderer->getWhiteBrush(), game.mRightScore);
-	renderer->draw(renderer->getWhiteBrush(), game.mBall);
-	renderer->draw(renderer->getWhiteBrush(), game.mTopWall);
-	renderer->draw(renderer->getWhiteBrush(), game.mBottomWall);
-	renderer->draw(renderer->getWhiteBrush(), game.mLeftPaddle);
-	renderer->draw(renderer->getWhiteBrush(), game.mRightPaddle);
+	renderer->draw(renderer->getWhiteBrush(), game.leftScore);
+	renderer->draw(renderer->getWhiteBrush(), game.rightScore);
+	renderer->draw(renderer->getWhiteBrush(), game.ball);
+	renderer->draw(renderer->getWhiteBrush(), game.topWall);
+	renderer->draw(renderer->getWhiteBrush(), game.bottomWall);
+	renderer->draw(renderer->getWhiteBrush(), game.leftPaddle);
+	renderer->draw(renderer->getWhiteBrush(), game.rightPaddle);
 }
 
 void Game::PlayState::onKeyDown(Game&, const winrt::Windows::UI::Core::KeyEventArgs& args) {
