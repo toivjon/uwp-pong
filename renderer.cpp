@@ -16,12 +16,6 @@ constexpr D3D_FEATURE_LEVEL FeatureLevels[] = {
 	D3D_FEATURE_LEVEL_9_1
 };
 
-inline void CheckTrue(bool value) {
-	if (!value) {
-		throw std::exception("ERROR: Value is FALSE!\n");
-	}
-}
-
 Renderer::Renderer() {
 	OutputDebugStringA("GraphicsContext::GraphicsContext\n");
 
@@ -85,7 +79,7 @@ void Renderer::initDeviceResources() {
 
 	// Query and use the underlying DXGI device to create a Direct2D device.
 	winrt::com_ptr<IDXGIDevice3> dxgiDevice;
-	CheckTrue(m3DDevice.try_as(dxgiDevice));
+	check_bool(m3DDevice.try_as(dxgiDevice));
 	check_hresult(m2DFactory->CreateDevice(dxgiDevice.get(), m2DDevice.put()));
 
 	// Construct a new Direct2D device context.
@@ -149,7 +143,7 @@ void Renderer::initWindowResources() {
 	} else {
 		// Query the underlying DXGI device from the Direct3D device.
 		winrt::com_ptr<IDXGIDevice> dxgiDevice;
-		CheckTrue(m3DDevice.try_as(dxgiDevice));
+		check_bool(m3DDevice.try_as(dxgiDevice));
 
 		// Query the underlying adapter (GPU/CPU) from the device.
 		winrt::com_ptr<IDXGIAdapter> dxgiAdapter;
