@@ -8,12 +8,24 @@
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.UI.Core.h>
 
-#include "vec2f.hpp"
-
 // An alias for the CoreWindow to avoid using the full name monster.
 using ApplicationWindow = winrt::Windows::UI::Core::CoreWindow;
 
 enum class ObjectID { NONE, LEFT_PADDLE, RIGHT_PADDLE, BALL, TOP_WALL, BOTTOM_WALL, LEFT_GOAL, RIGHT_GOAL };
+
+// Vec2f represents a 2D vector with floating point values.
+struct Vec2f final {
+	auto operator+(const Vec2f& v) const -> Vec2f { return { x + v.x, y + v.y }; }
+	auto operator-(const Vec2f& v) const -> Vec2f { return { x - v.x, y - v.y }; }
+
+	void operator+=(const Vec2f& v) { x += v.x; y += v.y; }
+	void operator-=(const Vec2f& v) { x -= v.x; y -= v.y; }
+
+	auto operator*(float s) const -> Vec2f { return { x * s, y * s }; }
+
+	float x;
+	float y;
+};
 
 struct Rectangle {
 	ObjectID id;
