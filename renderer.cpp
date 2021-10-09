@@ -78,7 +78,7 @@ void Renderer::initDeviceResources() {
 	));
 
 	// Query and use the underlying DXGI device to create a Direct2D device.
-	winrt::com_ptr<IDXGIDevice3> dxgiDevice;
+	com_ptr<IDXGIDevice3> dxgiDevice;
 	check_bool(m3DDevice.try_as(dxgiDevice));
 	check_hresult(m2DFactory->CreateDevice(dxgiDevice.get(), m2DDevice.put()));
 
@@ -127,11 +127,11 @@ void Renderer::initWindowResources() {
 		properties.dpiY = 96.f;
 
 		// Query the DXGI version of the back buffer surface.
-		winrt::com_ptr<IDXGISurface> dxgiBackBuffer;
+		com_ptr<IDXGISurface> dxgiBackBuffer;
 		check_hresult(mSwapChain->GetBuffer(0, IID_PPV_ARGS(&dxgiBackBuffer)));
 
 		// Create a new bitmap that's going to be used by the Direct2D.
-		winrt::com_ptr<ID2D1Bitmap1> bitmap;
+		com_ptr<ID2D1Bitmap1> bitmap;
 		check_hresult(m2DDeviceCtx->CreateBitmapFromDxgiSurface(
 			dxgiBackBuffer.get(),
 			&properties,
@@ -142,15 +142,15 @@ void Renderer::initWindowResources() {
 		m2DDeviceCtx->SetTarget(bitmap.get());
 	} else {
 		// Query the underlying DXGI device from the Direct3D device.
-		winrt::com_ptr<IDXGIDevice> dxgiDevice;
+		com_ptr<IDXGIDevice> dxgiDevice;
 		check_bool(m3DDevice.try_as(dxgiDevice));
 
 		// Query the underlying adapter (GPU/CPU) from the device.
-		winrt::com_ptr<IDXGIAdapter> dxgiAdapter;
+		com_ptr<IDXGIAdapter> dxgiAdapter;
 		check_hresult(dxgiDevice->GetAdapter(dxgiAdapter.put()));
 
 		// Query the factory object that created the DXGI device.
-		winrt::com_ptr<IDXGIFactory2> dxgiFactory;
+		com_ptr<IDXGIFactory2> dxgiFactory;
 		check_hresult(dxgiAdapter->GetParent(IID_PPV_ARGS(&dxgiFactory)));
 
 		// Create and define a swap chain descriptor.
@@ -170,7 +170,7 @@ void Renderer::initWindowResources() {
 		// Create a swap chain for the window.
 		check_hresult(dxgiFactory->CreateSwapChainForCoreWindow(
 			m3DDevice.get(),
-			winrt::get_unknown(mWindow.get()),
+			get_unknown(mWindow.get()),
 			&descriptor,
 			nullptr, // allow on all displays
 			mSwapChain.put()
@@ -186,11 +186,11 @@ void Renderer::initWindowResources() {
 		properties.dpiY = mDpi;
 
 		// Query the DXGI version of the back buffer surface.
-		winrt::com_ptr<IDXGISurface> dxgiBackBuffer;
+		com_ptr<IDXGISurface> dxgiBackBuffer;
 		check_hresult(mSwapChain->GetBuffer(0, IID_PPV_ARGS(&dxgiBackBuffer)));
 
 		// Create a new bitmap that's going to be used by the Direct2D.
-		winrt::com_ptr<ID2D1Bitmap1> bitmap;
+		com_ptr<ID2D1Bitmap1> bitmap;
 		check_hresult(m2DDeviceCtx->CreateBitmapFromDxgiSurface(
 			dxgiBackBuffer.get(),
 			&properties,
@@ -247,7 +247,7 @@ void Renderer::present() {
 	}
 }
 
-void Renderer::draw(winrt::com_ptr<ID2D1Brush> brush, const Rectangle& rect) {
+void Renderer::draw(com_ptr<ID2D1Brush> brush, const Rectangle& rect) {
 	m2DDeviceCtx->FillRectangle({
 	mWindowOffset.Width + (-rect.extent.x + rect.position.x) * (mWindowSize.Width - mWindowOffset.Width * 2),
 	mWindowOffset.Height + (-rect.extent.y + rect.position.y) * (mWindowSize.Height - mWindowOffset.Height * 2),
@@ -256,9 +256,9 @@ void Renderer::draw(winrt::com_ptr<ID2D1Brush> brush, const Rectangle& rect) {
 		}, brush.get());
 }
 
-void Renderer::draw(winrt::com_ptr<ID2D1Brush> brush, const Text& text) {
+void Renderer::draw(com_ptr<ID2D1Brush> brush, const Text& text) {
 	auto size = text.fontSize * (mWindowSize.Height - mWindowOffset.Height * 2.f);
-	winrt::com_ptr<IDWriteTextFormat> format;
+	com_ptr<IDWriteTextFormat> format;
 	mDWriteFactory->CreateTextFormat(
 		L"Calibri",
 		nullptr,
