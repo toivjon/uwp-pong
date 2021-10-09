@@ -8,25 +8,11 @@ using namespace winrt::Windows::Gaming::Input;
 using namespace winrt::Windows::UI::Core;
 using namespace winrt::Windows::System;
 
-// Build a randomly selected direction vector from 45, 135, 225 and 315 degrees.
-inline auto NewRandomDirection() -> Vec2f {
-	constexpr auto BallInitialVelocity = .0004f;
-	static std::default_random_engine rng;
-	static std::uniform_int_distribution<std::mt19937::result_type> dist(0, 3);
-	static const std::array<Vec2f, 4> dirs = {
-		Vec2f{BallInitialVelocity, BallInitialVelocity},
-		Vec2f{BallInitialVelocity, -BallInitialVelocity},
-		Vec2f{-BallInitialVelocity, BallInitialVelocity},
-		Vec2f{-BallInitialVelocity, -BallInitialVelocity}
-	};
-	return dirs[dist(rng)];
-}
-
 Game::Game(Audio::Ptr& audio) : audio(audio) {
 	state = std::make_shared<Game::DialogState>(L"Press X key or button to start a game");
 
 	mBall.extent = { .0115f, .015f };
-	mBall.position = {.5f, .5f};
+	mBall.position = { .5f, .5f };
 	mBall.id = ObjectID::BALL;
 
 	mTopWall.extent = { .5f, .015f };
@@ -38,12 +24,12 @@ Game::Game(Audio::Ptr& audio) : audio(audio) {
 	mBottomWall.id = ObjectID::BOTTOM_WALL;
 
 	mLeftPaddle.extent = { .0125f, .075f };
-	mLeftPaddle.position = { .05f, .5f};
+	mLeftPaddle.position = { .05f, .5f };
 	mLeftPaddle.velocity = { 0.f, 0.f };
 	mLeftPaddle.id = ObjectID::LEFT_PADDLE;
 
 	mRightPaddle.extent = mLeftPaddle.extent;
-	mRightPaddle.position = { .95f, .5f};
+	mRightPaddle.position = { .95f, .5f };
 	mRightPaddle.velocity = { 0.f, 0.f };
 	mRightPaddle.id = ObjectID::RIGHT_PADDLE;
 
@@ -266,7 +252,7 @@ void Game::DialogState::startGame(Game& game) {
 
 Game::CountdownState::CountdownState(Game& game) {
 	game.mBall.position = { .5f, .5f };
-	game.mBall.velocity = NewRandomDirection();
+	game.mBall.velocity = newRandomDirection();
 	game.mLeftPaddle.position.y = .5f;
 	game.mRightPaddle.position.y = .5f;
 }
@@ -285,6 +271,19 @@ void Game::CountdownState::render(Game& game, const Renderer::Ptr& renderer) {
 	renderer->draw(renderer->getWhiteBrush(), game.mBottomWall);
 	renderer->draw(renderer->getWhiteBrush(), game.mLeftPaddle);
 	renderer->draw(renderer->getWhiteBrush(), game.mRightPaddle);
+}
+
+auto Game::CountdownState::newRandomDirection() -> Vec2f {
+	constexpr auto BallInitialVelocity = .0004f;
+	static std::default_random_engine rng;
+	static std::uniform_int_distribution<std::mt19937::result_type> dist(0, 3);
+	static const std::array<Vec2f, 4> dirs = {
+		Vec2f{BallInitialVelocity, BallInitialVelocity},
+		Vec2f{BallInitialVelocity, -BallInitialVelocity},
+		Vec2f{-BallInitialVelocity, BallInitialVelocity},
+		Vec2f{-BallInitialVelocity, -BallInitialVelocity}
+	};
+	return dirs[dist(rng)];
 }
 
 void Game::PlayState::update(Game& game, std::chrono::milliseconds delta) {

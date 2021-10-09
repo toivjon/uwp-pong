@@ -51,6 +51,7 @@ private:
 		void onKeyUp(Game&, const winrt::Windows::UI::Core::KeyEventArgs&) override {};
 		void onReadGamepad(Game&, int, const winrt::Windows::Gaming::Input::GamepadReading&) override {};
 	private:
+		auto newRandomDirection()->Vec2f;
 		int countdown = 50;
 	};
 
