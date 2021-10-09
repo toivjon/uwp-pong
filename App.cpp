@@ -159,12 +159,12 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView> {
 	}
 
 private:
-	Renderer::Ptr        renderer;
-	Audio::Ptr           audio;
-	bool                 foreground = false;
-	Game::Ptr            game;
-	critical_section     gamepadLock;
-	std::vector<Gamepad> gamepads;
+	Renderer::Ptr         renderer;
+	Audio::Ptr            audio;
+	bool                  foreground = false;
+	std::unique_ptr<Game> game;
+	critical_section      gamepadLock;
+	std::vector<Gamepad>  gamepads;
 };
 
 int __stdcall wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {

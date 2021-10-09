@@ -5,8 +5,6 @@
 
 class Game {
 public:
-	using Ptr = std::unique_ptr<Game>;
-
 	Game(Audio::Ptr& audio);
 	void update(std::chrono::milliseconds delta) { state->update(*this, delta); }
 	void render(const Renderer::Ptr& renderer) { state->render(*this, renderer); }
