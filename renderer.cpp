@@ -247,12 +247,12 @@ void Renderer::present() {
 	}
 }
 
-void Renderer::draw(com_ptr<ID2D1Brush> brush, const Rectangle& rect) {
+void Renderer::draw(com_ptr<ID2D1Brush> brush, Rectangle::Ref rect) {
 	m2DDeviceCtx->FillRectangle({
-	mWindowOffset.Width + (-rect.extent.x + rect.position.x) * (mWindowSize.Width - mWindowOffset.Width * 2),
-	mWindowOffset.Height + (-rect.extent.y + rect.position.y) * (mWindowSize.Height - mWindowOffset.Height * 2),
-	mWindowOffset.Width + (rect.extent.x + rect.position.x) * (mWindowSize.Width - mWindowOffset.Width * 2),
-	mWindowOffset.Height + (rect.extent.y + rect.position.y) * (mWindowSize.Height - mWindowOffset.Height * 2),
+	mWindowOffset.Width + (-rect->extent.x + rect->position.x) * (mWindowSize.Width - mWindowOffset.Width * 2),
+	mWindowOffset.Height + (-rect->extent.y + rect->position.y) * (mWindowSize.Height - mWindowOffset.Height * 2),
+	mWindowOffset.Width + (rect->extent.x + rect->position.x) * (mWindowSize.Width - mWindowOffset.Width * 2),
+	mWindowOffset.Height + (rect->extent.y + rect->position.y) * (mWindowSize.Height - mWindowOffset.Height * 2),
 		}, brush.get());
 }
 

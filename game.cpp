@@ -10,27 +10,27 @@ using namespace winrt::Windows::System;
 Game::Game(Audio::Ptr& audio) {
 	state = std::make_shared<Game::DialogState>(L"Press X key or button to start a game");
 
-	mBall.extent = { .0115f, .015f };
-	mBall.position = { .5f, .5f };
-	mBall.id = ObjectID::BALL;
+	mBall = std::make_shared<Rectangle>();
+	mBall->extent = { .0115f, .015f };
+	mBall->position = { .5f, .5f };
 
-	mTopWall.extent = { .5f, .015f };
-	mTopWall.position = { .5f, .015f };
-	mTopWall.id = ObjectID::TOP_WALL;
+	mTopWall = std::make_shared<Rectangle>();
+	mTopWall->extent = { .5f, .015f };
+	mTopWall->position = { .5f, .015f };
 
-	mBottomWall.extent = mTopWall.extent;
-	mBottomWall.position = { .5f, .985f };
-	mBottomWall.id = ObjectID::BOTTOM_WALL;
+	mBottomWall = std::make_shared<Rectangle>();
+	mBottomWall->extent = mTopWall->extent;
+	mBottomWall->position = { .5f, .985f };
 
-	mLeftPaddle.extent = { .0125f, .075f };
-	mLeftPaddle.position = { .05f, .5f };
-	mLeftPaddle.velocity = { 0.f, 0.f };
-	mLeftPaddle.id = ObjectID::LEFT_PADDLE;
+	mLeftPaddle = std::make_shared<Rectangle>();
+	mLeftPaddle->extent = { .0125f, .075f };
+	mLeftPaddle->position = { .05f, .5f };
+	mLeftPaddle->velocity = { 0.f, 0.f };
 
-	mRightPaddle.extent = mLeftPaddle.extent;
-	mRightPaddle.position = { .95f, .5f };
-	mRightPaddle.velocity = { 0.f, 0.f };
-	mRightPaddle.id = ObjectID::RIGHT_PADDLE;
+	mRightPaddle = std::make_shared<Rectangle>();
+	mRightPaddle->extent = mLeftPaddle->extent;
+	mRightPaddle->position = { .95f, .5f };
+	mRightPaddle->velocity = { 0.f, 0.f };
 
 	mLeftScore.text = std::to_wstring(player1Score);
 	mLeftScore.position = { .35f, .025f };
@@ -40,13 +40,13 @@ Game::Game(Audio::Ptr& audio) {
 	mRightScore.position = { .65f, .025f };
 	mRightScore.fontSize = .27f;
 
-	mLeftGoal.extent = { .5f, .5f };
-	mLeftGoal.position = { -.5f - mBall.extent.x * 4.f, .5f };
-	mLeftGoal.id = ObjectID::LEFT_GOAL;
+	mLeftGoal = std::make_shared<Rectangle>();
+	mLeftGoal->extent = { .5f, .5f };
+	mLeftGoal->position = { -.5f - mBall->extent.x * 4.f, .5f };
 
-	mRightGoal.extent = mLeftGoal.extent;
-	mRightGoal.position = { 1.5f + mBall.extent.x * 4.f, .5f };
-	mRightGoal.id = ObjectID::RIGHT_GOAL;
+	mRightGoal = std::make_shared<Rectangle>();
+	mRightGoal->extent = mLeftGoal->extent;
+	mRightGoal->position = { 1.5f + mBall->extent.x * 4.f, .5f };
 
 	mBeepSound = audio->createSound(L"Assets/beep.wav");
 }
@@ -66,33 +66,33 @@ auto Game::detectCollision(float deltaMS) const -> Collision {
 	return result;
 }
 
-void Game::detectCollision(float deltaMS, const Rectangle& r1, const Rectangle& r2, Collision& result) const {
+void Game::detectCollision(float deltaMS, Rectangle::Ref r1, Rectangle::Ref r2, Collision& result) const {
 	auto hit = detectCollision(deltaMS, r1, r2);
-	if (hit.lhs != ObjectID::NONE && hit.time < result.time) {
+	if (hit.lhs && hit.time < result.time) {
 		result.time = hit.time;
-		result.lhs = r1.id;
-		result.rhs = r2.id;
+		result.lhs = r1;
+		result.rhs = r2;
 	}
 }
 
-auto Game::detectCollision(float deltaMS, const Rectangle& a, const Rectangle& b) const->Collision {
+auto Game::detectCollision(float deltaMS, Rectangle::Ref a, Rectangle::Ref b) const->Collision {
 	auto collision = Collision{};
 
-	const auto amin = a.position - a.extent;
-	const auto amax = a.position + a.extent;
-	const auto bmin = b.position - b.extent;
-	const auto bmax = b.position + b.extent;
+	const auto amin = a->position - a->extent;
+	const auto amax = a->position + a->extent;
+	const auto bmin = b->position - b->extent;
+	const auto bmax = b->position + b->extent;
 
 	// Exit early whether boxes initially collide.
 	if (amin.x <= bmax.x && amax.x >= bmin.x && amin.y <= bmax.y && amax.y >= bmin.y) {
-		collision.lhs = a.id;
-		collision.rhs = b.id;
+		collision.lhs = a;
+		collision.rhs = b;
 		collision.time = 0.f;
 		return collision;
 	}
 
 	// We will use relative velocity where 'a' is treated as stationary.
-	const auto v = (b.velocity - a.velocity) * deltaMS;
+	const auto v = (b->velocity - a->velocity) * deltaMS;
 
 	// Initialize times for the first and last contact.
 	auto tmin = -FLT_MAX;
@@ -125,8 +125,8 @@ auto Game::detectCollision(float deltaMS, const Rectangle& a, const Rectangle& b
 	if (tmin > tmax) return collision;
 
 	if (tmin >= 0.f && tmin <= 1.f) {
-		collision.lhs = a.id;
-		collision.rhs = b.id;
+		collision.lhs = a;
+		collision.rhs = b;
 		collision.time = tmin;
 	}
 	return collision;
@@ -135,20 +135,16 @@ auto Game::detectCollision(float deltaMS, const Rectangle& a, const Rectangle& b
 void Game::resolveCollision(const Collision& collision) {
 	constexpr auto BallVelocityMultiplier = 1.1f;
 	constexpr auto Nudge = .001f;
-	switch (collision.lhs) {
-	case ObjectID::BALL:
-		switch (collision.rhs) {
-		case ObjectID::BOTTOM_WALL:
-			mBall.position.y = mBottomWall.position.y - mBottomWall.extent.y - mBall.extent.y - Nudge;
-			mBall.velocity.y = -mBall.velocity.y;
+	if (collision.lhs == mBall) {
+		if (collision.rhs == mBottomWall) {
+			mBall->position.y = mBottomWall->position.y - mBottomWall->extent.y - mBall->extent.y - Nudge;
+			mBall->velocity.y = -mBall->velocity.y;
 			mBeepSound.play();
-			break;
-		case ObjectID::TOP_WALL:
-			mBall.position.y = mTopWall.position.y + mTopWall.extent.y + mBall.extent.y + Nudge;
-			mBall.velocity.y = -mBall.velocity.y;
+		} else if (collision.rhs == mTopWall) {
+			mBall->position.y = mTopWall->position.y + mTopWall->extent.y + mBall->extent.y + Nudge;
+			mBall->velocity.y = -mBall->velocity.y;
 			mBeepSound.play();
-			break;
-		case ObjectID::LEFT_GOAL:
+		} else if (collision.rhs == mLeftGoal) {
 			player2Score++;
 			if (player2Score >= 10) {
 				state = std::make_shared<DialogState>(L"Right player wins! Press X for rematch.");
@@ -156,8 +152,7 @@ void Game::resolveCollision(const Collision& collision) {
 				mRightScore.text = std::to_wstring(player2Score);
 				mNewRound = true;
 			}
-			break;
-		case ObjectID::RIGHT_GOAL:
+		} else if (collision.rhs == mRightGoal) {
 			player1Score++;
 			if (player1Score >= 10) {
 				state = std::make_shared<DialogState>(L"Left player wins! Press X for rematch.");
@@ -165,53 +160,42 @@ void Game::resolveCollision(const Collision& collision) {
 				mLeftScore.text = std::to_wstring(player1Score);
 				mNewRound = true;
 			}
-			break;
-		case ObjectID::LEFT_PADDLE: {
-			mBall.position.x = mLeftPaddle.position.x + mLeftPaddle.extent.x + mBall.extent.x + Nudge;
-			mBall.velocity.x = -mBall.velocity.x;
-			mBall.velocity = mBall.velocity * BallVelocityMultiplier;
+		} else if (collision.rhs == mLeftPaddle) {
+			mBall->position.x = mLeftPaddle->position.x + mLeftPaddle->extent.x + mBall->extent.x + Nudge;
+			mBall->velocity.x = -mBall->velocity.x;
+			mBall->velocity = mBall->velocity * BallVelocityMultiplier;
 			mBeepSound.play();
-			break;
-		}
-		case ObjectID::RIGHT_PADDLE:
-			mBall.position.x = mRightPaddle.position.x - mRightPaddle.extent.x - mBall.extent.x - Nudge;
-			mBall.velocity.x = -mBall.velocity.x;
-			mBall.velocity = mBall.velocity * BallVelocityMultiplier;
+		} else if (collision.rhs == mRightPaddle) {
+			mBall->position.x = mRightPaddle->position.x - mRightPaddle->extent.x - mBall->extent.x - Nudge;
+			mBall->velocity.x = -mBall->velocity.x;
+			mBall->velocity = mBall->velocity * BallVelocityMultiplier;
 			mBeepSound.play();
-			break;
 		}
-		break;
-	case ObjectID::LEFT_PADDLE:
-		switch (collision.rhs) {
-		case ObjectID::BOTTOM_WALL:
-			mLeftPaddle.position.y = mBottomWall.position.y - mBottomWall.extent.y - mLeftPaddle.extent.y - Nudge;
-			break;
-		case ObjectID::TOP_WALL:
-			mLeftPaddle.position.y = mTopWall.position.y + mTopWall.extent.y + mLeftPaddle.extent.y + Nudge;
-			break;
+	} else if (collision.lhs == mLeftPaddle) {
+		if (collision.rhs == mBottomWall) {
+			mLeftPaddle->position.y = mBottomWall->position.y - mBottomWall->extent.y - mLeftPaddle->extent.y - Nudge;
+		} else if (collision.rhs == mTopWall) {
+			mLeftPaddle->position.y = mTopWall->position.y + mTopWall->extent.y + mLeftPaddle->extent.y + Nudge;
 		}
-		mLeftPaddle.velocity.y = 0.f;
-		break;
-	case ObjectID::RIGHT_PADDLE:
-		switch (collision.rhs) {
-		case ObjectID::BOTTOM_WALL:
-			mRightPaddle.position.y = mBottomWall.position.y - mBottomWall.extent.y - mRightPaddle.extent.y - Nudge;
-			break;
-		case ObjectID::TOP_WALL:
-			mRightPaddle.position.y = mTopWall.position.y + mTopWall.extent.y + mRightPaddle.extent.y + Nudge;
-			break;
+		mLeftPaddle->velocity.y = 0.f;
+	} else if (collision.lhs == mRightPaddle) {
+		if (collision.rhs == mBottomWall) {
+			mRightPaddle->position.y = mBottomWall->position.y - mBottomWall->extent.y - mRightPaddle->extent.y - Nudge;
+		} else if (collision.rhs == mTopWall) {
+			mRightPaddle->position.y = mTopWall->position.y + mTopWall->extent.y + mRightPaddle->extent.y + Nudge;
 		}
-		mRightPaddle.velocity.y = 0.f;
-		break;
+		mRightPaddle->velocity.y = 0.f;
 	}
 }
 
 Game::DialogState::DialogState(const std::wstring& descriptionText) {
-	background.extent = { 0.375f, 0.40f };
-	background.position = { .5f, .5f };
+	background = std::make_shared<Rectangle>();
+	background->extent = { 0.375f, 0.40f };
+	background->position = { .5f, .5f };
 
-	foreground.extent = { 0.35f, 0.375f };
-	foreground.position = { .5f, .5f };
+	foreground = std::make_shared<Rectangle>();
+	foreground->extent = { 0.35f, 0.375f };
+	foreground->position = { .5f, .5f };
 
 	topic.text = L"UWP Pong";
 	topic.position = { .5f, .3f };
@@ -250,10 +234,10 @@ void Game::DialogState::startGame(Game& game) {
 }
 
 Game::CountdownState::CountdownState(Game& game) {
-	game.mBall.position = { .5f, .5f };
-	game.mBall.velocity = newRandomDirection();
-	game.mLeftPaddle.position.y = .5f;
-	game.mRightPaddle.position.y = .5f;
+	game.mBall->position = { .5f, .5f };
+	game.mBall->velocity = newRandomDirection();
+	game.mLeftPaddle->position.y = .5f;
+	game.mRightPaddle->position.y = .5f;
 }
 
 void Game::CountdownState::update(Game& game, std::chrono::milliseconds) {
@@ -295,10 +279,10 @@ void Game::PlayState::update(Game& game, std::chrono::milliseconds delta) {
 	do {
 		// Perform collision detection to find out the first collision.
 		const auto collision = game.detectCollision(deltaMS);
-		if (collision.lhs == ObjectID::NONE && collision.rhs == ObjectID::NONE) {
-			game.mLeftPaddle.position += game.mLeftPaddle.velocity * deltaMS;
-			game.mRightPaddle.position += game.mRightPaddle.velocity * deltaMS;
-			game.mBall.position += game.mBall.velocity * deltaMS;
+		if (!collision.lhs && !collision.rhs) {
+			game.mLeftPaddle->position += game.mLeftPaddle->velocity * deltaMS;
+			game.mRightPaddle->position += game.mRightPaddle->velocity * deltaMS;
+			game.mBall->position += game.mBall->velocity * deltaMS;
 			break;
 		}
 
@@ -307,9 +291,9 @@ void Game::PlayState::update(Game& game, std::chrono::milliseconds delta) {
 		deltaMS -= collisionMS;
 
 		// Apply movement to dynamic entities.
-		game.mBall.position += game.mBall.velocity * collisionMS;
-		game.mLeftPaddle.position += game.mLeftPaddle.velocity * collisionMS;
-		game.mRightPaddle.position += game.mRightPaddle.velocity * collisionMS;
+		game.mBall->position += game.mBall->velocity * collisionMS;
+		game.mLeftPaddle->position += game.mLeftPaddle->velocity * collisionMS;
+		game.mRightPaddle->position += game.mRightPaddle->velocity * collisionMS;
 
 		// Perform collision resolvement.
 		game.resolveCollision(collision);
@@ -380,17 +364,17 @@ void Game::PlayState::onReadGamepad(Game&, int player, const winrt::Windows::Gam
 	}
 }
 
-void Game::PlayState::applyMovement(Rectangle& rect, MoveDirection direction) {
+void Game::PlayState::applyMovement(Rectangle::Ref rect, MoveDirection direction) {
 	constexpr auto PaddleVelocity = .001f;
 	switch (direction) {
 	case MoveDirection::NONE:
-		rect.velocity.y = 0.f;
+		rect->velocity.y = 0.f;
 		break;
 	case MoveDirection::UP:
-		rect.velocity.y = -PaddleVelocity;
+		rect->velocity.y = -PaddleVelocity;
 		break;
 	case MoveDirection::DOWN:
-		rect.velocity.y = PaddleVelocity;
+		rect->velocity.y = PaddleVelocity;
 		break;
 	}
 }

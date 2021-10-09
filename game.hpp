@@ -36,8 +36,8 @@ private:
 		void onReadGamepad(Game& game, int player, const winrt::Windows::Gaming::Input::GamepadReading& reading) override;
 		void startGame(Game& game);
 	private:
-		Rectangle   background;
-		Rectangle   foreground;
+		Rectangle::Ref background;
+		Rectangle::Ref foreground;
 		Text        topic;
 		Text        description;
 	};
@@ -62,36 +62,36 @@ private:
 		void onKeyDown(Game& game, const winrt::Windows::UI::Core::KeyEventArgs& args) override;
 		void onKeyUp(Game& game, const winrt::Windows::UI::Core::KeyEventArgs& args) override;
 		void onReadGamepad(Game& game, int player, const winrt::Windows::Gaming::Input::GamepadReading& reading) override;
-		void applyMovement(Rectangle& rect, MoveDirection direction);
+		void applyMovement(Rectangle::Ref rect, MoveDirection direction);
 	private:
 		MoveDirection player1Movement = MoveDirection::NONE;
 		MoveDirection player2Movement = MoveDirection::NONE;
 	};
 
-	State::Ref  state;
+	State::Ref state;
 
 	int player1Score = 0;
 	int player2Score = 0;
 
 	struct Collision {
-		ObjectID lhs = ObjectID::NONE;
-		ObjectID rhs = ObjectID::NONE;
-		float	 time = FLT_MAX;
+		Rectangle::Ref lhs;
+		Rectangle::Ref rhs;
+		float          time = FLT_MAX;
 	};
 
 	auto detectCollision(float deltaMS) const->Collision;
-	void detectCollision(float deltaMS, const Rectangle& r1, const Rectangle& r2, Collision& result) const;
-	auto detectCollision(float deltaMS, const Rectangle& r1, const Rectangle& r2) const->Collision;
+	void detectCollision(float deltaMS, Rectangle::Ref r1, Rectangle::Ref r2, Collision& result) const;
+	auto detectCollision(float deltaMS, Rectangle::Ref r1, Rectangle::Ref r2) const->Collision;
 
 	void resolveCollision(const Collision& collision);
 
-	Rectangle	mBall;
-	Rectangle	mTopWall;
-	Rectangle	mBottomWall;
-	Rectangle	mLeftPaddle;
-	Rectangle	mRightPaddle;
-	Rectangle   mLeftGoal;
-	Rectangle   mRightGoal;
+	Rectangle::Ref mBall;
+	Rectangle::Ref mTopWall;
+	Rectangle::Ref mBottomWall;
+	Rectangle::Ref mLeftPaddle;
+	Rectangle::Ref mRightPaddle;
+	Rectangle::Ref mLeftGoal;
+	Rectangle::Ref mRightGoal;
 	Text		mLeftScore;
 	Text		mRightScore;
 

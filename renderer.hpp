@@ -11,8 +11,6 @@
 // An alias for the CoreWindow to avoid using the full name monster.
 using ApplicationWindow = winrt::Windows::UI::Core::CoreWindow;
 
-enum class ObjectID { NONE, LEFT_PADDLE, RIGHT_PADDLE, BALL, TOP_WALL, BOTTOM_WALL, LEFT_GOAL, RIGHT_GOAL };
-
 // Vec2f represents a 2D vector with floating point values.
 struct Vec2f final {
 	auto operator+(const Vec2f& v) const -> Vec2f { return { x + v.x, y + v.y }; }
@@ -28,7 +26,7 @@ struct Vec2f final {
 };
 
 struct Rectangle {
-	ObjectID id;
+	using Ref = std::shared_ptr<Rectangle>;
 	Vec2f	 extent = { 0.f,0.f };
 	Vec2f	 position = { 0.f,0.f };
 	Vec2f	 velocity = { 0.f, 0.f };
@@ -59,7 +57,7 @@ public:
 	winrt::com_ptr<ID2D1Brush> getWhiteBrush() const { return mWhiteBrush; }
 	winrt::com_ptr<ID2D1Brush> getBlackBrush() const { return mBlackBrush; }
 
-	void draw(winrt::com_ptr<ID2D1Brush> brush, const Rectangle& rect);
+	void draw(winrt::com_ptr<ID2D1Brush> brush, Rectangle::Ref rect);
 	void draw(winrt::com_ptr<ID2D1Brush> brush, const Text& text);
 
 private:
