@@ -14,6 +14,14 @@ public:
 	struct Sound {
 		IXAudio2SourceVoice* ptr = nullptr;
 		std::vector<BYTE>    bytes;
+
+		void play() {
+			XAUDIO2_BUFFER waveBuffer = {};
+			waveBuffer.AudioBytes = static_cast<UINT32>(bytes.size());
+			waveBuffer.pAudioData = &bytes[0];
+			winrt::check_hresult(ptr->SubmitSourceBuffer(&waveBuffer));
+			ptr->Start();
+		}
 	};
 
 	Audio();

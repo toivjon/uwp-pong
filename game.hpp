@@ -68,7 +68,6 @@ private:
 		MoveDirection player2Movement = MoveDirection::NONE;
 	};
 
-	Audio::Ptr& audio;
 	State::Ref  state;
 
 	int player1Score = 0;

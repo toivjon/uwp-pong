@@ -8,7 +8,7 @@ using namespace winrt::Windows::Gaming::Input;
 using namespace winrt::Windows::UI::Core;
 using namespace winrt::Windows::System;
 
-Game::Game(Audio::Ptr& audio) : audio(audio) {
+Game::Game(Audio::Ptr& audio) {
 	state = std::make_shared<Game::DialogState>(L"Press X key or button to start a game");
 
 	mBall.extent = { .0115f, .015f };
@@ -142,12 +142,12 @@ void Game::resolveCollision(const Collision& collision) {
 		case ObjectID::BOTTOM_WALL:
 			mBall.position.y = mBottomWall.position.y - mBottomWall.extent.y - mBall.extent.y - Nudge;
 			mBall.velocity.y = -mBall.velocity.y;
-			audio->playSound(mBeepSound);
+			mBeepSound.play();
 			break;
 		case ObjectID::TOP_WALL:
 			mBall.position.y = mTopWall.position.y + mTopWall.extent.y + mBall.extent.y + Nudge;
 			mBall.velocity.y = -mBall.velocity.y;
-			audio->playSound(mBeepSound);
+			mBeepSound.play();
 			break;
 		case ObjectID::LEFT_GOAL:
 			player2Score++;
@@ -171,14 +171,14 @@ void Game::resolveCollision(const Collision& collision) {
 			mBall.position.x = mLeftPaddle.position.x + mLeftPaddle.extent.x + mBall.extent.x + Nudge;
 			mBall.velocity.x = -mBall.velocity.x;
 			mBall.velocity = mBall.velocity * BallVelocityMultiplier;
-			audio->playSound(mBeepSound);
+			mBeepSound.play();
 			break;
 		}
 		case ObjectID::RIGHT_PADDLE:
 			mBall.position.x = mRightPaddle.position.x - mRightPaddle.extent.x - mBall.extent.x - Nudge;
 			mBall.velocity.x = -mBall.velocity.x;
 			mBall.velocity = mBall.velocity * BallVelocityMultiplier;
-			audio->playSound(mBeepSound);
+			mBeepSound.play();
 			break;
 		}
 		break;
