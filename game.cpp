@@ -295,7 +295,7 @@ void Game::PlayState::update(std::chrono::milliseconds delta) {
 			break;
 		}
 
-		// Consume simulation time and resolve collisions based on the first collision.
+		// Consume simulation time.
 		deltaMS -= collision.time;
 
 		// Apply movement to dynamic entities.
