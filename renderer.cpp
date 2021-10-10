@@ -197,9 +197,9 @@ void Renderer::initWindowResources() {
 	}
 }
 
-void Renderer::setWindow(const ApplicationWindow& window) {
-	this->window = window;
-	windowSize = Size(window.Bounds().Width, window.Bounds().Height);
+void Renderer::setWindow(const ApplicationWindow& newWindow) {
+	window = newWindow;
+	windowSize = Size(newWindow.Bounds().Width, newWindow.Bounds().Height);
 	dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 	d2dDeviceCtx->SetDpi(dpi, dpi);
 	initWindowResources();
@@ -212,9 +212,9 @@ void Renderer::setWindowSize(const Size& size) {
 	}
 }
 
-void Renderer::setDpi(float dpi) {
-	if (dpi != dpi) {
-		dpi = dpi;
+void Renderer::setDpi(float newDpi) {
+	if (newDpi != dpi) {
+		dpi = newDpi;
 		windowSize = Size(window.get().Bounds().Width, window.get().Bounds().Height);
 		d2dDeviceCtx->SetDpi(dpi, dpi);
 		initWindowResources();
