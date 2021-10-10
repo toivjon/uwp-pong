@@ -4,7 +4,6 @@
 #include <d2d1_3.h>
 #include <d3d11.h>
 #include <dxgi1_3.h>
-#include <memory>
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.UI.Core.h>
 
