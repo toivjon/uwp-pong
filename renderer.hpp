@@ -26,14 +26,12 @@ struct Vec2f final {
 };
 
 struct Rectangle {
-	using Ref = std::shared_ptr<Rectangle>;
-	Vec2f	 extent = { 0.f,0.f };
-	Vec2f	 position = { 0.f,0.f };
-	Vec2f	 velocity = { 0.f, 0.f };
+	Vec2f extent = { 0.f, 0.f };
+	Vec2f position = { 0.f, 0.f };
+	Vec2f velocity = { 0.f, 0.f };
 };
 
 struct Text {
-	using Ref = std::shared_ptr<Text>;
 	Vec2f		 position = { 0.f,0.f };
 	std::wstring text;
 	float		 fontSize = 0.f;
@@ -56,8 +54,8 @@ public:
 	winrt::com_ptr<ID2D1Brush> getWhiteBrush() const { return whiteBrush; }
 	winrt::com_ptr<ID2D1Brush> getBlackBrush() const { return blackBrush; }
 
-	void draw(winrt::com_ptr<ID2D1Brush> brush, Rectangle::Ref rect) const;
-	void draw(winrt::com_ptr<ID2D1Brush> brush, Text::Ref text) const;
+	void draw(winrt::com_ptr<ID2D1Brush> brush, const Rectangle& rect) const;
+	void draw(winrt::com_ptr<ID2D1Brush> brush, const Text& text) const;
 
 private:
 	winrt::agile_ref<ApplicationWindow>  window;

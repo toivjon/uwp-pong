@@ -34,10 +34,10 @@ private:
 		void onReadGamepad(int player, const winrt::Windows::Gaming::Input::GamepadReading& reading) override;
 		void startGame();
 	private:
-		Rectangle::Ref background;
-		Rectangle::Ref foreground;
-		Text::Ref      topic;
-		Text::Ref      description;
+		Rectangle background;
+		Rectangle foreground;
+		Text      topic;
+		Text      description;
 	};
 
 	class CountdownState final : public State {
@@ -73,26 +73,26 @@ private:
 	int player2Score = 0;
 
 	struct Collision {
-		Rectangle::Ref lhs;
-		Rectangle::Ref rhs;
-		float          time = FLT_MAX;
+		const Rectangle* lhs;
+		const Rectangle* rhs;
+		float            time = FLT_MAX;
 	};
 
 	auto detectCollision(float deltaMS) const->Collision;
-	void detectCollision(float deltaMS, Rectangle::Ref r1, Rectangle::Ref r2, Collision& result) const;
-	auto detectCollision(float deltaMS, Rectangle::Ref r1, Rectangle::Ref r2) const->Collision;
+	void detectCollision(float deltaMS, const Rectangle& r1, const Rectangle& r2, Collision& result) const;
+	auto detectCollision(float deltaMS, const Rectangle& r1, const Rectangle& r2) const->Collision;
 
 	auto resolveCollision(const Collision& collision) -> bool;
 
-	Rectangle::Ref ball;
-	Rectangle::Ref topWall;
-	Rectangle::Ref bottomWall;
-	Rectangle::Ref leftPaddle;
-	Rectangle::Ref rightPaddle;
-	Rectangle::Ref leftGoal;
-	Rectangle::Ref rightGoal;
-	Text::Ref      leftScore;
-	Text::Ref      rightScore;
+	Rectangle ball;
+	Rectangle topWall;
+	Rectangle bottomWall;
+	Rectangle leftPaddle;
+	Rectangle rightPaddle;
+	Rectangle leftGoal;
+	Rectangle rightGoal;
+	Text      leftScore;
+	Text      rightScore;
 
 	Audio::Sound beepSound;
 };

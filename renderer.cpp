@@ -239,17 +239,17 @@ void Renderer::present() {
 	}
 }
 
-void Renderer::draw(com_ptr<ID2D1Brush> brush, Rectangle::Ref rect) const {
+void Renderer::draw(com_ptr<ID2D1Brush> brush, const Rectangle& rect) const {
 	d2dDeviceCtx->FillRectangle({
-	windowOffset.Width + (-rect->extent.x + rect->position.x) * (windowSize.Width - windowOffset.Width * 2),
-	windowOffset.Height + (-rect->extent.y + rect->position.y) * (windowSize.Height - windowOffset.Height * 2),
-	windowOffset.Width + (rect->extent.x + rect->position.x) * (windowSize.Width - windowOffset.Width * 2),
-	windowOffset.Height + (rect->extent.y + rect->position.y) * (windowSize.Height - windowOffset.Height * 2),
+	windowOffset.Width + (-rect.extent.x + rect.position.x) * (windowSize.Width - windowOffset.Width * 2),
+	windowOffset.Height + (-rect.extent.y + rect.position.y) * (windowSize.Height - windowOffset.Height * 2),
+	windowOffset.Width + (rect.extent.x + rect.position.x) * (windowSize.Width - windowOffset.Width * 2),
+	windowOffset.Height + (rect.extent.y + rect.position.y) * (windowSize.Height - windowOffset.Height * 2),
 		}, brush.get());
 }
 
-void Renderer::draw(com_ptr<ID2D1Brush> brush, Text::Ref text) const {
-	auto size = text->fontSize * (windowSize.Height - windowOffset.Height * 2.f);
+void Renderer::draw(com_ptr<ID2D1Brush> brush, const Text& text) const {
+	auto size = text.fontSize * (windowSize.Height - windowOffset.Height * 2.f);
 	com_ptr<IDWriteTextFormat> format;
 	dWriteFactory->CreateTextFormat(
 		L"Calibri",
@@ -262,13 +262,13 @@ void Renderer::draw(com_ptr<ID2D1Brush> brush, Text::Ref text) const {
 		format.put()
 	);
 	format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
-	auto x = windowOffset.Width + text->position.x * (windowSize.Width - windowOffset.Width * 2);
-	auto y = windowOffset.Height + text->position.y * (windowSize.Height - windowOffset.Height * 2);
+	auto x = windowOffset.Width + text.position.x * (windowSize.Width - windowOffset.Width * 2);
+	auto y = windowOffset.Height + text.position.y * (windowSize.Height - windowOffset.Height * 2);
 	d2dDeviceCtx->DrawText(
-		text->text.c_str(),
-		UINT32(text->text.size()),
+		text.text.c_str(),
+		UINT32(text.text.size()),
 		format.get(),
-		{ x - text->text.length() * size * .5f,y,x + text->text.length() * size * .5f,y },
+		{ x - text.text.length() * size * .5f,y,x + text.text.length() * size * .5f,y },
 		brush.get()
 	);
 }
