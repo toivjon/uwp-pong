@@ -276,13 +276,13 @@ auto Game::CountdownState::newRandomDirection() -> Vec2f {
 }
 
 void Game::PlayState::update(std::chrono::milliseconds delta) {
-	// Get the time (in milliseconds) we must consume during this simulation step.
-	auto deltaMS = static_cast<float>(delta.count());
-
 	// Apply the keyboard and gamepad input to paddle velocities.
 	constexpr auto PaddleVelocity = .001f;
 	game.leftPaddle->velocity.y = static_cast<float>(player1Movement) * PaddleVelocity;
 	game.rightPaddle->velocity.y = static_cast<float>(player2Movement) * PaddleVelocity;
+
+	// Get the time (in milliseconds) we must consume during this simulation step.
+	auto deltaMS = static_cast<float>(delta.count());
 
 	for (auto endRound = false; !endRound;) {
 		// Perform collision detection to find out the first collision.
