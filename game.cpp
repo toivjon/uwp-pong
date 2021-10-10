@@ -129,7 +129,7 @@ auto Game::detectCollision(float deltaMS, Rectangle::Ref a, Rectangle::Ref b) co
 	if (tmin >= 0.f && tmin <= 1.f) {
 		collision.lhs = a;
 		collision.rhs = b;
-		collision.time = tmin;
+		collision.time = tmin * deltaMS;
 	}
 	return collision;
 }
@@ -296,13 +296,12 @@ void Game::PlayState::update(std::chrono::milliseconds delta) {
 		}
 
 		// Consume simulation time and resolve collisions based on the first collision.
-		const auto collisionMS = collision.time * deltaMS;
-		deltaMS -= collisionMS;
+		deltaMS -= collision.time;
 
 		// Apply movement to dynamic entities.
-		game.ball->position += game.ball->velocity * collisionMS;
-		game.leftPaddle->position += game.leftPaddle->velocity * collisionMS;
-		game.rightPaddle->position += game.rightPaddle->velocity * collisionMS;
+		game.ball->position += game.ball->velocity * collision.time;
+		game.leftPaddle->position += game.leftPaddle->velocity * collision.time;
+		game.rightPaddle->position += game.rightPaddle->velocity * collision.time;
 
 		// Perform collision resolvement.
 		endRound = game.resolveCollision(collision);
