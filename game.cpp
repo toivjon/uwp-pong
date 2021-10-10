@@ -284,8 +284,7 @@ void Game::PlayState::update(std::chrono::milliseconds delta) {
 	game.leftPaddle->velocity.y = static_cast<float>(player1Movement) * PaddleVelocity;
 	game.rightPaddle->velocity.y = static_cast<float>(player2Movement) * PaddleVelocity;
 
-	auto endRound = false;
-	do {
+	for (auto endRound = false; !endRound;) {
 		// Perform collision detection to find out the first collision.
 		const auto collision = game.detectCollision(deltaMS);
 		if (!collision.lhs && !collision.rhs) {
@@ -305,7 +304,7 @@ void Game::PlayState::update(std::chrono::milliseconds delta) {
 
 		// Perform collision resolvement.
 		endRound = game.resolveCollision(collision);
-	} while (!endRound);
+	}
 }
 
 void Game::PlayState::render(const Renderer& renderer) {
